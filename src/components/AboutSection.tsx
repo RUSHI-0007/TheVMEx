@@ -1,15 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import GoldDivider from "@/components/GoldDivider";
 import { EVENT } from "@/lib/config";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 32 },
   show: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.85, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.85, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
   }),
 };
 

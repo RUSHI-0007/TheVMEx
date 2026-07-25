@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import QRCode from "react-qr-code";
 import GoldDivider from "@/components/GoldDivider";
 import { TICKET_TIERS, EVENT } from "@/lib/config";
@@ -157,7 +157,7 @@ function TierSelectionStep({
         }}
       >
         {TICKET_TIERS.map((tier) => {
-          const isSoldOut = tier.available === 0;
+          const isSoldOut = (tier.available as number) === 0;
           const isSelected = selected === tier.id;
           return (
             <motion.div
@@ -702,9 +702,9 @@ export default function TicketBookingSection() {
     }
   }, [order]);
 
-  const fadeVariants = {
+  const fadeVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
     exit: { opacity: 0, y: -12, transition: { duration: 0.3 } },
   };
 
