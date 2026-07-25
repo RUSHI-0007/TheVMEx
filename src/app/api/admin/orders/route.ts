@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPendingOrders } from "@/lib/db";
 import { cookies } from "next/headers";
+import { verifyAdminSession } from "@/lib/adminAuth";
+import { getPendingOrders } from "@/lib/db";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    // Verify admin session cookie
     const cookieStore = await cookies();
-    const session = cookieStore.get("vmex_admin_session")?.value;
+    const session = await verifyAdminSession(cookieStore);
     if (!session) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }

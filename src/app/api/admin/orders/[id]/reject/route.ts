@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rejectOrder } from "@/lib/db";
 import { cookies } from "next/headers";
+import { verifyAdminSession } from "@/lib/adminAuth";
+import { rejectOrder } from "@/lib/db";
 
 export async function POST(
   req: NextRequest,
@@ -8,7 +9,7 @@ export async function POST(
 ) {
   try {
     const cookieStore = await cookies();
-    const session = cookieStore.get("vmex_admin_session")?.value;
+    const session = await verifyAdminSession(cookieStore);
     if (!session) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
@@ -21,8 +22,7 @@ export async function POST(
       return NextResponse.json({ error: "reason_required" }, { status: 400 });
     }
 
-    const { adminId, adminName } = JSON.parse(session);
-    const result = await rejectOrder(id, adminId, adminName, reason);
+    const result = await rejectOrder(id, session.adminId, session.adminName, reason);
 
     if (!result.ok) {
       if (result.error === "already_handled") {

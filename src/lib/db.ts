@@ -38,6 +38,9 @@ export interface Order {
   created_at: number;
   expires_at: number;
   ticket_qr_code: string | null;
+  checked_in: boolean;
+  checked_in_at: number | null;
+  checked_in_by: string | null;
 }
 
 export interface CreateOrderInput {
@@ -267,4 +270,45 @@ export async function expireStaleOrders(): Promise<void> {
     .update({ status: 'expired' })
     .eq("status", "pending")
     .lt("expires_at", now);
+}
+
+/**
+ * Check in an attendee. Atomically marks the order as checked_in=true.
+ * Uses optimistic concurrency (WHERE checked_in = false) to prevent double-entry.
+ */
+export async function checkInOrder(
+  orderId: string,
+  adminId: string,
+  adminName: string
+): Promise<{ ok: boolean; error?: string; checkedInAt?: number; order?: Order }> {
+  const order = await getOrderById(orderId);
+  if (!order) return { ok: false, error: "not_found" };
+  if (order.status !== "approved") return { ok: false, error: "not_approved" };
+  if (order.checked_in) {
+    return { ok: false, error: "already_checked_in", checkedInAt: order.checked_in_at ?? undefined };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+
+  // Atomic update — only succeeds if still not checked in (prevents race between two scanners)
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      checked_in: true,
+      checked_in_at: now,
+      checked_in_by: `${adminId}:${adminName}`,
+    })
+    .eq("id", orderId)
+    .eq("checked_in", false); // optimistic lock
+
+  if (error) return { ok: false, error: error.message };
+
+  // Verify the update actually applied
+  const updated = await getOrderById(orderId);
+  if (!updated?.checked_in || updated.checked_in_by !== `${adminId}:${adminName}`) {
+    // Another scanner won the race
+    return { ok: false, error: "already_checked_in", checkedInAt: updated?.checked_in_at ?? undefined };
+  }
+
+  return { ok: true, order: updated };
 }

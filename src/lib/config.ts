@@ -16,7 +16,7 @@ export const EVENT = {
   ageRestriction: "18+",
   upiId: "thevmex@upi", // ← Replace with actual UPI ID
   upiName: "TheVMEx Events",
-  adminPassword: "vmex@admin2026", // ← Change before go-live
+  adminPassword: process.env.ADMIN_PASSWORD, // Set ADMIN_PASSWORD in .env.local / Vercel env vars
   pendingExpiryMinutes: 60,
   socialLinks: {
     instagram: "https://www.instagram.com/thevmexperience?igsh=ZTF5d3BvanFiN2c5",
@@ -118,9 +118,12 @@ export const FAQS = [
   },
 ];
 
+// NOTE: PINs are intentionally NOT stored here.
+// They are kept in ADMIN_CREDENTIALS env var (server-side only).
+// This array is used only for the client-side name dropdown in /admin.
 export const ADMIN_TEAM_MEMBERS = [
-  { id: "a1", name: "Rishi", pin: "1234" },
-  { id: "a2", name: "Aditi", pin: "5678" },
-  { id: "a3", name: "Dev", pin: "9012" },
-  // ← Add team members here
+  { id: "a1", name: "Rishi" },
+  { id: "a2", name: "Aditi" },
+  { id: "a3", name: "Dev" },
+  // ← Add names here; add matching credentials to ADMIN_CREDENTIALS env var
 ] as const;
