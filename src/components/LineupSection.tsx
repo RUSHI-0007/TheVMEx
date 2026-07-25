@@ -25,8 +25,8 @@ const PERFORMERS: Performer[] = [
     role: "Live Artist",
     bio: "An electrifying live act known for blurring the line between the seen and unseen — Poltergeist brings raw energy, haunting melodies, and an on-stage presence that stays with you long after the night ends.",
     genre: "Alternative · Indie · Electronic",
-    instagramHandle: "@poltergeist",
-    instagramUrl: "https://instagram.com/poltergeist",
+    instagramHandle: "@poltergeistttttttttttt",
+    instagramUrl: "https://www.instagram.com/poltergeistttttttttttt?igsh=dXh6M2V0MzZxMXQ=",
     isHeadliner: true,
   },
   // ← Add more performers here — each renders as a card automatically

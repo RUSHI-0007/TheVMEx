@@ -19,7 +19,7 @@ export const EVENT = {
   adminPassword: "vmex@admin2026", // ← Change before go-live
   pendingExpiryMinutes: 60,
   socialLinks: {
-    instagram: "https://instagram.com/thevmex",
+    instagram: "https://www.instagram.com/thevmexperience?igsh=ZTF5d3BvanFiN2c5",
     whatsapp: "https://wa.me/919999999999", // ← Replace with actual number
   },
   rsvpNumbers: [
