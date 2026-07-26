@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
+import Script from "next/script";
 import QRCode from "react-qr-code";
 import GoldDivider from "@/components/GoldDivider";
 import { TICKET_TIERS, EVENT } from "@/lib/config";
@@ -39,18 +40,16 @@ type Step =
   | "select"      // 1. Tier + qty selection
   | "form"        // 2. Attendee details
   | "summary"     // 3. Order summary confirmation
-  | "payment"     // 4. UPI QR + payable amount
-  | "upload"      // 5. Screenshot + UTR upload
-  | "pending";    // 6. Pending verification screen
+  | "processing"  // 4. Verifying payment
+  | "confirmed";  // 5. Success screen
 
 // ─── Step progress indicator ──────────────────────────────────────────────────
 const STEPS: { key: Step; label: string }[] = [
   { key: "select", label: "Tickets" },
   { key: "form", label: "Details" },
   { key: "summary", label: "Review" },
-  { key: "payment", label: "Pay" },
-  { key: "upload", label: "Confirm" },
-  { key: "pending", label: "Status" },
+  { key: "processing", label: "Pay" },
+  { key: "confirmed", label: "Done" },
 ];
 
 function StepIndicator({ current }: { current: Step }) {
@@ -361,218 +360,26 @@ function OrderSummaryStep({
           <span style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 700, color: "var(--gold)" }}>₹{total.toLocaleString("en-IN")}</span>
         </div>
         <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "var(--text-dim)", marginTop: "0.5rem" }}>
-          ★ Your actual payable amount will have a unique paise value added (e.g. ₹{total}.37) — this is shown on the next screen.
+          ★ You will be redirected to our secure payment gateway to complete your booking.
         </p>
       </div>
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
         <button className="btn-gold-outline" onClick={onBack} disabled={isLoading}>← Edit</button>
         <button className="btn-gold" onClick={onConfirm} disabled={isLoading} id="confirm-order-btn">
-          {isLoading ? "Creating order…" : "Proceed to Payment →"}
+          {isLoading ? "Preparing Payment…" : "Proceed to Payment →"}
         </button>
       </div>
     </div>
   );
 }
 
-// ─── Step 4: UPI QR payment screen ───────────────────────────────────────────
-function PaymentStep({
-  order,
-  onPaid,
-}: {
-  order: Order;
-  onPaid: () => void;
-}) {
-  const upiUrl = `upi://pay?pa=${encodeURIComponent(EVENT.upiId)}&pn=${encodeURIComponent(EVENT.upiName)}&am=${encodeURIComponent(order.payable_amount)}&cu=INR&tn=${encodeURIComponent(order.id)}`;
-  const rupees = order.payable_amount.split(".")[0];
-  const paise = order.payable_amount.split(".")[1];
-
+// ─── Step 4: Processing ──────────────────────────────────────────────────────
+function ProcessingStep() {
   return (
-    <div style={{ maxWidth: "480px" }}>
-      {/* Warning banner */}
-      <div style={{ border: "1px solid rgba(212,175,55,0.3)", background: "rgba(212,175,55,0.05)", padding: "1rem 1.25rem", marginBottom: "2rem", display: "flex", gap: "0.75rem" }}>
-        <span style={{ fontSize: "1rem", flexShrink: 0 }}>⚠️</span>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-primary)", lineHeight: 1.6 }}>
-          You <strong>MUST</strong> pay the exact amount shown below including the paise. This unique amount is used to match your payment — do not round it or pay a different amount.
-        </p>
-      </div>
-
-      {/* Amount display */}
-      <div style={{ textAlign: "center", marginBottom: "2rem", padding: "1.75rem", border: "1px solid rgba(212,175,55,0.25)", background: "var(--bg-card)" }}>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.6rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: "0.5rem" }}>Pay Exactly</p>
-        <p style={{ fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 8vw, 3rem)", fontWeight: 700, color: "var(--gold)", lineHeight: 1 }}>
-          ₹{rupees}
-          <span style={{ fontSize: "0.55em", color: "var(--gold-muted)" }}>.{paise}</span>
-        </p>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "var(--text-dim)", marginTop: "0.4rem" }}>Order ID: {order.id}</p>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "var(--text-dim)" }}>UPI ID: {EVENT.upiId}</p>
-      </div>
-
-      {/* QR Code */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
-        <div style={{ padding: "1.25rem", background: "#fff", display: "inline-flex" }}>
-          <QRCode value={upiUrl} size={180} fgColor="#0B0B0D" />
-        </div>
-      </div>
-
-      <p style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--text-muted)", textAlign: "center", marginBottom: "0.5rem" }}>
-        Scan with any UPI app (PhonePe, GPay, Paytm)
-      </p>
-      <p style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-dim)", textAlign: "center", marginBottom: "2rem" }}>
-        If QR scan fails, send manually to <strong style={{ color: "var(--gold-muted)" }}>{EVENT.upiId}</strong>
-      </p>
-
-      {/* Expiry */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginBottom: "2rem", padding: "0.75rem", border: "1px solid rgba(212,175,55,0.1)" }}>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="7" r="6.25" stroke="var(--text-dim)" strokeWidth="1" />
-          <line x1="7" y1="3.5" x2="7" y2="7" stroke="var(--text-dim)" strokeWidth="1" strokeLinecap="round" />
-          <line x1="7" y1="7" x2="10" y2="9" stroke="var(--text-dim)" strokeWidth="1" strokeLinecap="round" />
-        </svg>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--text-dim)" }}>
-          This order is held for <ExpiryCountdown expiresAt={order.expires_at} /> — pay before it expires
-        </p>
-      </div>
-
-      <button className="btn-gold" onClick={onPaid} style={{ width: "100%" }} id="i-have-paid-btn">
-        I&apos;ve Paid — Upload Proof →
-      </button>
-    </div>
-  );
-}
-
-// ─── Step 5: Screenshot + UTR upload ─────────────────────────────────────────
-function UploadStep({
-  order,
-  onSubmit,
-  isLoading,
-  uploadError,
-}: {
-  order: Order;
-  onSubmit: (utr: string, file: File) => void;
-  isLoading: boolean;
-  uploadError: string | null;
-}) {
-  const [utr, setUtr] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-
-  const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic"];
-
-  const handleFile = (f: File) => {
-    setFileError(null);
-    if (!ALLOWED.includes(f.type)) {
-      setFileError("Please upload a JPG, PNG, or WebP image only.");
-      return;
-    }
-    if (f.size > 5 * 1024 * 1024) {
-      setFileError("File too large — maximum 5 MB.");
-      return;
-    }
-    setFile(f);
-  };
-
-  const handleSubmit = () => {
-    if (!utr.trim() || utr.trim().length < 6) return;
-    if (!file) return;
-    onSubmit(utr.trim(), file);
-  };
-
-  return (
-    <div style={{ maxWidth: "520px" }}>
-      <div style={{ border: "1px solid rgba(212,175,55,0.15)", background: "var(--bg-card)", padding: "1.5rem", marginBottom: "2rem" }}>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: "0.75rem" }}>Order</p>
-        <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem", color: "var(--text-primary)" }}>{order.id} · ₹{order.payable_amount}</p>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>Held for: <ExpiryCountdown expiresAt={order.expires_at} /></p>
-      </div>
-
-      <div style={{ display: "grid", gap: "1.5rem", marginBottom: "2rem" }}>
-        {/* UTR */}
-        <div>
-          <label className="input-label" htmlFor="utr-input">UTR / Transaction Reference Number *</label>
-          <input
-            id="utr-input"
-            className="input-field"
-            placeholder="12-digit UTR from your UPI app"
-            value={utr}
-            onChange={(e) => setUtr(e.target.value)}
-          />
-          <p style={{ fontFamily: "var(--font-body)", fontSize: "0.68rem", color: "var(--text-dim)", marginTop: "0.3rem" }}>Find this in your UPI app under the transaction receipt.</p>
-        </div>
-
-        {/* Screenshot upload */}
-        <div>
-          <label className="input-label">Payment Screenshot *</label>
-          <div
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-            onClick={() => document.getElementById("screenshot-input")?.click()}
-            style={{
-              border: `1px dashed ${dragOver ? "var(--gold)" : file ? "rgba(212,175,55,0.4)" : "rgba(212,175,55,0.2)"}`,
-              background: dragOver ? "rgba(212,175,55,0.04)" : "rgba(255,255,255,0.01)",
-              padding: "2rem",
-              cursor: "pointer",
-              textAlign: "center",
-              transition: "all 0.25s",
-            }}
-          >
-            <input
-              id="screenshot-input"
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
-            />
-            {file ? (
-              <div>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--gold)", marginBottom: "0.25rem" }}>✓ {file.name}</p>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "var(--text-dim)" }}>{(file.size / 1024).toFixed(0)} KB · Click to change</p>
-              </div>
-            ) : (
-              <div>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "0.25rem" }}>Drop screenshot here or click to upload</p>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "var(--text-dim)" }}>JPG, PNG, WebP · Max 5 MB</p>
-              </div>
-            )}
-          </div>
-          {fileError && <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "#e05c5c", marginTop: "0.4rem" }}>{fileError}</p>}
-        </div>
-      </div>
-
-      {uploadError && (
-        <div style={{ border: "1px solid rgba(224,92,92,0.3)", background: "rgba(224,92,92,0.05)", padding: "1rem", marginBottom: "1.5rem" }}>
-          <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "#e05c5c" }}>
-            {uploadError === "duplicate_utr"
-              ? "This UTR has already been used for another order. Please check your transaction details."
-              : uploadError === "order_expired"
-              ? "This order has expired. Please start a new booking."
-              : "Something went wrong. Please try again."}
-          </p>
-        </div>
-      )}
-
-      <button
-        className="btn-gold"
-        onClick={handleSubmit}
-        disabled={!utr.trim() || utr.trim().length < 6 || !file || isLoading}
-        style={{ width: "100%", opacity: (!utr.trim() || !file || isLoading) ? 0.5 : 1, cursor: (!utr.trim() || !file || isLoading) ? "not-allowed" : "pointer" }}
-        id="submit-proof-btn"
-      >
-        {isLoading ? "Submitting…" : "Submit Payment Proof →"}
-      </button>
-    </div>
-  );
-}
-
-// ─── Step 6: Pending verification ─────────────────────────────────────────────
-function PendingStep({ order }: { order: Order }) {
-  return (
-    <div style={{ maxWidth: "520px", textAlign: "center" }}>
-      {/* Calm status icon */}
+    <div style={{ maxWidth: "480px", textAlign: "center", padding: "2rem 0" }}>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
         <div style={{ width: "72px", height: "72px", border: "1px solid rgba(212,175,55,0.3)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(212,175,55,0.05)" }}>
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <circle cx="14" cy="14" r="12" stroke="rgba(212,175,55,0.2)" strokeWidth="1" />
               <path d="M14 2A12 12 0 0 1 26 14" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" />
@@ -580,33 +387,33 @@ function PendingStep({ order }: { order: Order }) {
           </motion.div>
         </div>
       </div>
-
-      <p style={{ fontFamily: "var(--font-script)", fontSize: "1.6rem", color: "var(--gold-muted)", marginBottom: "0.5rem" }}>Payment received</p>
-      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.4rem, 4vw, 1.8rem)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "1rem" }}>
-        Verification in Progress
-      </h3>
-      <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--text-muted)", lineHeight: 1.8, marginBottom: "2rem" }}>
-        Our team is matching your payment against the UPI transaction history. Most verifications complete within <strong style={{ color: "var(--text-primary)" }}>1–2 hours</strong>. You&apos;ll receive a confirmation once approved.
+      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", color: "var(--text-primary)", marginBottom: "0.5rem" }}>Verifying your payment...</h3>
+      <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+        Please don't close this window. We are confirming your transaction with the bank.
       </p>
+    </div>
+  );
+}
 
-      {/* Order details box */}
-      <div style={{ border: "1px solid rgba(212,175,55,0.15)", background: "var(--bg-card)", padding: "1.5rem", marginBottom: "2rem", textAlign: "left" }}>
-        {[
-          ["Order ID", order.id],
-          ["Ticket", `${order.ticket_tier_label} × ${order.quantity}`],
-          ["Amount Paid", `₹${order.payable_amount}`],
-          ["Attendee", order.attendee_name],
-        ].map(([l, v]) => (
-          <div key={l} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", paddingBottom: "0.65rem", borderBottom: "1px solid rgba(212,175,55,0.07)", marginBottom: "0.65rem" }}>
-            <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-dim)", letterSpacing: "0.05em" }}>{l}</span>
-            <span style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", color: "var(--text-muted)", textAlign: "right" }}>{v}</span>
-          </div>
-        ))}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-dim)" }}>Order expires in</span>
-          <ExpiryCountdown expiresAt={order.expires_at} />
+// ─── Step 5: Confirmed ───────────────────────────────────────────────────────
+function ConfirmedStep({ order }: { order: Order }) {
+  return (
+    <div style={{ maxWidth: "480px", textAlign: "center", padding: "1rem 0" }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+        <div style={{ width: "72px", height: "72px", background: "#3fb950", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </div>
       </div>
+      <p style={{ fontFamily: "var(--font-script)", fontSize: "1.6rem", color: "var(--gold-muted)", marginBottom: "0.5rem" }}>Success</p>
+      <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.8rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "1rem" }}>
+        Ticket Confirmed
+      </h3>
+      <p style={{ fontFamily: "var(--font-serif)", fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "2rem" }}>
+        Your payment has been successfully verified. 
+        Your ticket will be emailed to <strong style={{ color: "var(--text-primary)" }}>{order.attendee_email}</strong> shortly.
+      </p>
 
       <a
         href={`/ticket?orderId=${order.id}`}
@@ -659,48 +466,90 @@ export default function TicketBookingSection() {
     setIsLoading(true);
     setApiError(null);
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/orders/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tierId, quantity, attendee: form }),
       });
       const data = await res.json();
+      
       if (!res.ok || !data.ok) {
-        setApiError(data.error ?? "Failed to create order. Please try again.");
+        setApiError(data.error === "sold_out" ? "This ticket tier is currently sold out." : data.error ?? "Failed to create order. Please try again.");
         setIsLoading(false);
         return;
       }
+      
       setOrder(data.order);
-      setStep("payment");
-    } catch {
+
+      // Open Razorpay Checkout
+      const options = {
+        key: data.razorpayKeyId,
+        amount: data.order.payable_amount * 100, // Amount is in currency subunits.
+        currency: "INR",
+        name: "TheVMEx",
+        description: `Ticket Booking: ${data.order.ticket_tier_label}`,
+        order_id: data.razorpayOrderId,
+        handler: function (response: any) {
+          // Trigger polling
+          setStep("processing");
+          pollOrderStatus(data.order.id);
+        },
+        prefill: {
+          name: form.name,
+          email: form.email,
+          contact: form.phone,
+        },
+        notes: {
+          internalOrderId: data.order.id,
+        },
+        theme: {
+          color: "#d4af37",
+        },
+        modal: {
+          ondismiss: function () {
+            setIsLoading(false);
+            setApiError("Payment was cancelled or failed. Please try again.");
+          }
+        }
+      };
+
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function () {
+        setIsLoading(false);
+        setApiError("Payment failed. Please try again.");
+      });
+      rzp.open();
+
+    } catch (err) {
       setApiError("Network error. Please check your connection.");
-    } finally {
       setIsLoading(false);
     }
   }, [tierId, quantity, form]);
 
-  const handleUploadProof = useCallback(async (utr: string, file: File) => {
-    if (!order) return;
-    setIsLoading(true);
-    setUploadError(null);
-    try {
-      const fd = new FormData();
-      fd.append("utr", utr);
-      fd.append("screenshot", file);
-      const res = await fetch(`/api/orders/${order.id}/upload`, { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        setUploadError(data.error ?? "upload_failed");
-        setIsLoading(false);
+  const pollOrderStatus = async (orderId: string) => {
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > 30) { // Approx 60 seconds
+        clearInterval(interval);
+        setStep("confirmed"); // Show success anyway, user can check email or status later
         return;
       }
-      setStep("pending");
-    } catch {
-      setUploadError("network_error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [order]);
+      try {
+        const res = await fetch(`/api/orders/${orderId}`);
+        const data = await res.json();
+        if (res.ok && data.order?.status === "approved") {
+          clearInterval(interval);
+          setOrder(data.order);
+          setStep("confirmed");
+        }
+      } catch {
+        // silently fail and retry
+      }
+    }, 2000);
+  };
+
 
   const fadeVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
@@ -710,6 +559,7 @@ export default function TicketBookingSection() {
 
   return (
     <section id="tickets" className="section" style={{ background: "var(--bg-secondary)" }}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div className="container-site">
         {/* Header */}
         <motion.div
@@ -778,20 +628,8 @@ export default function TicketBookingSection() {
               </div>
             )}
 
-            {step === "payment" && order && (
-              <PaymentStep order={order} onPaid={() => setStep("upload")} />
-            )}
-
-            {step === "upload" && order && (
-              <UploadStep
-                order={order}
-                onSubmit={handleUploadProof}
-                isLoading={isLoading}
-                uploadError={uploadError}
-              />
-            )}
-
-            {step === "pending" && order && <PendingStep order={order} />}
+            {step === "processing" && <ProcessingStep />}
+            {step === "confirmed" && order && <ConfirmedStep order={order} />}
           </motion.div>
         </AnimatePresence>
       </div>

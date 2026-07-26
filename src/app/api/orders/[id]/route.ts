@@ -11,10 +11,7 @@ export async function GET(
     if (!order) {
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
-    // Strip internal fields before sending to client
-    const { paise_suffix: _p, ...safe } = order;
-    void _p;
-    return NextResponse.json({ order: safe });
+    return NextResponse.json({ order });
   } catch (err) {
     console.error("[GET /api/orders/[id]]", err);
     return NextResponse.json({ error: "server_error" }, { status: 500 });

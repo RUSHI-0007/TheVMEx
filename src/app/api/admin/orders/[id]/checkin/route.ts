@@ -30,6 +30,9 @@ export async function POST(
       if (result.error === "not_approved") {
         return NextResponse.json({ error: "not_approved" }, { status: 403 });
       }
+      if (result.error === "refunded") {
+        return NextResponse.json({ error: "refunded" }, { status: 403 });
+      }
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 

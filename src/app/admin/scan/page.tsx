@@ -10,7 +10,7 @@ type ScanState =
   | { status: "checking" }
   | { status: "valid"; orderId: string; attendeeName: string; tier: string; checkedInAt: number }
   | { status: "duplicate"; orderId: string; attendeeName: string; checkedInAt: number }
-  | { status: "rejected"; reason: "not_approved" | "not_found" | "bad_format" }
+  | { status: "rejected"; reason: "not_approved" | "not_found" | "bad_format" | "refunded" }
   | { status: "error"; message: string };
 
 // ── Helper: unix timestamp → readable time ────────────────────────────────────
@@ -91,7 +91,11 @@ export default function ScanPage() {
           checkedInAt: data.checkedInAt ?? 0,
         });
       } else if (res.status === 403) {
-        setScanState({ status: "rejected", reason: "not_approved" });
+        if (data.error === "refunded") {
+          setScanState({ status: "rejected", reason: "refunded" });
+        } else {
+          setScanState({ status: "rejected", reason: "not_approved" });
+        }
       } else if (res.status === 404) {
         setScanState({ status: "rejected", reason: "not_found" });
       } else if (res.status === 401) {
@@ -278,12 +282,14 @@ export default function ScanPage() {
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", color: "#e05c5c", marginBottom: "0.5rem" }}>
                 {scanState.reason === "bad_format" ? "Invalid QR Code" :
                  scanState.reason === "not_found" ? "Ticket Not Found" :
+                 scanState.reason === "refunded" ? "Ticket Refunded — Do Not Admit" :
                  "Payment Not Verified"}
               </h2>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
                 {scanState.reason === "bad_format" && "This QR code is not a Masquerade Night ticket."}
                 {scanState.reason === "not_found" && "No order matching this QR exists in the system."}
                 {scanState.reason === "not_approved" && "This booking was not approved — payment may be pending or rejected."}
+                {scanState.reason === "refunded" && "This order has been refunded and the ticket is permanently void."}
               </p>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", color: "#e05c5c", marginBottom: "1.5rem", border: "1px solid rgba(224,92,92,0.3)", padding: "0.75rem", background: "rgba(224,92,92,0.05)" }}>
                 Deny entry and contact the admin team if needed.

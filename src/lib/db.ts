@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { createClient } from "@supabase/supabase-js";
+import { sendTicketEmail } from "./email";
 
 // Initialize Supabase client. 
 // Note: We use SUPABASE_SERVICE_ROLE_KEY if available (in API routes) for full access, 
@@ -13,7 +14,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ── Types ────────────────────────────────────────────────────────────────────
-export type OrderStatus = "pending" | "approved" | "rejected" | "expired";
+export type OrderStatus = "pending" | "approved" | "rejected" | "expired" | "refunded";
 
 export interface Order {
   id: string;
@@ -21,8 +22,7 @@ export interface Order {
   ticket_tier_label: string;
   quantity: number;
   base_amount: number;
-  payable_amount: string;
-  paise_suffix: number;
+  payable_amount: number;
   attendee_name: string;
   attendee_phone: string;
   attendee_email: string;
@@ -41,6 +41,10 @@ export interface Order {
   checked_in: boolean;
   checked_in_at: number | null;
   checked_in_by: string | null;
+  razorpay_order_id: string | null;
+  razorpay_payment_id: string | null;
+  email_sent: boolean;
+  email_sent_at: number | null;
 }
 
 export interface CreateOrderInput {
@@ -49,46 +53,14 @@ export interface CreateOrderInput {
   ticket_tier_label: string;
   quantity: number;
   base_amount: number;
-  payable_amount: string;
-  paise_suffix: number;
+  payable_amount: number;
   attendee_name: string;
   attendee_phone: string;
   attendee_email: string;
   attendee_college: string;
   attendee_year: string;
   expires_at: number;
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-/** Generate a unique 2-digit paise suffix not colliding with pending orders */
-export async function generateUniquePaiseSuffix(basePaiseSuffix?: number): Promise<number> {
-  const { data, error } = await supabase
-    .from("orders")
-    .select("paise_suffix")
-    .eq("status", "pending");
-
-  if (error) throw error;
-
-  const used = new Set(data.map((r) => r.paise_suffix));
-
-  if (basePaiseSuffix !== undefined && !used.has(basePaiseSuffix)) {
-    return basePaiseSuffix;
-  }
-
-  // Random 2-digit paise: 01–99
-  let attempts = 0;
-  while (attempts < 200) {
-    const suffix = Math.floor(Math.random() * 99) + 1;
-    if (!used.has(suffix)) return suffix;
-    attempts++;
-  }
-  throw new Error("Could not generate unique paise suffix — too many pending orders");
-}
-
-/** Format payable amount string: base rupees + paise suffix */
-export function formatPayableAmount(baseRupees: number, paiseSuffix: number): string {
-  return `${baseRupees}.${String(paiseSuffix).padStart(2, "0")}`;
+  razorpay_order_id?: string;
 }
 
 // ── CRUD ───────────────────────────────────────────────────────────────────────
@@ -195,10 +167,23 @@ export async function submitPaymentProof(
   return { ok: true };
 }
 
+export async function checkInventory(tierId: string): Promise<number> {
+  // Count how many orders are NOT rejected/expired
+  const { count, error } = await supabase
+    .from("orders")
+    .select("*", { count: "exact", head: true })
+    .eq("ticket_tier", tierId)
+    .in("status", ["pending", "approved"]);
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function approveOrder(
   orderId: string,
   adminId: string,
-  adminName: string
+  adminName: string,
+  razorpayPaymentId?: string
 ): Promise<{ ok: boolean; error?: string }> {
   const order = await getOrderById(orderId);
   if (!order) return { ok: false, error: "not_found" };
@@ -214,7 +199,8 @@ export async function approveOrder(
       handled_by_id: adminId,
       handled_by_name: adminName,
       handled_at: now,
-      ticket_qr_code: ticketQr
+      ticket_qr_code: ticketQr,
+      ...(razorpayPaymentId ? { razorpay_payment_id: razorpayPaymentId } : {})
     })
     .eq("id", orderId)
     .eq("status", "pending"); // Prevents race condition
@@ -226,6 +212,20 @@ export async function approveOrder(
   if (updated?.status !== "approved" || updated.handled_by_id !== adminId) {
     return { ok: false, error: "race_condition" };
   }
+
+  // Attempt to send email
+  console.log(`[approveOrder] Sending ticket email for order ${orderId}...`);
+  const emailRes = await sendTicketEmail(updated);
+  if (emailRes.ok) {
+    await supabase
+      .from("orders")
+      .update({ email_sent: true, email_sent_at: Math.floor(Date.now() / 1000) })
+      .eq("id", orderId);
+  } else {
+    console.error(`[approveOrder] Failed to send email for order ${orderId}:`, emailRes.error);
+    // Note: We don't return an error here, the order is still approved.
+  }
+
   return { ok: true };
 }
 
@@ -283,6 +283,7 @@ export async function checkInOrder(
 ): Promise<{ ok: boolean; error?: string; checkedInAt?: number; order?: Order }> {
   const order = await getOrderById(orderId);
   if (!order) return { ok: false, error: "not_found" };
+  if (order.status === "refunded") return { ok: false, error: "refunded" };
   if (order.status !== "approved") return { ok: false, error: "not_approved" };
   if (order.checked_in) {
     return { ok: false, error: "already_checked_in", checkedInAt: order.checked_in_at ?? undefined };

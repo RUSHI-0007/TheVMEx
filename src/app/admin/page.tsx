@@ -120,6 +120,7 @@ function StatusBadge({ status }: { status: string }) {
     approved: { bg: "rgba(46,160,67,0.12)",  color: "#3fb950" },
     rejected: { bg: "rgba(224,92,92,0.12)",  color: "#e05c5c" },
     expired:  { bg: "rgba(120,120,120,0.1)", color: "var(--text-dim)" },
+    refunded: { bg: "rgba(180,100,220,0.12)", color: "#b464dc" },
   };
   const c = colors[status] ?? colors.pending;
   return (
@@ -285,12 +286,15 @@ function OrderCard({
   order,
   onApprove,
   onReject,
+  onResendEmail,
 }: {
   order: Order;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
+  onResendEmail: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [resending, setResending] = useState(false);
 
   return (
     <div style={{ border: "1px solid rgba(212,175,55,0.12)", background: "var(--bg-card)", marginBottom: "1px" }}>
@@ -305,6 +309,11 @@ function OrderCard({
             ₹{order.payable_amount}
           </span>
           <StatusBadge status={order.status} />
+          {order.status === "approved" && (
+            <span style={{ fontFamily: "var(--font-body)", fontSize: "0.6rem", color: order.email_sent ? "#3fb950" : "#e05c5c", border: `1px solid ${order.email_sent ? "#3fb95044" : "#e05c5c44"}`, padding: "0.15rem 0.4rem", borderRadius: "10px" }}>
+              {order.email_sent ? "✓ Email Sent" : "⚠ Email Failed"}
+            </span>
+          )}
           <span style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--text-muted)" }}>{order.attendee_name}</span>
           <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-dim)" }}>{order.ticket_tier_label} × {order.quantity}</span>
           {order.status === "pending" && <ExpiryTimer expiresAt={order.expires_at} />}
@@ -406,6 +415,35 @@ function OrderCard({
                   </button>
                 </div>
               )}
+
+              {/* Resend email button for approved orders */}
+              {order.status === "approved" && (
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                  <button
+                    onClick={async () => {
+                      setResending(true);
+                      await onResendEmail(order.id);
+                      setResending(false);
+                    }}
+                    disabled={resending}
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                      padding: "0.5rem 1rem",
+                      background: "rgba(212,175,55,0.1)",
+                      color: "var(--gold)",
+                      border: "1px solid rgba(212,175,55,0.3)",
+                      cursor: resending ? "not-allowed" : "pointer",
+                      opacity: resending ? 0.5 : 1
+                    }}
+                  >
+                    {resending ? "Sending..." : "Resend Email"}
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -420,7 +458,7 @@ function AdminDashboard({ adminName }: { adminName: string }) {
   const [loading, setLoading] = useState(true);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected" | "expired">("pending");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected" | "expired" | "refunded">("pending");
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -448,14 +486,24 @@ function AdminDashboard({ adminName }: { adminName: string }) {
     if (res.ok) {
       setStatusMsg({ text: `Order ${orderId} approved ✓`, ok: true });
       fetchOrders();
-    } else if (data.error === "already_handled") {
-      setStatusMsg({ text: "This order was already handled by another team member.", ok: false });
-      fetchOrders();
     } else {
-      setStatusMsg({ text: `Error: ${data.error}`, ok: false });
+      setStatusMsg({ text: `Failed to approve order: ${data.error}`, ok: false });
     }
     setTimeout(() => setStatusMsg(null), 5000);
   };
+
+  const handleResendEmail = async (orderId: string) => {
+    const res = await fetch(`/api/admin/orders/${orderId}/resend-email`, { method: "POST" });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      setStatusMsg({ text: `Email resent for order ${orderId} ✓`, ok: true });
+      fetchOrders();
+    } else {
+      setStatusMsg({ text: `Failed to resend email: ${data.error}`, ok: false });
+    }
+    setTimeout(() => setStatusMsg(null), 5000);
+  };
+
 
   const handleReject = async (orderId: string, reason: string) => {
     setRejectTarget(null);
@@ -525,7 +573,7 @@ function AdminDashboard({ adminName }: { adminName: string }) {
 
         {/* Filters */}
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-          {(["pending", "approved", "rejected", "expired", "all"] as const).map((f) => (
+          {(["pending", "approved", "rejected", "expired", "refunded", "all"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -554,12 +602,13 @@ function AdminDashboard({ adminName }: { adminName: string }) {
           <p style={{ color: "var(--text-dim)", fontSize: "0.82rem", textAlign: "center", padding: "3rem" }}>No {filter} orders.</p>
         ) : (
           <div>
-            {filteredOrders.map((order) => (
+            {filteredOrders.map((o) => (
               <OrderCard
-                key={order.id}
-                order={order}
+                key={o.id}
+                order={o}
                 onApprove={handleApprove}
                 onReject={(id) => setRejectTarget(id)}
+                onResendEmail={handleResendEmail}
               />
             ))}
           </div>
