@@ -15,14 +15,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "server_configuration_error" }, { status: 500 });
     }
 
+    console.log("Step 1: Init");
     const body = await req.json();
     const { tierId, quantity, attendee } = body;
+    console.log("Step 2: Body parsed", tierId, quantity);
 
     // Validate tier
     const tier = TICKET_TIERS.find((t) => t.id === tierId);
     if (!tier) {
       return NextResponse.json({ error: "invalid_tier" }, { status: 400 });
     }
+    console.log("Step 3: Tier validated");
 
     // Validate fields
     const { name, phone, email, college, year } = attendee ?? {};
@@ -38,9 +41,11 @@ export async function POST(req: NextRequest) {
     if (!quantity || quantity < 1) {
       return NextResponse.json({ error: "invalid_quantity" }, { status: 400 });
     }
+    console.log("Step 4: Fields validated");
 
     // Check inventory
     const currentSold = await checkInventory(tier.id);
+    console.log("Step 5: Inventory checked", currentSold);
     if (currentSold + quantity > tier.totalInventory) {
       return NextResponse.json({ error: "sold_out" }, { status: 400 });
     }
@@ -51,45 +56,51 @@ export async function POST(req: NextRequest) {
 
     const orderId = `VMX-${uuidv4().slice(0, 8).toUpperCase()}`;
     const expiresAt = Math.floor(Date.now() / 1000) + EVENT.pendingExpiryMinutes * 60;
+    console.log("Step 6: Razorpay init starting");
 
     // Initialize Razorpay
     const razorpay = new Razorpay({
       key_id: razorpayKeyId,
       key_secret: razorpayKeySecret,
     });
+    console.log("Step 7: Razorpay init complete");
 
-    // Create Razorpay Order
-    const rzpOrder = await razorpay.orders.create({
-      amount: amountInPaise,
-      currency: "INR",
-      receipt: orderId,
-      notes: {
-        internalOrderId: orderId,
-      },
-    });
+    let rzpOrder;
+    try {
+      rzpOrder = await razorpay.orders.create({
+        amount: amountInPaise,
+        currency: "INR",
+        receipt: orderId,
+        notes: {
+          internalOrderId: orderId,
+        },
+      });
+    } catch (rzpErr) {
+      console.error("[Razorpay Error]", rzpErr);
+      return NextResponse.json({ error: "razorpay_error", details: rzpErr }, { status: 500 });
+    }
 
-    // Create Internal Order in Supabase
-    const order = await createOrder({
-      id: orderId,
-      ticket_tier_id: tier.id,
-      ticket_tier_label: tier.label,
-      quantity,
-      base_amount: baseRupees,
-      payable_amount: baseRupees, // We changed payable_amount to number
-      attendee_name: name.trim(),
-      attendee_phone: phone.trim(),
-      attendee_email: email.trim(),
-      attendee_college: college.trim(),
-      attendee_year: year.trim(),
-      expires_at: expiresAt,
-      razorpay_order_id: rzpOrder.id,
-    });
-
-    // Update with Razorpay Order ID (optional, we could have passed it to createOrder but Order interface requires it later or we can just update it)
-    // Wait, createOrder doesn't take razorpay_order_id in CreateOrderInput right now.
-    // Let's modify the Supabase row to include it.
-    // Actually, I can just include it in CreateOrderInput in db.ts to save an update.
-    // I will do that in the next step. For now, let's just return what we need.
+    let order;
+    try {
+      order = await createOrder({
+        id: orderId,
+        ticket_tier_id: tier.id,
+        ticket_tier_label: tier.label,
+        quantity,
+        base_amount: baseRupees,
+        payable_amount: baseRupees,
+        attendee_name: name.trim(),
+        attendee_phone: phone.trim(),
+        attendee_email: email.trim(),
+        attendee_college: college.trim(),
+        attendee_year: year.trim(),
+        expires_at: expiresAt,
+        razorpay_order_id: rzpOrder.id,
+      });
+    } catch (dbErr) {
+      console.error("[DB Error]", dbErr);
+      return NextResponse.json({ error: "db_error", details: dbErr }, { status: 500 });
+    }
 
     return NextResponse.json({
       ok: true,
@@ -97,8 +108,9 @@ export async function POST(req: NextRequest) {
       razorpayOrderId: rzpOrder.id,
       razorpayKeyId, // Sent to client to initialize checkout.js
     });
-  } catch (err) {
-    console.error("[POST /api/orders/create-payment]", err);
+  } catch (err: any) {
+    console.error("[POST /api/orders/create-payment] OUTER Error:");
+    console.dir(err, { depth: null });
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 }

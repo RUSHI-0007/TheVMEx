@@ -73,7 +73,8 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     .insert([{
       ...input,
       status: 'pending',
-      created_at: now
+      created_at: now,
+      paise_suffix: 0 // dummy value to satisfy NOT NULL constraint from legacy UPI flow
     }])
     .select()
     .single();
@@ -172,7 +173,7 @@ export async function checkInventory(tierId: string): Promise<number> {
   const { count, error } = await supabase
     .from("orders")
     .select("*", { count: "exact", head: true })
-    .eq("ticket_tier", tierId)
+    .eq("ticket_tier_id", tierId)
     .in("status", ["pending", "approved"]);
 
   if (error) throw error;
