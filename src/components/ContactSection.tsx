@@ -22,8 +22,8 @@ function ContactRow({
         {icon}
       </div>
       <div>
-        <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim mb-0.5">{label}</p>
-        <p className={`font-serif text-[0.95rem] ${muted ? "text-text-muted" : "text-text-primary"}`}>{value}</p>
+        <p className="font-body text-[0.8125rem] tracking-[0.2em] uppercase text-text-dim mb-0.5">{label}</p>
+        <p className={`font-serif text-[1.25rem] ${muted ? "text-text-muted" : "text-text-primary"}`}>{value}</p>
       </div>
     </div>
   );
@@ -67,7 +67,7 @@ export default function ContactSection() {
           <h2 className="font-display text-[clamp(1.8rem,4vw,2.75rem)] font-bold text-text-primary leading-[1.1] relative z-10">
             We&apos;re here<br />to help.
           </h2>
-          <p className="font-serif text-[0.9rem] text-text-muted leading-[1.7] font-light mt-3 max-w-[480px]">
+          <p className="font-serif text-[1.125rem] text-text-muted leading-[1.7] font-light mt-3 max-w-[480px]">
             Reach our team for anything — tickets, entry, or VIP queries. We&apos;ll get back to you fast.
           </p>
         </motion.div>
@@ -128,10 +128,10 @@ export default function ContactSection() {
             <line x1="9" y1="3" x2="9" y2="18"/>
             <line x1="15" y1="6" x2="15" y2="21"/>
           </svg>
-          <p className="font-body text-[0.7rem] tracking-[0.2em] uppercase text-text-dim mb-1">
+          <p className="font-body text-[0.875rem] tracking-[0.2em] uppercase text-text-dim mb-1">
             Venue map coming soon
           </p>
-          <p className="font-serif text-[0.8rem] text-text-dim font-light italic">
+          <p className="font-serif text-[1rem] text-text-dim font-light italic">
             Once confirmed, we&apos;ll drop the location right here
           </p>
         </motion.div>

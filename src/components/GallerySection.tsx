@@ -60,7 +60,7 @@ export default function GallerySection() {
           <h2 className="font-display text-[clamp(1.8rem,4vw,2.75rem)] font-bold text-text-primary leading-[1.1]">
             Glimpses<br />of the Night
           </h2>
-          <p className="font-body text-[0.65rem] tracking-[0.2em] uppercase text-text-dim pb-1 shrink-0">
+          <p className="font-body text-[0.875rem] tracking-[0.2em] uppercase text-text-dim pb-1 shrink-0">
             Freshers Party 2025
           </p>
         </motion.div>
@@ -98,7 +98,7 @@ export default function GallerySection() {
           ))}
         </motion.div>
 
-        <p className="font-body text-[0.65rem] tracking-[0.15em] uppercase text-text-dim text-center pt-4">
+        <p className="font-body text-[0.875rem] tracking-[0.15em] uppercase text-text-dim text-center pt-4">
           Tap any photo to view · Reels &amp; photos from past events
         </p>
       </div>

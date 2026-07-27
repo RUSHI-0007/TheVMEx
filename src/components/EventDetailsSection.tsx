@@ -20,7 +20,7 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-4 py-[18px] bg-transparent border-none cursor-pointer text-left"
       >
-        <span className={`font-body text-[0.9rem] font-normal leading-[1.5] transition-colors duration-200 ${open ? "text-gold" : "text-text-primary"}`}>
+        <span className={`font-body text-[1.125rem] font-normal leading-[1.5] transition-colors duration-200 ${open ? "text-gold" : "text-text-primary"}`}>
           {q}
         </span>
         {/* Plus/X icon */}
@@ -39,7 +39,7 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="font-serif text-[0.9rem] text-text-muted leading-[1.85] pb-[18px] font-light">
+            <p className="font-serif text-[1rem] text-text-muted leading-[1.85] pb-[18px] font-light">
               {a}
             </p>
           </motion.div>
@@ -112,7 +112,7 @@ export default function EventDetailsSection() {
           transition={{ duration: 0.8 }}
           className="mb-10"
         >
-          <span className="font-serif text-[0.85rem] italic text-gold-dim mb-3 block font-light">
+          <span className="font-serif text-[1rem] italic text-gold-dim mb-3 block font-light">
             Everything you need to know
           </span>
           <h2 className="font-display text-[clamp(2.5rem,6vw,4rem)] font-bold leading-tight text-text-primary">
@@ -136,17 +136,17 @@ export default function EventDetailsSection() {
               </div>
               {/* Content */}
               <div className="px-4 py-3.5 flex flex-col justify-center flex-1">
-                <p className="font-body text-[0.6rem] tracking-[0.22em] uppercase text-text-dim mb-1">
+                <p className="font-body text-[0.75rem] tracking-[0.22em] uppercase text-text-dim mb-1">
                   {d.label}
                 </p>
-                <p className={`font-serif text-[0.95rem] leading-[1.4] ${d.isTba ? "text-text-muted" : "text-text-primary"}`}>
+                <p className={`font-serif text-[1.25rem] leading-[1.4] ${d.isTba ? "text-text-muted" : "text-text-primary"}`}>
                   {d.value}
                 </p>
                 {d.sub && (
-                  <p className="font-body text-[0.72rem] text-text-dim mt-0.5">{d.sub}</p>
+                  <p className="font-body text-[0.875rem] text-text-dim mt-0.5">{d.sub}</p>
                 )}
                 {d.isTba && (
-                  <span className="inline-block mt-1 font-body text-[0.55rem] tracking-[0.2em] uppercase text-gold border border-gold/25 px-2 py-0.5 w-fit">
+                  <span className="inline-block mt-1 font-body text-[0.7rem] tracking-[0.2em] uppercase text-gold border border-gold/25 px-2 py-0.5 w-fit">
                     Stay tuned
                   </span>
                 )}
@@ -163,7 +163,7 @@ export default function EventDetailsSection() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7 }}
           >
-            <h3 className="font-display text-[1.25rem] font-bold text-text-primary mb-4">What&apos;s Included</h3>
+            <h3 className="font-display text-[1.75rem] font-bold text-text-primary mb-4">What&apos;s Included</h3>
             <ul className="flex flex-col gap-2.5">
               {[
                 "Entry to the venue for the full duration",
@@ -172,8 +172,8 @@ export default function EventDetailsSection() {
                 "Access to all curated music sets",
                 "Digital QR ticket for entry",
               ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5 font-serif text-[0.9rem] text-text-muted leading-[1.6] font-light">
-                  <span className="mt-[7px] w-1 h-1 bg-gold-dim shrink-0 rotate-45" />
+                <li key={item} className="flex items-start gap-2.5 font-serif text-[1.125rem] text-text-muted leading-[1.6] font-light">
+                  <span className="mt-[9px] w-1 h-1 bg-gold-dim shrink-0 rotate-45" />
                   {item}
                 </li>
               ))}
@@ -186,7 +186,7 @@ export default function EventDetailsSection() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7 }}
           >
-            <h3 className="font-display text-[1.25rem] font-bold text-text-primary mb-4">Entry Rules</h3>
+            <h3 className="font-display text-[1.75rem] font-bold text-text-primary mb-4">Entry Rules</h3>
             <ul className="flex flex-col gap-2.5">
               {[
                 `Strictly ${EVENT.ageRestriction} — no exceptions`,
@@ -196,8 +196,8 @@ export default function EventDetailsSection() {
                 "Late entry subject to capacity at that time",
                 "Management reserves the right of admission",
               ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5 font-serif text-[0.9rem] text-text-muted leading-[1.6] font-light">
-                  <span className="mt-[7px] w-1 h-1 bg-gold-dim shrink-0 rotate-45" />
+                <li key={item} className="flex items-start gap-2.5 font-serif text-[1.125rem] text-text-muted leading-[1.6] font-light">
+                  <span className="mt-[9px] w-1 h-1 bg-gold-dim shrink-0 rotate-45" />
                   {item}
                 </li>
               ))}
@@ -209,7 +209,7 @@ export default function EventDetailsSection() {
         <div className="flex items-center gap-3 mb-8">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
           <span className="w-[5px] h-[5px] bg-gold-dim rotate-45 shrink-0" />
-          <span className="font-body text-[0.55rem] tracking-[0.25em] uppercase text-text-dim">FAQ</span>
+          <span className="font-body text-[0.75rem] tracking-[0.25em] uppercase text-text-dim">FAQ</span>
           <span className="w-[5px] h-[5px] bg-gold-dim rotate-45 shrink-0" />
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
         </div>

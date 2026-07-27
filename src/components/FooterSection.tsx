@@ -10,7 +10,7 @@ export default function FooterSection() {
         {/* Brand */}
         <div className="text-center mb-10">
           <span className="font-script text-[2.25rem] text-gold-dim block leading-none mb-1">TheVMEx</span>
-          <div className="font-body text-[0.8rem] font-bold tracking-[0.2em] uppercase text-text-dim">
+          <div className="font-body text-[0.875rem] font-bold tracking-[0.2em] uppercase text-text-dim">
             Masquerade Night · Aug 2026
           </div>
         </div>
@@ -28,7 +28,7 @@ export default function FooterSection() {
             <a
               key={link.label}
               href={link.href}
-              className="font-body text-[0.7rem] tracking-[0.15em] uppercase text-text-dim hover:text-gold transition-colors duration-200"
+              className="font-body text-[0.875rem] tracking-[0.15em] uppercase text-text-dim hover:text-gold transition-colors duration-200"
             >
               {link.label}
             </a>
@@ -65,15 +65,15 @@ export default function FooterSection() {
 
         {/* Copyright */}
         <div className="border-t border-gold/[0.06] pt-6 text-center">
-          <p className="font-body text-[0.65rem] tracking-[0.06em] text-text-dim mb-3">
+          <p className="font-body text-[0.875rem] tracking-[0.06em] text-text-dim mb-3">
             © {new Date().getFullYear()} TheVMEx. All rights reserved.
           </p>
           <div className="flex justify-center gap-4">
-            <a href="/admin" className="font-body text-[0.6rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Admin</a>
+            <a href="/admin" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Admin</a>
             <span className="text-text-dim">·</span>
-            <a href="/admin/scan" className="font-body text-[0.6rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Scanner</a>
+            <a href="/admin/scan" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Scanner</a>
             <span className="text-text-dim">·</span>
-            <a href="/ticket" className="font-body text-[0.6rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">My Ticket</a>
+            <a href="/ticket" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">My Ticket</a>
           </div>
         </div>
 
