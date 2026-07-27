@@ -14,13 +14,13 @@ const fadeUp: Variants = {
 };
 
 // ── Stat pill ─────────────────────────────────────────────────────────────
-function StatPill({ value, label }: { value: string; label: string }) {
+function StatPill({ value, label, className = "" }: { value: string; label: string; className?: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 py-5 px-8 border border-gold/15 bg-gold/[0.03]">
+    <div className={`flex flex-col items-center justify-center gap-1 py-5 px-8 border border-gold/15 bg-gold/[0.03] ${className}`}>
       <span className="font-display text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-gold leading-none">
         {value}
       </span>
-      <span className="font-body text-[0.65rem] tracking-[0.18em] uppercase text-text-dim">
+      <span className="font-body text-[0.65rem] tracking-[0.18em] uppercase text-text-dim text-center">
         {label}
       </span>
     </div>
@@ -170,11 +170,11 @@ export default function AboutSection() {
           {/* Stats */}
           <motion.div
             variants={fadeUp}
-            className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-px bg-gold/10 border border-gold/10 mb-10"
+            className="grid grid-cols-2 md:grid-cols-3 gap-px bg-gold/10 border border-gold/10 mb-10"
           >
             <StatPill value="500+" label="Attendees · Freshers Party" />
             <StatPill value="1st" label="Flagship Event · 2025" />
-            <StatPill value="2nd" label="Edition · Masquerade 2026" />
+            <StatPill value="2nd" label="Edition · Masquerade 2026" className="col-span-2 md:col-span-1" />
           </motion.div>
 
           <motion.a
