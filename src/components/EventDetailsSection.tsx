@@ -115,7 +115,7 @@ export default function EventDetailsSection() {
           <span className="font-serif text-[0.85rem] italic text-gold-dim mb-3 block font-light">
             Everything you need to know
           </span>
-          <h2 className="font-display text-[clamp(2.2rem,5vw,3.25rem)] font-bold text-text-primary leading-[1.1]">
+          <h2 className="font-display text-[clamp(2.5rem,6vw,4rem)] font-bold leading-tight text-text-primary">
             Event<br />Details
           </h2>
         </motion.div>
