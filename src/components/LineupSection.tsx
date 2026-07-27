@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import GoldDivider from "@/components/GoldDivider";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface Performer {
@@ -29,7 +28,6 @@ const PERFORMERS: Performer[] = [
     instagramUrl: "https://www.instagram.com/poltergeistttttttttttt?igsh=dXh6M2V0MzZxMXQ=",
     isHeadliner: true,
   },
-  // ← Add more performers here — each renders as a card automatically
 ];
 
 // ─── Social icon helpers ───────────────────────────────────────────────────
@@ -67,177 +65,55 @@ function HeadlinerCard({ performer }: { performer: Performer }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        position: "relative",
-        border: "1px solid rgba(212,175,55,0.22)",
-        background: "var(--bg-card)",
-        padding: "0",
-        overflow: "hidden",
-      }}
+      className="relative border border-gold/[0.22] bg-[#18151a] p-0 overflow-hidden max-w-[800px] mx-auto"
     >
       {/* Gold top bar */}
-      <div
-        style={{
-          height: "2px",
-          background: "linear-gradient(90deg, transparent, var(--gold), var(--gold-muted), transparent)",
-        }}
-      />
+      <div className="h-[2px] bg-[linear-gradient(90deg,transparent,var(--color-gold),var(--color-gold-muted),transparent)]" />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "0",
-        }}
-        className="headliner-inner"
-      >
-        {/* Monogram / visual panel */}
-        <div
-          style={{
-            background: "linear-gradient(135deg, #0f0d10 0%, #1a1520 50%, #0f0d10 100%)",
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            overflow: "hidden",
-            borderBottom: "1px solid rgba(212,175,55,0.1)",
-          }}
-        >
-          {/* Background radial */}
+      <div className="flex flex-col">
+        {/* Visual panel */}
+        <div className="bg-[#0f0d10] h-[400px] md:h-[500px] flex flex-col items-center justify-center relative overflow-hidden border-b border-gold/10">
+          {/* Background image */}
           <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "radial-gradient(ellipse 80% 70% at 50% 50%, rgba(212,175,55,0.07) 0%, transparent 70%)",
-            }}
+            className="absolute inset-0 bg-cover bg-center opacity-90 transition-transform duration-[10s] hover:scale-105"
+            style={{ backgroundImage: "url('/images/poltergeist.jpg')" }}
           />
-
-          {/* Monogram circle */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              width: "110px",
-              height: "110px",
-              borderRadius: "50%",
-              border: "1px solid rgba(212,175,55,0.3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "1.25rem",
-              background: "rgba(212,175,55,0.05)",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "2.5rem",
-                fontWeight: 700,
-                color: "var(--gold)",
-                lineHeight: 1,
-              }}
-            >
-              {performer.name[0]}
-            </span>
-          </div>
-
+          {/* Gradient overlay to seamlessly blend image to the background color below */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#18151a] via-transparent to-[#18151a]/20 opacity-90" />
+          
           {/* Headliner badge */}
-          <span
-            className="badge-gold"
-            style={{ position: "relative", zIndex: 1 }}
-          >
+          <span className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 inline-block px-4 py-1.5 font-body text-[0.625rem] font-bold tracking-[0.15em] uppercase text-[#0b0b0d] bg-gold">
             Headliner
           </span>
-
-          {/* Decorative corner lines */}
-          {[
-            { top: 16, left: 16, borderTop: 1, borderLeft: 1 },
-            { top: 16, right: 16, borderTop: 1, borderRight: 1 },
-            { bottom: 16, left: 16, borderBottom: 1, borderLeft: 1 },
-            { bottom: 16, right: 16, borderBottom: 1, borderRight: 1 },
-          ].map((style, i) => (
-            <div
-              key={i}
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                width: 20,
-                height: 20,
-                borderColor: "rgba(212,175,55,0.25)",
-                borderStyle: "solid",
-                borderWidth: 0,
-                ...style,
-              }}
-            />
-          ))}
         </div>
 
         {/* Info panel */}
-        <div style={{ padding: "2.5rem" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.6rem",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "var(--gold-muted)",
-              marginBottom: "0.5rem",
-            }}
-          >
+        <div className="p-10 flex flex-col items-center text-center">
+          <p className="font-body text-[0.6rem] tracking-[0.25em] uppercase text-gold-muted mb-2">
             {performer.role}
           </p>
-          <h3
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2rem, 5vw, 2.8rem)",
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              lineHeight: 1.1,
-              marginBottom: "0.75rem",
-            }}
-          >
+          <h3 className="font-display text-[clamp(2rem,5vw,2.8rem)] font-bold text-text-primary leading-[1.1] mb-3">
             {performer.name}
           </h3>
 
           {performer.genre && (
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.72rem",
-                letterSpacing: "0.12em",
-                color: "var(--gold-dim)",
-                marginBottom: "1.5rem",
-              }}
-            >
+            <p className="font-body text-[0.72rem] tracking-[0.12em] text-gold-dim mb-6">
               {performer.genre}
             </p>
           )}
 
-          <p
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(1rem, 2vw, 1.1rem)",
-              color: "var(--text-muted)",
-              lineHeight: 1.85,
-              marginBottom: "2rem",
-              maxWidth: "520px",
-            }}
-          >
+          <p className="font-serif text-[clamp(1rem,2vw,1.1rem)] text-text-muted leading-[1.85] mb-8 max-w-[520px]">
             {performer.bio}
           </p>
 
           {/* Social links */}
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <div className="flex gap-3 flex-wrap justify-center">
             {performer.instagramUrl && (
               <a
                 href={performer.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-gold-outline"
-                style={{ padding: "0.55rem 1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                className="relative inline-flex items-center justify-center gap-2 px-4 py-2 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group"
                 aria-label={`${performer.name} on Instagram`}
               >
                 <InstagramIcon />
@@ -249,8 +125,7 @@ function HeadlinerCard({ performer }: { performer: Performer }) {
                 href={performer.spotifyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-gold-outline"
-                style={{ padding: "0.55rem 1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                className="relative inline-flex items-center justify-center gap-2 px-4 py-2 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group"
                 aria-label={`${performer.name} on Spotify`}
               >
                 <SpotifyIcon />
@@ -262,8 +137,7 @@ function HeadlinerCard({ performer }: { performer: Performer }) {
                 href={performer.youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-gold-outline"
-                style={{ padding: "0.55rem 1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                className="relative inline-flex items-center justify-center gap-2 px-4 py-2 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group"
                 aria-label={`${performer.name} on YouTube`}
               >
                 <YoutubeIcon />
@@ -273,185 +147,6 @@ function HeadlinerCard({ performer }: { performer: Performer }) {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @media (min-width: 768px) {
-          .headliner-inner {
-            grid-template-columns: 320px 1fr !important;
-          }
-          .headliner-inner > div:first-child {
-            border-bottom: none !important;
-            border-right: 1px solid rgba(212,175,55,0.1) !important;
-            min-height: 360px !important;
-          }
-        }
-      `}</style>
-    </motion.div>
-  );
-}
-
-// ─── Supporting performer card ─────────────────────────────────────────────
-function PerformerCard({ performer, index }: { performer: Performer; index: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="card-base"
-      style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}
-    >
-      {/* Monogram */}
-      <div
-        style={{
-          width: "52px",
-          height: "52px",
-          borderRadius: "50%",
-          border: "1px solid rgba(212,175,55,0.25)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "rgba(212,175,55,0.05)",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "1.25rem",
-            fontWeight: 700,
-            color: "var(--gold)",
-          }}
-        >
-          {performer.name[0]}
-        </span>
-      </div>
-
-      <div>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.6rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "var(--gold-muted)",
-            marginBottom: "0.3rem",
-          }}
-        >
-          {performer.role}
-        </p>
-        <h3
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "1.3rem",
-            fontWeight: 700,
-            color: "var(--text-primary)",
-          }}
-        >
-          {performer.name}
-        </h3>
-        {performer.genre && (
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.7rem",
-              letterSpacing: "0.1em",
-              color: "var(--text-dim)",
-              marginTop: "0.25rem",
-            }}
-          >
-            {performer.genre}
-          </p>
-        )}
-      </div>
-
-      <p
-        style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: "0.95rem",
-          color: "var(--text-muted)",
-          lineHeight: 1.75,
-          flex: 1,
-        }}
-      >
-        {performer.bio}
-      </p>
-
-      {performer.instagramUrl && (
-        <a
-          href={performer.instagramUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            fontFamily: "var(--font-body)",
-            fontSize: "0.72rem",
-            letterSpacing: "0.1em",
-            color: "var(--gold-muted)",
-            textDecoration: "none",
-            transition: "color 0.2s",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = "var(--gold)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "var(--gold-muted)")}
-        >
-          <InstagramIcon />
-          {performer.instagramHandle}
-        </a>
-      )}
-    </motion.div>
-  );
-}
-
-// ─── "More coming soon" placeholder card ──────────────────────────────────
-function ComingSoonCard() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        border: "1px dashed rgba(212,175,55,0.15)",
-        padding: "2rem",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "0.75rem",
-        minHeight: "180px",
-      }}
-    >
-      <div
-        style={{
-          width: "40px",
-          height: "40px",
-          border: "1px dashed rgba(212,175,55,0.25)",
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <line x1="8" y1="2" x2="8" y2="14" stroke="var(--gold-dim)" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="2" y1="8" x2="14" y2="8" stroke="var(--gold-dim)" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </div>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "0.65rem",
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: "var(--text-dim)",
-          textAlign: "center",
-        }}
-      >
-        More Performers
-        <br />
-        <span style={{ color: "var(--gold-dim)" }}>To be announced</span>
-      </p>
     </motion.div>
   );
 }
@@ -459,87 +154,30 @@ function ComingSoonCard() {
 // ─── Main export ───────────────────────────────────────────────────────────
 export default function LineupSection() {
   const headliner = PERFORMERS.find((p) => p.isHeadliner);
-  const supporting = PERFORMERS.filter((p) => !p.isHeadliner);
 
   return (
-    <section id="lineup" className="section" style={{ background: "var(--bg-secondary)" }}>
-      <div className="container-site">
+    <section id="lineup" className="relative z-10 py-28 md:py-30 bg-[#151316]">
+      <div className="w-full max-w-[1200px] mx-auto px-6 sm:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          style={{ textAlign: "center", marginBottom: "4rem" }}
+          className="text-center mb-16 flex flex-col items-center"
         >
-          <p className="section-eyebrow">The Lineup</p>
-          <h2 className="section-heading" style={{ marginBottom: "0" }}>
+          <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-3">The Lineup</p>
+          <h2 className="font-display text-[clamp(2rem,5vw,3.25rem)] font-bold leading-tight text-text-primary mb-0">
             Featuring{" "}
-            <span style={{ color: "var(--gold)", fontStyle: "italic" }}>
-              Live Music
-            </span>
+            <span className="text-gold italic">Live Music</span>
           </h2>
         </motion.div>
 
         {/* Headliner */}
         {headliner && (
-          <div style={{ marginBottom: "3rem" }}>
+          <div className="mb-12">
             <HeadlinerCard performer={headliner} />
           </div>
-        )}
-
-        {/* Supporting performers grid */}
-        {(supporting.length > 0 || true) && (
-          <>
-            <div
-              style={{
-                marginBottom: "2rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-              }}
-            >
-              <div
-                style={{
-                  flex: 1,
-                  height: "1px",
-                  background: "rgba(212,175,55,0.1)",
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--text-dim)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Also Performing
-              </span>
-              <div
-                style={{
-                  flex: 1,
-                  height: "1px",
-                  background: "rgba(212,175,55,0.1)",
-                }}
-              />
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              {supporting.map((p, i) => (
-                <PerformerCard key={p.id} performer={p} index={i} />
-              ))}
-              <ComingSoonCard />
-            </div>
-          </>
         )}
       </div>
     </section>

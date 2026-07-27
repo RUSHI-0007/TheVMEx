@@ -5,15 +5,15 @@ import { EVENT } from "@/lib/config";
 
 function ContactItem({ label, value, icon, link }: { label: string; value: string; icon: React.ReactNode; link?: string }) {
   const content = (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-      <div style={{ width: "36px", height: "36px", border: "1px solid rgba(212,175,55,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)", flexShrink: 0, background: "rgba(212,175,55,0.05)" }}>
+    <div className="flex items-start gap-4">
+      <div className="w-9 h-9 border border-gold/20 flex items-center justify-center text-gold shrink-0 bg-gold/5">
         {icon}
       </div>
       <div>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: "0.25rem" }}>
+        <p className="font-body text-[0.6rem] tracking-[0.15em] uppercase text-text-dim mb-1">
           {label}
         </p>
-        <p style={{ fontFamily: "var(--font-display)", fontSize: "1rem", color: "var(--text-primary)" }}>
+        <p className="font-display text-[1rem] text-text-primary">
           {value}
         </p>
       </div>
@@ -22,7 +22,7 @@ function ContactItem({ label, value, icon, link }: { label: string; value: strin
 
   if (link) {
     return (
-      <a href={link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block" }} className="hover-lift">
+      <a href={link} target="_blank" rel="noopener noreferrer" className="block transition-transform duration-300 hover:-translate-y-1">
         {content}
       </a>
     );
@@ -33,9 +33,9 @@ function ContactItem({ label, value, icon, link }: { label: string; value: strin
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="section" style={{ background: "var(--bg-secondary)" }}>
-      <div className="container-site">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "4rem" }} className="contact-grid">
+    <section id="contact" className="relative z-10 py-28 md:py-30 bg-[#151316]">
+      <div className="w-full max-w-[1200px] mx-auto px-6 sm:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Left: Info */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
@@ -43,15 +43,15 @@ export default function ContactSection() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8 }}
           >
-            <p className="section-eyebrow">Get in Touch</p>
-            <h2 className="section-heading" style={{ marginBottom: "2.5rem" }}>
-              Need <span style={{ color: "var(--gold)", fontStyle: "italic" }}>Help?</span>
+            <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-3">Get in Touch</p>
+            <h2 className="font-display text-[clamp(2rem,5vw,3.25rem)] font-bold leading-tight text-text-primary mb-10">
+              Need <span className="text-gold italic">Help?</span>
             </h2>
-            <p style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem", color: "var(--text-muted)", lineHeight: 1.8, marginBottom: "3rem", maxWidth: "480px" }}>
+            <p className="font-serif text-[1.1rem] text-text-muted leading-[1.8] mb-12 max-w-[480px]">
               Our team is here to assist you with any questions regarding tickets, entry rules, or VIP reservations.
             </p>
             
-            <div style={{ display: "grid", gap: "2rem" }}>
+            <div className="grid gap-8">
               <ContactItem
                 label="WhatsApp (Priority Support)"
                 value="Message Us"
@@ -93,37 +93,24 @@ export default function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8 }}
-            style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}
+            className="flex flex-col justify-center"
           >
-            <div style={{ width: "100%", height: "400px", border: "1px solid rgba(212,175,55,0.2)", background: "var(--bg-card)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "1rem" }}>
-               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--gold-dim)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-full h-[400px] border border-gold/20 bg-[#18151a] flex items-center justify-center flex-col gap-4">
+               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8a6f24" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
                  <line x1="9" y1="3" x2="9" y2="18" />
                  <line x1="15" y1="6" x2="15" y2="21" />
                </svg>
-               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-dim)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+               <p className="font-body text-[0.8rem] text-text-dim tracking-[0.1em] uppercase">
                  Venue Location Map
                </p>
-               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", color: "var(--gold-dim)" }}>
+               <p className="font-body text-[0.7rem] text-gold-dim">
                  (To be added once venue is confirmed)
                </p>
             </div>
           </motion.div>
         </div>
       </div>
-      <style jsx>{`
-        .hover-lift {
-          transition: transform 0.3s ease;
-        }
-        .hover-lift:hover {
-          transform: translateY(-4px);
-        }
-        @media (min-width: 900px) {
-          .contact-grid {
-            grid-template-columns: 1fr 1fr !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

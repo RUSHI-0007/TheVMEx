@@ -25,54 +25,54 @@ export default function GallerySection() {
   }
 
   return (
-    <section id="gallery" className="section">
-      <div className="container-site">
+    <section id="gallery" className="relative z-10 py-28 md:py-30">
+      <div className="w-full max-w-[1200px] mx-auto px-6 sm:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8 }}
-          style={{ marginBottom: "3rem", textAlign: "center" }}
+          className="mb-12 text-center"
         >
-          <p className="section-eyebrow">Previous Editions</p>
-          <h2 className="section-heading">
+          <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-3">Previous Editions</p>
+          <h2 className="font-display text-[clamp(2rem,5vw,3.25rem)] font-bold leading-tight text-text-primary mb-6">
             Glimpses of the{" "}
-            <span style={{ color: "var(--gold)", fontStyle: "italic" }}>Night</span>
+            <span className="text-gold italic">Night</span>
           </h2>
         </motion.div>
 
         {/* Gallery Grid */}
-        <div className="gallery-grid">
-          {GALLERY_IMAGES.map((img, i) => (
-            <motion.div
-              key={img.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className={`gallery-item span-${img.span}`}
-              onClick={() => setSelectedImage(img.src)}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  backgroundImage: `url(${img.src})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  transition: "transform 0.4s ease",
-                }}
-                className="gallery-bg"
-              />
-              <div className="gallery-overlay">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </div>
-            </motion.div>
-          ))}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] auto-rows-[240px] md:auto-rows-[280px] gap-6">
+          {GALLERY_IMAGES.map((img, i) => {
+            let spanClass = "";
+            if (img.span === "large") spanClass = "md:col-span-2 md:row-span-2";
+            else if (img.span === "row") spanClass = "md:col-span-2";
+            else if (img.span === "col") spanClass = "md:row-span-2";
+
+            return (
+              <motion.div
+                key={img.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className={`relative overflow-hidden cursor-zoom-in border border-gold/15 group ${spanClass}`}
+                onClick={() => setSelectedImage(img.src)}
+              >
+                <div
+                  className="w-full h-full bg-cover bg-center transition-transform duration-400 ease-in-out group-hover:scale-105"
+                  style={{ backgroundImage: `url(${img.src})` }}
+                />
+                <div className="absolute inset-0 bg-[#0b0b0d]/40 flex items-center justify-center text-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
@@ -84,18 +84,7 @@ export default function GallerySection() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(11,11,13,0.95)",
-              backdropFilter: "blur(10px)",
-              zIndex: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "2rem",
-              cursor: "zoom-out",
-            }}
+            className="fixed inset-0 bg-[#0b0b0d]/95 backdrop-blur-md z-[9999] flex items-center justify-center p-8 cursor-zoom-out"
             onClick={() => setSelectedImage(null)}
           >
             <motion.img
@@ -105,34 +94,13 @@ export default function GallerySection() {
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               src={selectedImage}
               alt="Enlarged gallery view"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-                border: "1px solid rgba(212,175,55,0.2)",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
-              }}
+              className="max-w-full max-h-full object-contain border border-gold/20 shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image itself
             />
             
             <button
               onClick={() => setSelectedImage(null)}
-              style={{
-                position: "absolute",
-                top: "2rem",
-                right: "2rem",
-                background: "rgba(212,175,55,0.1)",
-                border: "1px solid rgba(212,175,55,0.3)",
-                color: "var(--gold)",
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
+              className="absolute top-8 right-8 bg-gold/10 border border-gold/30 text-gold w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-gold/20 hover:scale-105"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -142,59 +110,6 @@ export default function GallerySection() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <style jsx>{`
-        .gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          grid-auto-rows: 240px;
-          gap: 1.5rem;
-        }
-        
-        .gallery-item {
-          position: relative;
-          overflow: hidden;
-          cursor: zoom-in;
-          border: 1px solid rgba(212,175,55,0.15);
-        }
-        
-        .gallery-item:hover .gallery-bg {
-          transform: scale(1.05);
-        }
-        
-        .gallery-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(11,11,13,0.4);
-          display: flex;
-          alignItems: center;
-          justifyContent: center;
-          color: var(--gold);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        
-        .gallery-item:hover .gallery-overlay {
-          opacity: 1;
-        }
-
-        /* Responsive masonry-like spans */
-        @media (min-width: 768px) {
-          .gallery-grid {
-            grid-auto-rows: 280px;
-          }
-          .span-large {
-            grid-column: span 2;
-            grid-row: span 2;
-          }
-          .span-row {
-            grid-column: span 2;
-          }
-          .span-col {
-            grid-row: span 2;
-          }
-        }
-      `}</style>
     </section>
   );
 }

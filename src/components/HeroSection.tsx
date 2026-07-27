@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import MaskIllustration from "@/components/MaskIllustration";
 import GoldDivider from "@/components/GoldDivider";
 import { EVENT } from "@/lib/config";
 
@@ -35,29 +34,11 @@ function useCountdown(targetISO: string) {
 
 function CountdownBlock({ value, label }: { value: number; label: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "60px" }}>
-      <span
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(2rem, 5vw, 3rem)",
-          fontWeight: 700,
-          color: "var(--gold)",
-          lineHeight: 1,
-          letterSpacing: "-0.01em",
-        }}
-      >
+    <div className="flex flex-col items-center min-w-[60px]">
+      <span className="font-display text-[clamp(2rem,5vw,3rem)] font-bold text-[#d4af37] leading-none tracking-tighter">
         {String(value).padStart(2, "0")}
       </span>
-      <span
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "0.6rem",
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: "var(--text-dim)",
-          marginTop: "0.4rem",
-        }}
-      >
+      <span className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-[#5e5a55] mt-1.5">
         {label}
       </span>
     </div>
@@ -66,16 +47,7 @@ function CountdownBlock({ value, label }: { value: number; label: string }) {
 
 function CountdownSeparator() {
   return (
-    <span
-      style={{
-        fontFamily: "var(--font-display)",
-        fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
-        color: "var(--gold-dim)",
-        lineHeight: 1,
-        alignSelf: "flex-start",
-        paddingTop: "0.15rem",
-      }}
-    >
+    <span className="font-display text-[clamp(1.5rem,4vw,2.5rem)] text-[#8a6f24] leading-none self-start pt-1">
       :
     </span>
   );
@@ -84,26 +56,9 @@ function CountdownSeparator() {
 // ─── Info chip ─────────────────────────────────────────────────────────────
 function InfoChip({ icon, text }: { icon: string; text: string }) {
   return (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.5rem",
-        padding: "0.45rem 1rem",
-        border: "1px solid rgba(212,175,55,0.2)",
-        background: "rgba(212,175,55,0.04)",
-      }}
-    >
-      <span style={{ fontSize: "0.75rem" }}>{icon}</span>
-      <span
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "0.75rem",
-          fontWeight: 500,
-          letterSpacing: "0.06em",
-          color: "var(--text-muted)",
-        }}
-      >
+    <div className="inline-flex items-center gap-2 px-4 py-2 border border-[#d4af37]/20 bg-[#d4af37]/5">
+      <span className="text-xs">{icon}</span>
+      <span className="font-body text-xs font-medium tracking-wide text-[#9a948c]">
         {text}
       </span>
     </div>
@@ -129,56 +84,25 @@ function Navbar() {
   ];
 
   return (
-    <header
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        padding: "0 2rem",
-        height: "70px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        transition: "background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease",
-        background: scrolled ? "rgba(11,11,13,0.9)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(212,175,55,0.1)" : "1px solid transparent",
-      }}
-    >
+    <header className={`fixed top-0 left-0 right-0 z-50 px-8 h-[70px] flex items-center justify-between transition-all duration-500 ease-in-out ${scrolled ? "bg-[#0b0b0d]/90 backdrop-blur-md border-b border-[#d4af37]/10" : "bg-transparent border-b border-transparent"}`}>
       {/* Wordmark */}
-      <a href="#" style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: "1px" }}>
-        <span style={{ fontFamily: "var(--font-script)", fontSize: "0.78rem", color: "var(--gold-muted)", lineHeight: 1 }}>
-          presents
-        </span>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.08em" }}>
-          TheVMEx
-        </span>
+      <a href="#" className="flex flex-col gap-[1px]">
+        <span className="font-script text-[0.78rem] text-[#c9a24b] leading-none">presents</span>
+        <span className="font-display text-[1.2rem] font-bold text-[#ede6da] tracking-wider">TheVMEx</span>
       </a>
 
       {/* Desktop nav */}
-      <nav style={{ display: "flex", alignItems: "center", gap: "2.5rem" }} aria-label="Main navigation">
+      <nav className="hidden md:flex items-center gap-10" aria-label="Main navigation">
         {navLinks.map((l) => (
           <a
             key={l.href}
             href={l.href}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--text-muted)",
-              textDecoration: "none",
-              transition: "color 0.2s ease",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--gold)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
+            className="font-body text-[0.72rem] tracking-[0.14em] uppercase text-[#9a948c] hover:text-[#d4af37] transition-colors duration-200"
           >
             {l.label}
           </a>
         ))}
-        <a href="#tickets" className="btn-gold" style={{ padding: "0.5rem 1.25rem" }}>
+        <a href="#tickets" className="relative inline-flex items-center justify-center gap-2 px-5 py-2 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37] hover:bg-[#c9a24b] hover:border-[#c9a24b] transition-colors duration-300 whitespace-nowrap">
           Book Tickets
         </a>
       </nav>
@@ -188,14 +112,7 @@ function Navbar() {
         id="mobile-menu-toggle"
         aria-label="Toggle menu"
         onClick={() => setMenuOpen(!menuOpen)}
-        style={{
-          display: "none",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "0.25rem",
-          color: "var(--gold)",
-        }}
+        className="md:hidden p-1 text-[#d4af37]"
       >
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
           {menuOpen ? (
@@ -215,38 +132,18 @@ function Navbar() {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: "70px",
-            left: 0,
-            right: 0,
-            background: "rgba(11,11,13,0.97)",
-            borderBottom: "1px solid rgba(212,175,55,0.12)",
-            padding: "1.5rem 2rem 2rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1.25rem",
-          }}
-        >
+        <div className="md:hidden fixed top-[70px] left-0 right-0 bg-[#0b0b0d]/95 border-b border-[#d4af37]/10 px-8 pt-6 pb-8 flex flex-col gap-5">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setMenuOpen(false)}
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.85rem",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--text-muted)",
-                textDecoration: "none",
-              }}
+              className="font-body text-[0.85rem] tracking-[0.14em] uppercase text-[#9a948c]"
             >
               {l.label}
             </a>
           ))}
-          <a href="#tickets" className="btn-gold" style={{ textAlign: "center", padding: "0.7rem 1.5rem" }} onClick={() => setMenuOpen(false)}>
+          <a href="#tickets" className="relative inline-flex items-center justify-center gap-2 px-6 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37] transition-colors duration-300 whitespace-nowrap" onClick={() => setMenuOpen(false)}>
             Book Tickets
           </a>
         </div>
@@ -274,54 +171,24 @@ export default function HeroSection() {
 
       <section
         id="hero"
-        style={{
-          position: "relative",
-          minHeight: "100dvh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: "8rem 1.5rem 5rem",
-          overflow: "hidden",
-        }}
+        className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-6 pt-32 pb-20 overflow-hidden"
       >
         {/* Ambient background glow */}
         <div
           aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse 70% 55% at 50% 40%, rgba(212,175,55,0.06) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 40%, rgba(212,175,55,0.06) 0%, transparent 70%)" }}
         />
 
         {/* Subtle horizontal scan lines texture overlay */}
         <div
           aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(212,175,55,0.012) 3px, rgba(212,175,55,0.012) 4px)",
-            pointerEvents: "none",
-          }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(212,175,55,0.012) 3px, rgba(212,175,55,0.012) 4px)" }}
         />
 
         {/* Content */}
-        <div style={{ position: "relative", zIndex: 1, maxWidth: "860px", width: "100%" }}>
-
-          {/* Mask illustration */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            style={{ marginBottom: "1rem" }}
-          >
-            <MaskIllustration size={320} className="hero-mask" />
-          </motion.div>
+        <div className="relative z-10 w-full max-w-[860px]">
 
           {/* "presents" script accent */}
           <motion.p
@@ -329,13 +196,7 @@ export default function HeroSection() {
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-script)",
-              fontSize: "clamp(1.2rem, 3vw, 1.6rem)",
-              color: "var(--gold-muted)",
-              marginBottom: "0.25rem",
-              lineHeight: 1,
-            }}
+            className="font-script text-[clamp(1.2rem,3vw,1.6rem)] text-[#c9a24b] mb-1 leading-none"
           >
             TheVMEx presents
           </motion.p>
@@ -346,19 +207,11 @@ export default function HeroSection() {
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.8rem, 9vw, 6.5rem)",
-              fontWeight: 900,
-              letterSpacing: "0.04em",
-              lineHeight: 1,
-              color: "var(--text-primary)",
-              marginBottom: "0.5rem",
-            }}
+            className="font-display text-[clamp(2.8rem,9vw,6.5rem)] font-black tracking-wide leading-none text-[#ede6da] mb-2"
           >
             MASQUERADE
             <br />
-            <span style={{ color: "var(--gold)" }}>NIGHT</span>
+            <span className="text-[#d4af37]">NIGHT</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -367,14 +220,7 @@ export default function HeroSection() {
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
-              fontStyle: "italic",
-              color: "var(--text-muted)",
-              marginBottom: "2.5rem",
-              lineHeight: 1.6,
-            }}
+            className="font-serif text-[clamp(1rem,2.5vw,1.3rem)] italic text-[#9a948c] mb-10 leading-relaxed"
           >
             An Evening Shrouded in Mystery &amp; Elegance
           </motion.p>
@@ -385,13 +231,7 @@ export default function HeroSection() {
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.75rem",
-              justifyContent: "center",
-              marginBottom: "2.5rem",
-            }}
+            className="flex flex-wrap justify-center gap-3 mb-10"
           >
             <InfoChip icon="🗓" text={EVENT.date} />
             <InfoChip icon="📍" text={EVENT.venue} />
@@ -404,12 +244,13 @@ export default function HeroSection() {
             initial="hidden"
             animate="show"
             variants={fadeUp}
-            style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "4rem" }}
+            className="flex flex-wrap justify-center gap-4 mb-16"
           >
-            <a href="#tickets" className="btn-gold" id="hero-book-cta">
+            <a href="#tickets" id="hero-book-cta" className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37] hover:bg-[#c9a24b] hover:border-[#c9a24b] transition-colors duration-300 whitespace-nowrap">
               Book Your Ticket
             </a>
-            <a href="#about" className="btn-gold-outline" id="hero-details-cta">
+            <a href="#about" id="hero-details-cta" className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#d4af37] bg-transparent border border-[#d4af37]/40 hover:text-[#0b0b0d] hover:border-[#d4af37] hover:bg-[#d4af37] transition-all duration-300 whitespace-nowrap group">
+              <span className="absolute inset-0 bg-[#d4af37] scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100 -z-10" />
               View Details
             </a>
           </motion.div>
@@ -421,19 +262,10 @@ export default function HeroSection() {
             animate="show"
             variants={fadeUp}
           >
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.6rem",
-                letterSpacing: "0.25em",
-                textTransform: "uppercase",
-                color: "var(--text-dim)",
-                marginBottom: "1rem",
-              }}
-            >
+            <p className="font-body text-[0.6rem] tracking-[0.25em] uppercase text-[#5e5a55] mb-4">
               Event begins in
             </p>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", justifyContent: "center" }}>
+            <div className="flex items-start justify-center gap-4">
               <CountdownBlock value={countdown.days} label="Days" />
               <CountdownSeparator />
               <CountdownBlock value={countdown.hours} label="Hours" />
@@ -450,27 +282,10 @@ export default function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 1 }}
-          style={{
-            position: "absolute",
-            bottom: "2rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.4rem",
-          }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
           aria-hidden="true"
         >
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.55rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--text-dim)",
-            }}
-          >
+          <span className="font-body text-[0.55rem] tracking-[0.2em] uppercase text-[#5e5a55]">
             Scroll
           </span>
           <motion.div
@@ -478,7 +293,7 @@ export default function HeroSection() {
             transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M9 3v12M4 10l5 5 5-5" stroke="var(--gold-dim)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M9 3v12M4 10l5 5 5-5" stroke="#8a6f24" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.div>
         </motion.div>

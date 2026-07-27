@@ -134,50 +134,38 @@ export default function ScanPage() {
   // ── Loading / unauthorized ──────────────────────────────────────────────────
   if (!sessionChecked) {
     return (
-      <div style={{ minHeight: "100dvh", background: "var(--bg-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)", fontSize: "0.9rem" }}>Verifying session…</p>
+      <div className="min-h-[100dvh] bg-[#0b0b0d] flex items-center justify-center">
+        <p className="font-body text-text-muted text-[0.9rem]">Verifying session…</p>
       </div>
     );
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg-primary)", padding: "2rem 1.5rem" }}>
-      <div style={{ maxWidth: "500px", margin: "0 auto" }}>
+    <div className="min-h-[100dvh] bg-[#0b0b0d] p-8 px-6">
+      <div className="max-w-[500px] mx-auto">
 
-        <header style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <a href="/admin" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", color: "var(--text-muted)", textDecoration: "none" }}>← Back to Admin</a>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.8rem", color: "var(--text-primary)", marginTop: "1rem" }}>
+        <header className="text-center mb-8">
+          <a href="/admin" className="font-display text-[1rem] text-text-muted no-underline hover:text-gold transition-colors">← Back to Admin</a>
+          <h1 className="font-display text-[1.8rem] text-text-primary mt-4 mb-2">
             Entry Scanner
           </h1>
-          <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-dim)" }}>
+          <p className="font-body text-[0.8rem] text-text-dim">
             Point camera at attendee's ticket QR
           </p>
         </header>
 
         {/* Camera window — visible only when idle/checking */}
-        <div style={{
-          display: (scanState.status === "idle" || scanState.status === "checking") ? "block" : "none",
-          border: "2px solid rgba(212,175,55,0.3)",
-          borderRadius: "12px",
-          overflow: "hidden",
-          background: "#000",
-          position: "relative",
-        }}>
-          <div id="reader" style={{ width: "100%", border: "none" }} />
+        <div className={`relative border-2 border-gold/30 rounded-xl overflow-hidden bg-black ${(scanState.status === "idle" || scanState.status === "checking") ? "block" : "hidden"}`}>
+          <div id="reader" className="w-full border-none [&_button]:bg-gold [&_button]:text-black [&_button]:border-none [&_button]:py-2 [&_button]:px-4 [&_button]:font-body [&_button]:font-semibold [&_button]:cursor-pointer [&_button]:mb-2.5 [&_select]:bg-[#18151a] [&_select]:text-text-primary [&_select]:border [&_select]:border-gold/30 [&_select]:p-1.5 [&_select]:mb-2.5 [&_a]:hidden" />
           {scanState.status === "checking" && (
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "rgba(11,11,13,0.8)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexDirection: "column", gap: "1rem",
-            }}>
+            <div className="absolute inset-0 bg-[#0b0b0d]/80 flex flex-col items-center justify-center gap-4 z-10">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                style={{ width: 40, height: 40, border: "3px solid var(--gold)", borderTopColor: "transparent", borderRadius: "50%" }}
+                className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full"
               />
-              <p style={{ fontFamily: "var(--font-body)", color: "var(--gold)", fontSize: "0.9rem" }}>Verifying ticket…</p>
+              <p className="font-body text-gold text-[0.9rem]">Verifying ticket…</p>
             </div>
           )}
         </div>
@@ -190,34 +178,29 @@ export default function ScanPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
-              style={{
-                background: "rgba(46,160,67,0.08)",
-                border: "1px solid rgba(46,160,67,0.35)",
-                padding: "2rem",
-                textAlign: "center",
-              }}
+              className="bg-[#2ea043]/10 border border-[#2ea043]/35 p-8 text-center"
             >
-              <div style={{ width: 64, height: 64, background: "#3fb950", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+              <div className="w-16 h-16 bg-[#3fb950] rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", color: "#3fb950", marginBottom: "0.25rem" }}>Valid Ticket ✓</h2>
-              <p style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", color: "var(--text-primary)", marginBottom: "0.25rem" }}>{scanState.attendeeName}</p>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>Checked in just now · {formatTime(scanState.checkedInAt)}</p>
+              <h2 className="font-display text-[1.6rem] text-[#3fb950] mb-1">Valid Ticket ✓</h2>
+              <p className="font-display text-[1.1rem] text-text-primary mb-1">{scanState.attendeeName}</p>
+              <p className="font-body text-[0.75rem] text-text-muted mb-6">Checked in just now · {formatTime(scanState.checkedInAt)}</p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", textAlign: "left", background: "var(--bg-primary)", padding: "1rem", border: "1px solid rgba(212,175,55,0.15)", marginBottom: "2rem" }}>
+              <div className="grid grid-cols-2 gap-3 text-left bg-[#0b0b0d] p-4 border border-gold/15 mb-8">
                 <div>
-                  <p style={{ fontSize: "0.6rem", textTransform: "uppercase", color: "var(--text-dim)", letterSpacing: "0.1em" }}>Order ID</p>
-                  <p style={{ fontSize: "0.78rem", color: "var(--gold-muted)", fontFamily: "monospace" }}>{scanState.orderId}</p>
+                  <p className="text-[0.6rem] uppercase text-text-dim tracking-[0.1em] mb-1">Order ID</p>
+                  <p className="text-[0.78rem] text-gold-muted font-mono">{scanState.orderId}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: "0.6rem", textTransform: "uppercase", color: "var(--text-dim)", letterSpacing: "0.1em" }}>Ticket</p>
-                  <p style={{ fontSize: "0.78rem", color: "var(--text-primary)" }}>{scanState.tier}</p>
+                  <p className="text-[0.6rem] uppercase text-text-dim tracking-[0.1em] mb-1">Ticket</p>
+                  <p className="text-[0.78rem] text-text-primary">{scanState.tier}</p>
                 </div>
               </div>
 
-              <button onClick={resetScanner} className="btn-gold" style={{ width: "100%" }}>
+              <button onClick={resetScanner} className="w-full relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-gold border border-gold hover:bg-gold-muted hover:border-gold-muted transition-colors duration-400 whitespace-nowrap">
                 Scan Next →
               </button>
             </motion.div>
@@ -229,32 +212,28 @@ export default function ScanPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
-              style={{
-                background: "rgba(224,140,0,0.08)",
-                border: "1px solid rgba(224,140,0,0.5)",
-                padding: "2rem",
-                textAlign: "center",
-              }}
+              className="bg-[#e08c00]/10 border border-[#e08c00]/50 p-8 text-center"
             >
-              <div style={{ width: 64, height: 64, background: "#e08c00", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+              <div className="w-16 h-16 bg-[#e08c00] rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               </div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", color: "#e08c00", marginBottom: "0.25rem" }}>Already Checked In ⚠</h2>
-              <p style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", color: "var(--text-primary)", marginBottom: "0.25rem" }}>{scanState.attendeeName}</p>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
+              <h2 className="font-display text-[1.6rem] text-[#e08c00] mb-1">Already Checked In ⚠</h2>
+              <p className="font-display text-[1.1rem] text-text-primary mb-1">{scanState.attendeeName}</p>
+              <p className="font-body text-[0.75rem] text-text-muted mb-6">
                 {scanState.checkedInAt > 0
                   ? `Previously checked in at ${formatTime(scanState.checkedInAt)}`
                   : "This ticket was already used for entry"}
               </p>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", color: "#e08c00", marginBottom: "1.5rem", border: "1px solid rgba(224,140,0,0.3)", padding: "0.75rem", background: "rgba(224,140,0,0.05)" }}>
+              <p className="font-body text-[0.78rem] text-[#e08c00] mb-6 border border-[#e08c00]/30 p-3 bg-[#e08c00]/5">
                 Do NOT allow entry — this QR has already been scanned.
               </p>
 
-              <button onClick={resetScanner} className="btn-gold-outline" style={{ width: "100%" }}>
+              <button onClick={resetScanner} className="w-full relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group">
+                <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
                 Scan Another →
               </button>
             </motion.div>
@@ -266,36 +245,32 @@ export default function ScanPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
-              style={{
-                background: "rgba(224,92,92,0.08)",
-                border: "1px solid rgba(224,92,92,0.4)",
-                padding: "2rem",
-                textAlign: "center",
-              }}
+              className="bg-[#e05c5c]/10 border border-[#e05c5c]/40 p-8 text-center"
             >
-              <div style={{ width: 64, height: 64, background: "#e05c5c", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+              <div className="w-16 h-16 bg-[#e05c5c] rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", color: "#e05c5c", marginBottom: "0.5rem" }}>
+              <h2 className="font-display text-[1.6rem] text-[#e05c5c] mb-2">
                 {scanState.reason === "bad_format" ? "Invalid QR Code" :
                  scanState.reason === "not_found" ? "Ticket Not Found" :
                  scanState.reason === "refunded" ? "Ticket Refunded — Do Not Admit" :
                  "Payment Not Verified"}
               </h2>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
+              <p className="font-body text-[0.85rem] text-text-muted mb-6">
                 {scanState.reason === "bad_format" && "This QR code is not a Masquerade Night ticket."}
                 {scanState.reason === "not_found" && "No order matching this QR exists in the system."}
                 {scanState.reason === "not_approved" && "This booking was not approved — payment may be pending or rejected."}
                 {scanState.reason === "refunded" && "This order has been refunded and the ticket is permanently void."}
               </p>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", color: "#e05c5c", marginBottom: "1.5rem", border: "1px solid rgba(224,92,92,0.3)", padding: "0.75rem", background: "rgba(224,92,92,0.05)" }}>
+              <p className="font-body text-[0.78rem] text-[#e05c5c] mb-6 border border-[#e05c5c]/30 p-3 bg-[#e05c5c]/5">
                 Deny entry and contact the admin team if needed.
               </p>
 
-              <button onClick={resetScanner} className="btn-gold-outline" style={{ width: "100%" }}>
+              <button onClick={resetScanner} className="w-full relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group">
+                <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
                 Try Again →
               </button>
             </motion.div>
@@ -306,42 +281,18 @@ export default function ScanPage() {
               key="error"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{
-                background: "rgba(100,100,100,0.08)",
-                border: "1px solid rgba(100,100,100,0.4)",
-                padding: "2rem",
-                textAlign: "center",
-              }}
+              className="bg-[#646464]/10 border border-[#646464]/40 p-8 text-center"
             >
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>Something went wrong</h2>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-dim)", marginBottom: "1.5rem" }}>{scanState.message}</p>
-              <button onClick={resetScanner} className="btn-gold-outline" style={{ width: "100%" }}>Retry →</button>
+              <h2 className="font-display text-[1.4rem] text-text-muted mb-2">Something went wrong</h2>
+              <p className="font-body text-[0.82rem] text-text-dim mb-6">{scanState.message}</p>
+              <button onClick={resetScanner} className="w-full relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group">
+                <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
+                Retry →
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      <style jsx global>{`
-        #reader { border: none !important; }
-        #reader button {
-          background: var(--gold) !important;
-          color: #000 !important;
-          border: none !important;
-          padding: 8px 16px !important;
-          font-family: var(--font-body) !important;
-          font-weight: 600 !important;
-          cursor: pointer !important;
-          margin-bottom: 10px;
-        }
-        #reader select {
-          background: var(--bg-card) !important;
-          color: var(--text-primary) !important;
-          border: 1px solid rgba(212,175,55,0.3) !important;
-          padding: 6px !important;
-          margin-bottom: 10px;
-        }
-        #reader a { display: none !important; }
-      `}</style>
     </div>
   );
 }

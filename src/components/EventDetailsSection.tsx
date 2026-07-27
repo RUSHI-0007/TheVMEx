@@ -20,80 +20,24 @@ function DetailCard({
   isTba?: boolean;
 }) {
   return (
-    <div
-      className="card-base"
-      style={{
-        padding: "1.75rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.85rem",
-      }}
-    >
-      <div
-        style={{
-          width: "40px",
-          height: "40px",
-          border: "1px solid rgba(212,175,55,0.2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "var(--gold)",
-          flexShrink: 0,
-        }}
-      >
+    <div className="card-base p-7 flex flex-col gap-3.5">
+      <div className="w-10 h-10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
         {icon}
       </div>
       <div>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.6rem",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "var(--text-dim)",
-            marginBottom: "0.35rem",
-          }}
-        >
+        <p className="font-body text-[0.6rem] tracking-[0.22em] uppercase text-text-dim mb-1.5">
           {label}
         </p>
-        <p
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "1rem",
-            fontWeight: 600,
-            color: isTba ? "var(--text-muted)" : "var(--text-primary)",
-            lineHeight: 1.3,
-          }}
-        >
+        <p className={`font-display text-[1rem] font-semibold leading-[1.3] ${isTba ? "text-text-muted" : "text-text-primary"}`}>
           {value}
         </p>
         {subvalue && (
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.78rem",
-              color: "var(--text-dim)",
-              marginTop: "0.3rem",
-              lineHeight: 1.5,
-            }}
-          >
+          <p className="font-body text-[0.78rem] text-text-dim mt-1.5 leading-[1.5]">
             {subvalue}
           </p>
         )}
         {isTba && (
-          <span
-            style={{
-              display: "inline-block",
-              marginTop: "0.5rem",
-              padding: "0.2rem 0.6rem",
-              border: "1px solid rgba(212,175,55,0.2)",
-              fontFamily: "var(--font-body)",
-              fontSize: "0.55rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--gold-dim)",
-            }}
-          >
+          <span className="inline-block mt-2 px-2.5 py-1 border border-gold/20 font-body text-[0.55rem] tracking-[0.2em] uppercase text-gold-dim">
             Stay tuned
           </span>
         )}
@@ -120,42 +64,22 @@ function FAQItem({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      style={{ borderBottom: "1px solid rgba(212,175,55,0.1)" }}
+      className="border-b border-gold/10"
     >
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         id={`faq-btn-${index}`}
         aria-controls={`faq-panel-${index}`}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "1.5rem",
-          padding: "1.4rem 0",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-        }}
+        className="w-full flex items-center justify-between gap-6 py-5.5 bg-transparent border-none cursor-pointer text-left"
       >
-        <span
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.9rem",
-            fontWeight: 500,
-            color: open ? "var(--gold)" : "var(--text-primary)",
-            lineHeight: 1.5,
-            transition: "color 0.25s ease",
-          }}
-        >
+        <span className={`font-body text-[0.9rem] font-medium leading-[1.5] transition-colors duration-250 ${open ? "text-gold" : "text-text-primary"}`}>
           {q}
         </span>
         <motion.div
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
-          style={{ flexShrink: 0 }}
+          className="shrink-0"
         >
           <svg
             width="18"
@@ -169,7 +93,7 @@ function FAQItem({
               y1="2"
               x2="9"
               y2="16"
-              stroke={open ? "var(--gold)" : "var(--text-dim)"}
+              stroke={open ? "#d4af37" : "#8a8a93"}
               strokeWidth="1.2"
               strokeLinecap="round"
             />
@@ -178,7 +102,7 @@ function FAQItem({
               y1="9"
               x2="16"
               y2="9"
-              stroke={open ? "var(--gold)" : "var(--text-dim)"}
+              stroke={open ? "#d4af37" : "#8a8a93"}
               strokeWidth="1.2"
               strokeLinecap="round"
             />
@@ -196,18 +120,9 @@ function FAQItem({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            style={{ overflow: "hidden" }}
+            className="overflow-hidden"
           >
-            <p
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "0.975rem",
-                color: "var(--text-muted)",
-                lineHeight: 1.85,
-                paddingBottom: "1.4rem",
-                maxWidth: "680px",
-              }}
-            >
+            <p className="font-serif text-[0.975rem] text-text-muted leading-[1.85] pb-5.5 max-w-[680px]">
               {a}
             </p>
           </motion.div>
@@ -220,26 +135,16 @@ function FAQItem({
 // ── What's included list ───────────────────────────────────────────────────
 function IncludedItem({ text }: { text: string }) {
   return (
-    <li
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "0.75rem",
-        fontFamily: "var(--font-body)",
-        fontSize: "0.875rem",
-        color: "var(--text-muted)",
-        lineHeight: 1.6,
-      }}
-    >
+    <li className="flex items-start gap-3 font-body text-[0.875rem] text-text-muted leading-[1.6]">
       <svg
         width="14"
         height="14"
         viewBox="0 0 14 14"
         fill="none"
         aria-hidden="true"
-        style={{ marginTop: "3px", flexShrink: 0 }}
+        className="mt-[3px] shrink-0"
       >
-        <polygon points="7,0 14,7 7,14 0,7" fill="var(--gold)" opacity="0.7" />
+        <polygon points="7,0 14,7 7,14 0,7" fill="#d4af37" opacity="0.7" />
       </svg>
       {text}
     </li>
@@ -257,31 +162,24 @@ export default function EventDetailsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: "4rem" }}
+          className="mb-16 flex flex-col items-center text-center"
         >
           <p className="section-eyebrow">Event Details</p>
           <h2 className="section-heading">
             Everything You Need to{" "}
-            <span style={{ color: "var(--gold)", fontStyle: "italic" }}>
+            <span className="text-gold italic">
               Know
             </span>
           </h2>
         </motion.div>
 
-        {/* Detail cards grid */}
+        {/* Detail cards grid - Fixed layout spacing by strictly using 3 columns on large screens */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: "1px",
-            background: "rgba(212,175,55,0.07)",
-            border: "1px solid rgba(212,175,55,0.07)",
-            marginBottom: "5rem",
-          }}
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-gold/[0.07] border border-gold/[0.07] mb-20 max-w-[1000px] mx-auto text-left"
         >
           <DetailCard
             icon={
@@ -355,33 +253,17 @@ export default function EventDetailsSection() {
         </motion.div>
 
         {/* What's included */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "4rem",
-            marginBottom: "5rem",
-          }}
-          className="details-split"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-20 max-w-[900px] mx-auto text-left">
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h3
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.4rem",
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                marginBottom: "1.5rem",
-              }}
-            >
+            <h3 className="font-display text-[1.4rem] font-bold text-text-primary mb-6">
               What&apos;s Included
             </h3>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+            <ul className="list-none flex flex-col gap-3.5">
               {[
                 "Entry to the venue for the full duration of the event",
                 "Welcome drink on arrival",
@@ -400,18 +282,10 @@ export default function EventDetailsSection() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h3
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.4rem",
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                marginBottom: "1.5rem",
-              }}
-            >
+            <h3 className="font-display text-[1.4rem] font-bold text-text-primary mb-6">
               Entry Rules
             </h3>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+            <ul className="list-none flex flex-col gap-3.5">
               {[
                 `Strictly ${EVENT.ageRestriction} — no exceptions`,
                 "Valid photo ID is mandatory — Aadhaar, Passport, or Driving Licence",
@@ -427,7 +301,7 @@ export default function EventDetailsSection() {
         </div>
 
         {/* ── Divider ─────────────────────────────────────────────────── */}
-        <div style={{ marginBottom: "5rem" }}>
+        <div className="mb-20 max-w-[1000px] mx-auto">
           <GoldDivider label="FAQ" />
         </div>
 
@@ -437,31 +311,21 @@ export default function EventDetailsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: "2.5rem" }}
+          className="mb-10 flex flex-col items-center text-center"
         >
-          <h2 className="section-heading" style={{ marginBottom: "0.5rem" }}>
+          <h2 className="section-heading mb-2">
             Frequently Asked{" "}
-            <span style={{ color: "var(--gold)", fontStyle: "italic" }}>
+            <span className="text-gold italic">
               Questions
             </span>
           </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "1rem",
-              color: "var(--text-muted)",
-            }}
-          >
+          <p className="font-serif text-[1rem] text-text-muted">
             Still have questions? Reach us on{" "}
             <a
               href={EVENT.socialLinks.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: "var(--gold-muted)",
-                textDecoration: "underline",
-                textDecorationColor: "rgba(212,175,55,0.3)",
-              }}
+              className="text-gold-muted underline decoration-gold/30"
             >
               WhatsApp
             </a>
@@ -470,20 +334,12 @@ export default function EventDetailsSection() {
         </motion.div>
 
         {/* FAQ accordion */}
-        <div style={{ maxWidth: "780px" }}>
+        <div className="max-w-[780px] mx-auto">
           {FAQS.map((faq, i) => (
             <FAQItem key={i} q={faq.q} a={faq.a} index={i} />
           ))}
         </div>
       </div>
-
-      <style jsx>{`
-        @media (min-width: 900px) {
-          .details-split {
-            grid-template-columns: 1fr 1fr !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
