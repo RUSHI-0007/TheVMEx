@@ -97,7 +97,7 @@ function AdminLogin({ onLogin }: { onLogin: (name: string) => void }) {
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, { bg: string; color: string }> = {
+  const colors: Record<string, { bg: string; color: string; border: string }> = {
     pending:  { bg: "bg-gold/[0.12]", color: "text-gold", border: "border-gold/20" },
     approved: { bg: "bg-[#2ea043]/[0.12]",  color: "text-[#3fb950]", border: "border-[#3fb950]/20" },
     rejected: { bg: "bg-[#e05c5c]/[0.12]",  color: "text-[#e05c5c]", border: "border-[#e05c5c]/20" },
