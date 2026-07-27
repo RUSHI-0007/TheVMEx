@@ -21,9 +21,9 @@ const GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 2,
-    type: "image",
-    src: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop",
-    alt: "DJ performance",
+    type: "video",
+    src: "/videos/video1.mp4",
+    alt: "Event video",
     className: "col-span-1 row-span-1",
   },
   {
@@ -35,9 +35,9 @@ const GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 4,
-    type: "image",
-    src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop",
-    alt: "Festival lights",
+    type: "video",
+    src: "/videos/video2.mp4",
+    alt: "video2",
     className: "col-span-2 row-span-1", // wide
   },
   {
@@ -49,9 +49,9 @@ const GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 6,
-    type: "image",
-    src: "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=800&auto=format&fit=crop",
-    alt: "People enjoying the event",
+    type: "video",
+    src: "/videos/video3.mp4",
+    alt: "video3",
     className: "col-span-1 row-span-1",
   },
 ];
@@ -112,7 +112,7 @@ export default function GallerySection() {
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               )}
-              
+
               {/* Overlay with play/view icon */}
               <div className="absolute inset-0 bg-[#0b0b0d]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 {item.type === "video" ? (
@@ -123,8 +123,8 @@ export default function GallerySection() {
                 ) : (
                   // Zoom icon for images
                   <svg width="24" height="24" viewBox="0 0 20 20" fill="none" className="scale-90 group-hover:scale-100 transition-transform duration-300">
-                    <line x1="10" y1="2" x2="10" y2="18" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round"/>
-                    <line x1="2" y1="10" x2="18" y2="10" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round"/>
+                    <line x1="10" y1="2" x2="10" y2="18" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="2" y1="10" x2="18" y2="10" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" />
                   </svg>
                 )}
               </div>
@@ -172,7 +172,7 @@ export default function GallerySection() {
                 />
               )}
             </motion.div>
-            
+
             <button
               onClick={() => setSelectedItem(null)}
               className="absolute top-6 right-6 md:top-8 md:right-8 bg-gold/10 border border-gold/30 text-gold w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-gold/20 transition-colors z-50 rounded-full"
