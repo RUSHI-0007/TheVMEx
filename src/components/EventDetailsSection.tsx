@@ -178,14 +178,13 @@ export default function EventDetailsSection() {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="mb-16 text-center"
         >
-          <p className="section-eyebrow">Event Details</p>
-          <h2 className="section-heading">
+          <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-3">Event Details</p>
+          <h2 className="font-display text-[clamp(2rem,5vw,3.25rem)] font-bold leading-tight text-text-primary mb-0">
             Everything You Need to{" "}
-            <span className="text-gold italic">
-              Know
-            </span>
+            <span className="text-gold italic">Know</span>
           </h2>
         </motion.div>
+
 
         {/* Detail cards grid — individual staggered animated cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-20 max-w-[1000px] mx-auto">
