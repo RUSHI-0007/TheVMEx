@@ -162,7 +162,7 @@ export default function EventDetailsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-16 flex flex-col items-center text-center"
+          className="mb-16 max-w-[1000px] mx-auto text-left"
         >
           <p className="section-eyebrow">Event Details</p>
           <h2 className="section-heading">
@@ -311,7 +311,7 @@ export default function EventDetailsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-10 flex flex-col items-center text-center"
+          className="mb-10 max-w-[780px] mx-auto text-left"
         >
           <h2 className="section-heading mb-2">
             Frequently Asked{" "}
