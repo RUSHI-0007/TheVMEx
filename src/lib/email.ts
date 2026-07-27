@@ -92,7 +92,7 @@ export async function sendTicketEmail(order: Order): Promise<{ ok: boolean; erro
     `;
 
     const { data, error } = await resend.emails.send({
-      from: `${EVENT.brand} Tickets <tickets@updates.thevmex.com>`, // Update to verified domain or testing domain
+      from: `${EVENT.brand} Tickets <onboarding@resend.dev>`, // Resend requires this for unverified domains
       to: order.attendee_email,
       subject: `Your Ticket Confirmed: ${EVENT.name}`,
       html: emailHtml,
