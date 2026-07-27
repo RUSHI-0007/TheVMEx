@@ -12,19 +12,33 @@ function DetailCard({
   value,
   subvalue,
   isTba = false,
+  index = 0,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   subvalue?: string;
   isTba?: boolean;
+  index?: number;
 }) {
   return (
-    <div className="card-base p-7 flex flex-col gap-3.5">
-      <div className="w-10 h-10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -4, transition: { duration: 0.25 } }}
+      className="group relative bg-[#18151a] border border-gold/10 hover:border-gold/35 p-7 flex flex-col gap-3.5 overflow-hidden transition-shadow duration-300 hover:shadow-[0_8px_40px_rgba(212,175,55,0.1)] cursor-default"
+    >
+      {/* Animated top accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-[linear-gradient(90deg,transparent,var(--color-gold),transparent)] opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+      {/* Subtle background shimmer on hover */}
+      <div className="absolute inset-0 bg-gold/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
+
+      <div className="relative z-10 w-10 h-10 border border-gold/20 group-hover:border-gold/50 flex items-center justify-center text-gold shrink-0 transition-colors duration-300">
         {icon}
       </div>
-      <div>
+      <div className="relative z-10">
         <p className="font-body text-[0.6rem] tracking-[0.22em] uppercase text-text-dim mb-1.5">
           {label}
         </p>
@@ -42,7 +56,7 @@ function DetailCard({
           </span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -162,7 +176,7 @@ export default function EventDetailsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-16 max-w-[1000px] mx-auto text-left"
+          className="mb-16 text-center"
         >
           <p className="section-eyebrow">Event Details</p>
           <h2 className="section-heading">
@@ -173,15 +187,10 @@ export default function EventDetailsSection() {
           </h2>
         </motion.div>
 
-        {/* Detail cards grid - Fixed layout spacing by strictly using 3 columns on large screens */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-gold/[0.07] border border-gold/[0.07] mb-20 max-w-[1000px] mx-auto text-left"
-        >
+        {/* Detail cards grid — individual staggered animated cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-20 max-w-[1000px] mx-auto">
           <DetailCard
+            index={0}
             icon={
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <rect x="1" y="3" width="16" height="14" rx="1" stroke="currentColor" strokeWidth="1.2"/>
@@ -195,6 +204,7 @@ export default function EventDetailsSection() {
             subvalue="Doors open 7:30 PM · Show starts 8:00 PM"
           />
           <DetailCard
+            index={1}
             icon={
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M9 1C6.24 1 4 3.24 4 6c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5z" stroke="currentColor" strokeWidth="1.2"/>
@@ -206,6 +216,7 @@ export default function EventDetailsSection() {
             isTba
           />
           <DetailCard
+            index={2}
             icon={
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1.2"/>
@@ -218,6 +229,7 @@ export default function EventDetailsSection() {
             subvalue="Valid government ID mandatory at entry"
           />
           <DetailCard
+            index={3}
             icon={
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M9 2l2.09 4.26L16 7.27l-3.5 3.41.83 4.82L9 13.18l-4.33 2.32.83-4.82L2 7.27l4.91-.01z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
@@ -228,6 +240,7 @@ export default function EventDetailsSection() {
             subvalue="Masks encouraged — priority entry for masked guests"
           />
           <DetailCard
+            index={4}
             icon={
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <rect x="1" y="6" width="16" height="10" rx="1" stroke="currentColor" strokeWidth="1.2"/>
@@ -240,6 +253,7 @@ export default function EventDetailsSection() {
             subvalue="Live performance · Alternative · Indie · Electronic"
           />
           <DetailCard
+            index={5}
             icon={
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M2 16l4-4m0 0l8-8M6 12l2-2m6-6l2-2M6 6l6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -250,7 +264,8 @@ export default function EventDetailsSection() {
             subvalue="Rideshare recommended"
             isTba
           />
-        </motion.div>
+        </div>
+
 
         {/* What's included */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-20 max-w-[900px] mx-auto text-left">
