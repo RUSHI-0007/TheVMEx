@@ -1,6 +1,6 @@
 "use client";
 
-import { EVENT } from "@/lib/config";
+import { EVENT, BRAND, CONTACT } from "@/lib/config";
 
 export default function FooterSection() {
   return (
@@ -9,9 +9,12 @@ export default function FooterSection() {
 
         {/* Brand */}
         <div className="text-center mb-10">
-          <span className="font-script text-[2.25rem] text-gold-dim block leading-none mb-1">TheVMEx</span>
+          <span className="font-script text-[2.25rem] text-gold-dim block leading-none mb-1">{BRAND.name}</span>
           <div className="font-body text-[0.875rem] font-bold tracking-[0.2em] uppercase text-text-dim">
             Masquerade Night · Aug 2026
+          </div>
+          <div className="font-body text-[0.7rem] text-text-dim mt-2 opacity-60">
+            {BRAND.name} is operated by {BRAND.legalName}
           </div>
         </div>
 
@@ -63,15 +66,18 @@ export default function FooterSection() {
           </a>
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & Legal */}
         <div className="border-t border-gold/[0.06] pt-6 text-center">
-          <p className="font-body text-[0.875rem] tracking-[0.06em] text-text-dim mb-3">
-            © {new Date().getFullYear()} TheVMEx. All rights reserved.
+          <p className="font-body text-[0.875rem] tracking-[0.06em] text-text-dim mb-1">
+            © {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.
           </p>
-          <div className="flex justify-center gap-4">
-            <a href="/admin" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Admin</a>
+          <p className="font-body text-[0.75rem] text-text-dim opacity-70 mb-4">
+            Email: {CONTACT.email} | Phone: {CONTACT.phone}
+          </p>
+          <div className="flex justify-center gap-4 flex-wrap">
+            <a href="/terms" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Terms & Conditions</a>
             <span className="text-text-dim">·</span>
-            <a href="/admin/scan" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Scanner</a>
+            <a href="/privacy" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Privacy Policy</a>
             <span className="text-text-dim">·</span>
             <a href="/ticket" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">My Ticket</a>
           </div>

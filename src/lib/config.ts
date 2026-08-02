@@ -3,9 +3,14 @@
 // Single source of truth: update event data / ticket prices here
 // ============================================================
 
+export const BRAND = {
+  name: "TheVMEx",
+  legalName: "Manthan Manohar Khaire",
+} as const;
+
 export const EVENT = {
   name: "Masquerade Night",
-  brand: "TheVMEx",
+  brand: BRAND.name,
   tagline: "An Evening Shrouded in Mystery & Elegance",
   date: "Friday, 21st August 2026",
   dateISO: "2026-08-21T20:00:00+05:30", // 8 PM IST
@@ -20,10 +25,10 @@ export const EVENT = {
   pendingExpiryMinutes: 60,
   socialLinks: {
     instagram: "https://www.instagram.com/thevmexperience?igsh=ZTF5d3BvanFiN2c5",
-    whatsapp: "https://wa.me/919999999999", // ← Replace with actual number
+    whatsapp: "https://wa.me/918888822040", 
   },
   rsvpNumbers: [
-    { name: "RSVP / Queries", number: "+91 99999 99999" }, // ← Replace
+    { name: "Support", number: "+91 88888 22040" }, 
   ],
   pastEvents: [
     {
@@ -125,5 +130,19 @@ export const ADMIN_TEAM_MEMBERS = [
   { id: "a1", name: "Rishi" },
   { id: "a2", name: "Aditi" },
   { id: "a3", name: "Dev" },
-  // ← Add names here; add matching credentials to ADMIN_CREDENTIALS env var
+// ← Add names here; add matching credentials to ADMIN_CREDENTIALS env var
 ] as const;
+
+export const PAYMENT = {
+  upiId: EVENT.upiId,
+  upiName: EVENT.upiName,
+  maxScreenshotSizeMb: 5,
+} as const;
+
+export const CONTACT = {
+  email: "khairemanthan@gmail.com",
+  phone: "+91 88888 22040",
+  rsvp: [{ name: "Support", phone: "+91 88888 22040" }],
+} as const;
+
+export const ADMIN_SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || "default_secret_for_development";

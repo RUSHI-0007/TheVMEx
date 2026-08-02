@@ -1,30 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrderByPhone, getOrderByEmail, getOrderById } from "@/lib/db";
+import { lookupOrder } from "@/lib/orders";
+import { generateQrDataUrl, buildTicketQrPayload } from "@/lib/qr";
+import { getTicketTier } from "@/lib/utils";
+import type { TicketTierId } from "@/lib/config";
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
+  const query = request.nextUrl.searchParams.get("q");
+  if (!query?.trim()) {
+    return NextResponse.json({ error: "Search query required" }, { status: 400 });
+  }
+
   try {
-    const { searchParams } = new URL(req.url);
-    const orderId = searchParams.get("orderId");
-    const phone = searchParams.get("phone");
-    const email = searchParams.get("email");
-
-    if (orderId) {
-      const order = await getOrderById(orderId);
-      if (!order) return NextResponse.json({ orders: [] });
-      return NextResponse.json({ orders: [order] });
-    }
-    if (phone) {
-      const orders = await getOrderByPhone(phone.trim());
-      return NextResponse.json({ orders });
-    }
-    if (email) {
-      const orders = await getOrderByEmail(email.trim());
-      return NextResponse.json({ orders });
+    const orders = await lookupOrder(query);
+    if (orders.length === 0) {
+      return NextResponse.json({ error: "No orders found" }, { status: 404 });
     }
 
-    return NextResponse.json({ error: "provide orderId, phone, or email" }, { status: 400 });
-  } catch (err) {
-    console.error("[GET /api/orders/lookup]", err);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+    const results = await Promise.all(
+      orders.map(async (order) => {
+        const tier = getTicketTier(order.ticketTierId as TicketTierId);
+        let ticketQr: string | null = null;
+
+        if (order.status === "approved" && order.ticketId) {
+          const payload = buildTicketQrPayload(
+            order.ticketId,
+            order.orderId,
+            order.attendeeName
+          );
+          ticketQr = await generateQrDataUrl(payload);
+        }
+
+        return {
+          ...order,
+          tierName: tier?.label ?? order.ticketTierId,
+          ticketQr,
+        };
+      })
+    );
+
+    return NextResponse.json({ orders: results });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to lookup order" },
+      { status: 500 }
+    );
   }
 }

@@ -1,20 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyAdminSession } from "@/lib/adminAuth";
-import { getPendingOrders } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { getPendingOrders } from "@/lib/orders";
+import { getSessionFromRequest } from "@/lib/auth";
+import { getTicketTier } from "@/lib/utils";
+import type { TicketTierId } from "@/lib/config";
 
-export async function GET(_req: NextRequest) {
+export async function GET(request: Request) {
+  const session = getSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const cookieStore = await cookies();
-    const session = await verifyAdminSession(cookieStore);
-    if (!session) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
-
     const orders = await getPendingOrders();
-    return NextResponse.json({ orders });
-  } catch (err) {
-    console.error("[GET /api/admin/orders]", err);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+    const enriched = orders.map((order) => {
+      const tier = getTicketTier(order.ticketTierId as TicketTierId);
+      return {
+        ...order,
+        tierName: tier?.label ?? order.ticketTierId,
+      };
+    });
+
+    return NextResponse.json({
+      orders: enriched,
+      admin: { id: session.adminId, name: session.adminName },
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to fetch orders" },
+      { status: 500 }
+    );
   }
 }

@@ -1,35 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyAdminSession } from "@/lib/adminAuth";
-import { approveOrder } from "@/lib/db";
+import { approveOrder } from "@/lib/orders";
+import { getSessionFromRequest } from "@/lib/auth";
 
 export async function POST(
-  _req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = getSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id: orderId } = await params;
+
   try {
-    const cookieStore = await cookies();
-    const session = await verifyAdminSession(cookieStore);
-    if (!session) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const result = await approveOrder(id, session.adminId, session.adminName);
-
-    if (!result.ok) {
-      if (result.error === "already_handled") {
-        return NextResponse.json({ error: "already_handled" }, { status: 409 });
-      }
-      if (result.error === "race_condition") {
-        return NextResponse.json({ error: "race_condition" }, { status: 409 });
-      }
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("[POST /api/admin/orders/[id]/approve]", err);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+    const order = await approveOrder(
+      orderId,
+      session.adminId,
+      session.adminName
+    );
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error(error);
+    const message =
+      error instanceof Error ? error.message : "Failed to approve order";
+    return NextResponse.json({ error: message }, { status: 409 });
   }
 }

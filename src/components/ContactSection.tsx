@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { EVENT } from "@/lib/config";
+import { EVENT, CONTACT } from "@/lib/config";
 
 function ContactRow({
   icon,
@@ -99,6 +99,17 @@ export default function ContactSection() {
                 <rect x="2" y="2" width="20" height="20" rx="5"/>
                 <circle cx="12" cy="12" r="4"/>
                 <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+              </svg>
+            }
+          />
+          <ContactRow
+            label="Email"
+            value={CONTACT.email}
+            href={`mailto:${CONTACT.email}`}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M2 6l10 7 10-7" />
               </svg>
             }
           />

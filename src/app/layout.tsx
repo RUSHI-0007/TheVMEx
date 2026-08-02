@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://masqueradenight.thevmex.com"), // ← update when deployed
+  metadataBase: new URL("https://the-vmex.vercel.app"), 
   title: "Masquerade Night 2026 — TheVMEx | Ft. Poltergeist · 21 Aug",
   description:
     "TheVMEx presents Masquerade Night — an evening of mystery, elegance, and live music. Ft. Poltergeist. Friday, 21st August 2026. Book your tickets now.",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://masqueradenight.thevmex.com",
+    url: "https://the-vmex.vercel.app",
     siteName: "TheVMEx — Masquerade Night",
     title: "Masquerade Night 2026 — TheVMEx | Ft. Poltergeist",
     description:

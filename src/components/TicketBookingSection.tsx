@@ -1,53 +1,48 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import Script from "next/script";
-import { TICKET_TIERS, EVENT } from "@/lib/config";
+import { TICKET_TIERS, EVENT, PAYMENT } from "@/lib/config";
 import type { TicketTierId } from "@/lib/config";
+import { OrderCountdown } from "@/components/ui/CountdownTimer";
+import { Button } from "@/components/ui/Button";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface AttendeeForm {
-  name: string;
+  attendeeName: string;
   phone: string;
   email: string;
   college: string;
   year: string;
 }
 
-interface Order {
-  id: string;
-  ticket_tier_id: string;
-  ticket_tier_label: string;
+interface OrderData {
+  orderId: string;
+  ticketTierId: string;
   quantity: number;
-  base_amount: number;
-  payable_amount: string;
-  attendee_name: string;
-  attendee_phone: string;
-  attendee_email: string;
-  attendee_college: string;
-  attendee_year: string;
+  baseAmount: number;
+  payableAmount: number;
+  expiresAt: string;
   status: string;
-  created_at: number;
-  expires_at: number;
-  utr: string | null;
-  screenshot_path: string | null;
+  ticketId?: string | null;
+  attendeeName: string;
 }
 
 type Step =
   | "select"      // 1. Tier + qty selection
   | "form"        // 2. Attendee details
   | "summary"     // 3. Order summary confirmation
-  | "processing"  // 4. Verifying payment
-  | "confirmed";  // 5. Success screen
+  | "payment"     // 4. Pay via QR and upload screenshot
+  | "pending";    // 5. Success/Pending screen
 
 // ─── Step progress indicator ──────────────────────────────────────────────────
 const STEPS: { key: Step; label: string }[] = [
   { key: "select", label: "Tickets" },
   { key: "form", label: "Details" },
   { key: "summary", label: "Review" },
-  { key: "processing", label: "Pay" },
-  { key: "confirmed", label: "Done" },
+  { key: "payment", label: "Pay" },
+  { key: "pending", label: "Done" },
 ];
 
 function StepIndicator({ current }: { current: Step }) {
@@ -89,22 +84,36 @@ function StepIndicator({ current }: { current: Step }) {
 
 // ─── Step 1: Tier + quantity selection ───────────────────────────────────────
 function TierSelectionStep({
+  tiers,
   selected,
   quantity,
   onSelect,
   onQty,
   onNext,
+  loading,
 }: {
+  tiers: any[];
   selected: TicketTierId | null;
   quantity: number;
   onSelect: (id: TicketTierId) => void;
   onQty: (n: number) => void;
   onNext: () => void;
+  loading: boolean;
 }) {
+  if (loading) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-gold-muted animate-pulse font-body tracking-widest text-sm uppercase">
+          Loading availability...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 mb-10">
-        {TICKET_TIERS.map((tier) => {
+        {tiers.map((tier) => {
           const isSoldOut = (tier.available as number) === 0;
           const isSelected = selected === tier.id;
           return (
@@ -138,7 +147,7 @@ function TierSelectionStep({
                 ₹{tier.price.toLocaleString("en-IN")}
               </p>
               <ul className="list-none flex flex-col gap-1.5 mb-4">
-                {tier.inclusions.map((inc) => (
+                {tier.inclusions.map((inc: string) => (
                   <li key={inc} className="flex items-start gap-2 font-body text-[0.78rem] text-text-muted">
                     <span className="text-gold mt-px">✦</span> {inc}
                   </li>
@@ -175,7 +184,8 @@ function TierSelectionStep({
             >+</button>
           </div>
           {selected && (() => {
-            const tier = TICKET_TIERS.find(t => t.id === selected)!;
+            const tier = tiers.find(t => t.id === selected);
+            if (!tier) return null;
             return (
               <p className="font-display text-[1.1rem] font-semibold text-gold">
                 Total: ₹{(tier.price * quantity).toLocaleString("en-IN")}
@@ -188,7 +198,6 @@ function TierSelectionStep({
       <button
         onClick={onNext}
         disabled={!selected}
-        id="ticket-next-btn"
         className={`relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-gold border border-gold transition-colors duration-400 whitespace-nowrap ${selected ? "opacity-100 hover:bg-gold-muted hover:border-gold-muted cursor-pointer" : "opacity-40 cursor-not-allowed"}`}
       >
         Continue to Details →
@@ -215,47 +224,48 @@ function AttendeeFormStep({
 }) {
   const field = (key: keyof AttendeeForm, label: string, type = "text", placeholder = "") => (
     <div>
-      <label className="block font-body text-[0.75rem] font-semibold tracking-[0.1em] uppercase text-text-muted mb-1.5" htmlFor={`attendee-${key}`}>{label}</label>
+      <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2" htmlFor={`attendee-${key}`}>{label}</label>
       <input
         id={`attendee-${key}`}
-        className={`w-full px-4 py-3 bg-white/[0.03] border text-text-primary font-body text-[0.9rem] outline-none transition-colors duration-300 focus:bg-gold/[0.03] ${errors[key] ? "border-[#e05c5c]/50 bg-[#e05c5c]/5 focus:border-[#e05c5c]/80" : "border-gold/20 focus:border-gold/50"}`}
+        className={`w-full px-4 py-3 bg-[#0b0b0d]/50 border text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner ${errors[key] ? "border-[#e05c5c] focus:ring-1 focus:ring-[#e05c5c]/50 bg-[#e05c5c]/5" : "border-gold/30 focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"}`}
         type={type}
         placeholder={placeholder}
         value={form[key]}
         onChange={(e) => onChange({ [key]: e.target.value })}
       />
-      {errors[key] && <p className="font-body text-[0.7rem] text-[#e05c5c] mt-1">{errors[key]}</p>}
+      {errors[key] && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-2 font-semibold tracking-wide">⚠ {errors[key]}</p>}
     </div>
   );
 
   return (
     <div className="max-w-[520px]">
       <div className="grid gap-5 mb-8">
-        {field("name", "Full Name *", "text", "As it will appear on your ticket")}
-        {field("phone", "Phone Number *", "tel", "+91 XXXXX XXXXX")}
-        {field("email", "Email Address *", "email", "For ticket confirmation")}
-        {field("college", "College / Institution *", "text", "e.g. VJTI Mumbai")}
+        {field("attendeeName", "Full Name *", "text", "As it will appear on your ticket")}
+        {field("phone", "Phone Number *", "tel", "10-digit mobile")}
+        {field("email", "Email Address *", "email", "you@email.com")}
+        {field("college", "College / Institution *", "text", "Your college")}
         <div>
-          <label className="block font-body text-[0.75rem] font-semibold tracking-[0.1em] uppercase text-text-muted mb-1.5" htmlFor="attendee-year">Year / Category *</label>
+          <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2" htmlFor="attendee-year">Year / Category *</label>
           <select
             id="attendee-year"
-            className={`w-full px-4 py-3 bg-white/[0.03] border text-text-primary font-body text-[0.9rem] outline-none transition-colors duration-300 focus:bg-gold/[0.03] ${errors.year ? "border-[#e05c5c]/50 bg-[#e05c5c]/5 focus:border-[#e05c5c]/80" : "border-gold/20 focus:border-gold/50"}`}
+            className={`w-full px-4 py-3 bg-[#0b0b0d] border text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner appearance-none ${errors.year ? "border-[#e05c5c] focus:ring-1 focus:ring-[#e05c5c]/50 bg-[#e05c5c]/5" : "border-gold/30 focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"}`}
             value={form.year}
             onChange={(e) => onChange({ year: e.target.value })}
           >
             <option value="">Select year</option>
             {YEAR_OPTIONS.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
-          {errors.year && <p className="font-body text-[0.7rem] text-[#e05c5c] mt-1">{errors.year}</p>}
+          {errors.year && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-2 font-semibold tracking-wide">⚠ {errors.year}</p>}
         </div>
       </div>
 
-      <div className="flex gap-4 flex-wrap">
-        <button className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group" onClick={onBack}>
-          <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
+      <div className="flex gap-4 flex-wrap mt-10">
+        <Button variant="outline" onClick={onBack}>
           ← Back
-        </button>
-        <button className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-gold border border-gold hover:bg-gold-muted hover:border-gold-muted transition-colors duration-400 whitespace-nowrap" onClick={onNext} id="form-next-btn">Review Order →</button>
+        </Button>
+        <Button variant="gold" onClick={onNext}>
+          Review Order →
+        </Button>
       </div>
     </div>
   );
@@ -266,6 +276,7 @@ function OrderSummaryStep({
   tierId,
   quantity,
   form,
+  tiers,
   onConfirm,
   onBack,
   isLoading,
@@ -273,20 +284,23 @@ function OrderSummaryStep({
   tierId: TicketTierId;
   quantity: number;
   form: AttendeeForm;
+  tiers: any[];
   onConfirm: () => void;
   onBack: () => void;
   isLoading: boolean;
 }) {
-  const tier = TICKET_TIERS.find((t) => t.id === tierId)!;
+  const tier = tiers.find((t) => t.id === tierId);
+  if (!tier) return null;
   const total = tier.price * quantity;
   return (
     <div className="max-w-[520px]">
-      <div className="border border-gold/20 p-8 bg-[#18151a] mb-8">
+      <div className="border border-gold/40 p-8 bg-[#0b0b0d] mb-8 relative overflow-hidden shadow-[0_0_25px_rgba(212,175,55,0.08)]">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gold/50"></div>
         <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim mb-6">Order Summary</p>
         {[
           ["Ticket", `${tier.label} × ${quantity}`],
           ["Price per ticket", `₹${tier.price.toLocaleString("en-IN")}`],
-          ["Attendee", form.name],
+          ["Attendee", form.attendeeName],
           ["Phone", form.phone],
           ["Email", form.email],
           ["College", form.college],
@@ -298,82 +312,169 @@ function OrderSummaryStep({
             <span className="font-body text-[0.82rem] text-text-muted text-right">{value}</span>
           </div>
         ))}
-        <div className="flex justify-between items-center mt-3">
-          <span className="font-body text-[0.8rem] font-semibold tracking-[0.1em] uppercase text-text-muted">Base Total</span>
-          <span className="font-display text-[1.5rem] font-bold text-gold">₹{total.toLocaleString("en-IN")}</span>
+        <div className="flex justify-between items-center mt-6">
+          <span className="font-body text-[0.8rem] font-semibold tracking-[0.1em] uppercase text-text-muted">Total Amount</span>
+          <span className="font-display text-[1.8rem] font-bold text-gold">₹{total.toLocaleString("en-IN")}</span>
         </div>
-        <p className="font-body text-[0.7rem] text-text-dim mt-2">
-          ★ You will be redirected to our secure payment gateway to complete your booking.
-        </p>
       </div>
-      <div className="flex gap-4 flex-wrap">
-        <button className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group" onClick={onBack} disabled={isLoading}>
-          <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
+      <div className="flex gap-4 flex-wrap mt-10">
+        <Button variant="outline" onClick={onBack} disabled={isLoading}>
           ← Edit
-        </button>
-        <button className={`relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-gold border border-gold transition-colors duration-400 whitespace-nowrap ${isLoading ? "opacity-70 cursor-wait" : "hover:bg-gold-muted hover:border-gold-muted cursor-pointer"}`} onClick={onConfirm} disabled={isLoading} id="confirm-order-btn">
+        </Button>
+        <Button variant="gold" onClick={onConfirm} disabled={isLoading}>
           {isLoading ? "Preparing Payment…" : "Proceed to Payment →"}
-        </button>
+        </Button>
       </div>
     </div>
   );
 }
 
-// ─── Step 4: Processing ──────────────────────────────────────────────────────
-function ProcessingStep() {
+// ─── Step 4: Payment via QR ──────────────────────────────────────────────────
+function PaymentStep({
+  order,
+  upiQr,
+  onSubmitPayment,
+  isLoading,
+}: {
+  order: OrderData;
+  upiQr: string;
+  onSubmitPayment: (utr: string, screenshot: File) => void;
+  isLoading: boolean;
+}) {
+  const [utr, setUtr] = useState("");
+  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [error, setError] = useState("");
+
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload an image file (JPG, PNG, etc.)");
+      return;
+    }
+    if (file.size > PAYMENT.maxScreenshotSizeMb * 1024 * 1024) {
+      setError(`File must be under ${PAYMENT.maxScreenshotSizeMb}MB`);
+      return;
+    }
+    setScreenshot(file);
+    setError("");
+  };
+
+  const handleSubmit = () => {
+    if (!utr.trim()) {
+      setError("Please enter your UTR / reference number");
+      return;
+    }
+    if (!screenshot) {
+      setError("Please upload a payment screenshot");
+      return;
+    }
+    onSubmitPayment(utr, screenshot);
+  };
+
   return (
-    <div className="max-w-[480px] text-center py-8">
-      <div className="flex justify-center mb-8">
-        <div className="w-[72px] h-[72px] border border-gold/30 rounded-full flex items-center justify-center bg-gold/5">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}>
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <circle cx="14" cy="14" r="12" stroke="rgba(212,175,55,0.2)" strokeWidth="1" />
-              <path d="M14 2A12 12 0 0 1 26 14" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </motion.div>
+    <div className="max-w-[700px]">
+      <div className="grid md:grid-cols-2 gap-8 mb-8">
+        {/* Left: QR Code */}
+        <div className="bg-[#18151a] border border-gold/20 p-8 flex flex-col items-center justify-center text-center">
+          <p className="font-body text-[0.65rem] tracking-[0.15em] uppercase text-text-dim mb-2">Scan & Pay</p>
+          <p className="font-display text-[2rem] font-bold text-gold mb-6">
+            ₹{order.payableAmount.toLocaleString("en-IN")}
+          </p>
+          <div className="bg-white p-4 rounded-xl mb-6 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+            <img src={upiQr} alt="UPI QR Code" className="w-48 h-48" />
+          </div>
+          <p className="font-body text-[0.8rem] text-text-muted mb-1">
+            UPI ID: <span className="text-text-primary font-mono select-all">{PAYMENT.upiId}</span>
+          </p>
+          <p className="font-body text-[0.8rem] text-text-muted">
+            Name: <span className="text-text-primary">{PAYMENT.upiName}</span>
+          </p>
+          <div className="mt-6 border-t border-gold/10 w-full pt-4">
+            <OrderCountdown expiresAt={order.expiresAt} />
+          </div>
+        </div>
+
+        {/* Right: Upload Form */}
+        <div className="flex flex-col justify-center">
+          <h3 className="font-display text-[1.5rem] text-text-primary mb-2">Verify Payment</h3>
+          <p className="font-body text-[0.85rem] text-text-muted leading-[1.6] mb-8">
+            Once you have completed the payment via the QR code, please enter the UTR number and upload a screenshot for verification.
+          </p>
+
+          <div className="grid gap-5 mb-6">
+            <div>
+              <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2">UTR / Reference Number *</label>
+              <input
+                type="text"
+                value={utr}
+                onChange={(e) => setUtr(e.target.value)}
+                placeholder="e.g. 312456789012"
+                className="w-full px-4 py-3 bg-[#0b0b0d]/50 border border-gold/30 text-text-primary font-mono text-[1rem] outline-none transition-all duration-300 rounded-sm shadow-inner focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"
+              />
+            </div>
+            <div>
+              <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2">Upload Screenshot *</label>
+              <div className="flex items-center gap-4">
+                <label className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2.5 font-body text-[0.75rem] font-bold tracking-wider uppercase text-gold bg-[#0b0b0d] border border-gold hover:bg-gold hover:text-black transition-colors duration-300 rounded-sm">
+                  <span>Choose File</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                    onChange={handleScreenshotChange}
+                    className="hidden"
+                  />
+                </label>
+                <span className="font-body text-[0.85rem] text-text-muted truncate max-w-[200px]">
+                  {screenshot ? screenshot.name : "No file chosen"}
+                </span>
+              </div>
+            </div>
+          </div>
+          {error && <p className="font-body text-[0.8rem] text-[#e05c5c] mb-6 font-semibold tracking-wide">⚠ {error}</p>}
+
+          <Button variant="gold" onClick={handleSubmit} disabled={isLoading} className="w-full flex items-center justify-center py-3.5">
+            {isLoading ? "Submitting..." : "Submit Verification"}
+          </Button>
         </div>
       </div>
-      <h3 className="font-display text-[1.5rem] text-text-primary mb-2">Verifying your payment...</h3>
-      <p className="font-body text-[0.85rem] text-text-muted leading-[1.6]">
-        Please don't close this window. We are confirming your transaction with the bank.
-      </p>
     </div>
   );
 }
 
-// ─── Step 5: Confirmed ───────────────────────────────────────────────────────
-function ConfirmedStep({ order }: { order: Order }) {
+// ─── Step 5: Confirmed/Pending ────────────────────────────────────────────────
+function ConfirmedStep({ order }: { order: OrderData }) {
   return (
-    <div className="max-w-[480px] text-center py-4">
+    <div className="max-w-[480px] text-center py-4 mx-auto">
       <div className="flex justify-center mb-8">
-        <div className="w-[72px] h-[72px] bg-[#3fb950] rounded-full flex items-center justify-center">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
+        <div className="w-[72px] h-[72px] bg-gold/10 border border-gold rounded-full flex items-center justify-center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
           </svg>
         </div>
       </div>
-      <p className="font-script text-[1.6rem] text-gold-muted mb-2">Success</p>
+      <p className="font-script text-[1.6rem] text-gold-muted mb-2">Pending Verification</p>
       <h3 className="font-display text-[1.8rem] font-bold text-text-primary mb-4">
-        Ticket Confirmed
+        Details Received
       </h3>
       <p className="font-serif text-[0.95rem] text-text-muted leading-[1.6] mb-8">
-        Your payment has been successfully verified. 
-        Your ticket will be emailed to <strong className="text-text-primary">{order.attendee_email}</strong> shortly.
+        Your payment details are being verified manually. This usually takes 1-2 hours. Once approved, your digital pass will be active.
       </p>
 
       <a
-        href={`/ticket?orderId=${order.id}`}
-        id="check-ticket-btn"
+        href={`/ticket?orderId=${order.orderId}`}
         className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group w-full mb-4"
       >
         <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
-        Check Ticket Status
+        Track Status & View Ticket
       </a>
 
       <p className="font-body text-[0.72rem] text-text-dim leading-[1.6]">
-        Save your Order ID: <strong className="text-gold-muted font-mono">{order.id}</strong>
+        Save your Order ID: <strong className="text-gold-muted font-mono">{order.orderId}</strong>
         <br />
-        Questions? Reach us on{" "}
+        Need help? Reach us on{" "}
         <a href={EVENT.socialLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="text-gold-muted underline hover:text-gold transition-colors">
           WhatsApp
         </a>
@@ -387,15 +488,33 @@ export default function TicketBookingSection() {
   const [step, setStep] = useState<Step>("select");
   const [tierId, setTierId] = useState<TicketTierId | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [form, setForm] = useState<AttendeeForm>({ name: "", phone: "", email: "", college: "", year: "" });
+  const [form, setForm] = useState<AttendeeForm>({ attendeeName: "", phone: "", email: "", college: "", year: "" });
   const [formErrors, setFormErrors] = useState<Partial<AttendeeForm>>({});
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderData | null>(null);
+  const [upiQr, setUpiQr] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [tiers, setTiers] = useState<any[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTiers = async () => {
+      try {
+        const res = await fetch("/api/tiers");
+        const data = await res.json();
+        setTiers(data.tiers ?? []);
+      } catch {
+        setApiError("Failed to load ticket availability");
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    fetchTiers();
+  }, []);
 
   const validateForm = (): boolean => {
     const errors: Partial<AttendeeForm> = {};
-    if (!form.name.trim()) errors.name = "Name is required";
+    if (!form.attendeeName.trim()) errors.attendeeName = "Name is required";
     if (!form.phone.trim()) errors.phone = "Phone is required";
     else if (!/^\+?[0-9\s]{10,13}$/.test(form.phone.replace(/\s/g, ""))) errors.phone = "Enter a valid 10-digit number";
     if (!form.email.trim()) errors.email = "Email is required";
@@ -411,89 +530,59 @@ export default function TicketBookingSection() {
     setIsLoading(true);
     setApiError(null);
     try {
-      const res = await fetch("/api/orders/create-payment", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tierId, quantity, attendee: form }),
+        body: JSON.stringify({ ticketTierId: tierId, quantity, ...form }),
       });
       const data = await res.json();
       
-      if (!res.ok || !data.ok) {
-        setApiError(data.error === "sold_out" ? "This ticket tier is currently sold out." : data.error ?? "Failed to create order. Please try again.");
+      if (!res.ok) {
+        setApiError(data.error ?? "Failed to create order. Please try again.");
         setIsLoading(false);
         return;
       }
       
       setOrder(data.order);
-
-      // Open Razorpay Checkout
-      const options = {
-        key: data.razorpayKeyId,
-        amount: data.order.payable_amount * 100, // Amount is in currency subunits.
-        currency: "INR",
-        name: "TheVMEx",
-        description: `Ticket Booking: ${data.order.ticket_tier_label}`,
-        order_id: data.razorpayOrderId,
-        handler: function (response: any) {
-          // Trigger polling
-          setStep("processing");
-          pollOrderStatus(data.order.id);
-        },
-        prefill: {
-          name: form.name,
-          email: form.email,
-          contact: form.phone,
-        },
-        notes: {
-          internalOrderId: data.order.id,
-        },
-        theme: {
-          color: "#d4af37",
-        },
-        modal: {
-          ondismiss: function () {
-            setIsLoading(false);
-            setApiError("Payment was cancelled or failed. Please try again.");
-          }
-        }
-      };
-
-      // @ts-ignore
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function () {
-        setIsLoading(false);
-        setApiError("Payment failed. Please try again.");
-      });
-      rzp.open();
-
+      setUpiQr(data.upiQr);
+      setStep("payment");
+      setIsLoading(false);
     } catch (err) {
       setApiError("Network error. Please check your connection.");
       setIsLoading(false);
     }
   }, [tierId, quantity, form]);
 
-  const pollOrderStatus = async (orderId: string) => {
-    let attempts = 0;
-    const interval = setInterval(async () => {
-      attempts++;
-      if (attempts > 30) { // Approx 60 seconds
-        clearInterval(interval);
-        setStep("confirmed"); // Show success anyway, user can check email or status later
+  const handleSubmitPayment = useCallback(async (utr: string, screenshot: File) => {
+    if (!order) return;
+    setIsLoading(true);
+    setApiError(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append("orderId", order.orderId);
+      formData.append("utr", utr.trim());
+      formData.append("screenshot", screenshot);
+
+      const res = await fetch("/api/orders/payment", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setApiError(data.error ?? "Failed to submit payment.");
+        setIsLoading(false);
         return;
       }
-      try {
-        const res = await fetch(`/api/orders/${orderId}`);
-        const data = await res.json();
-        if (res.ok && data.order?.status === "approved") {
-          clearInterval(interval);
-          setOrder(data.order);
-          setStep("confirmed");
-        }
-      } catch {
-        // silently fail and retry
-      }
-    }, 2000);
-  };
+
+      setOrder(data.order);
+      setStep("pending");
+      setIsLoading(false);
+    } catch (e) {
+      setApiError("Network error. Please check your connection.");
+      setIsLoading(false);
+    }
+  }, [order]);
 
   const fadeVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
@@ -503,7 +592,6 @@ export default function TicketBookingSection() {
 
   return (
     <section id="tickets" className="relative z-10 py-28 md:py-30 bg-[#151316]">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div className="w-full max-w-[1200px] mx-auto px-6 sm:px-8">
         {/* Header */}
         <motion.div
@@ -513,14 +601,12 @@ export default function TicketBookingSection() {
           transition={{ duration: 0.8 }}
           className="mb-12"
         >
-          <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-3">Tickets</p>
-          <h2 className="font-display text-[clamp(2rem,5vw,3.25rem)] font-bold leading-tight text-text-primary mb-6">
-            Book Your{" "}
-            <span className="text-gold italic">Spot</span>
-          </h2>
-          <p className="font-serif text-[clamp(1rem,2.5vw,1.25rem)] text-text-muted leading-[1.8] max-w-[640px]">
-            Seats are limited. Secure yours before they&apos;re gone.
-          </p>
+          <SectionHeading
+            label="Secure Your Spot"
+            title="Book Tickets"
+            subtitle="Select your tier, complete payment via UPI, and receive your digital ticket after verification."
+            align="center"
+          />
         </motion.div>
 
         <StepIndicator current={step} />
@@ -536,6 +622,8 @@ export default function TicketBookingSection() {
           >
             {step === "select" && (
               <TierSelectionStep
+                tiers={tiers}
+                loading={initialLoading}
                 selected={tierId}
                 quantity={quantity}
                 onSelect={setTierId}
@@ -560,6 +648,7 @@ export default function TicketBookingSection() {
                   tierId={tierId}
                   quantity={quantity}
                   form={form}
+                  tiers={tiers}
                   onConfirm={handleCreateOrder}
                   onBack={() => setStep("form")}
                   isLoading={isLoading}
@@ -572,8 +661,23 @@ export default function TicketBookingSection() {
               </div>
             )}
 
-            {step === "processing" && <ProcessingStep />}
-            {step === "confirmed" && order && <ConfirmedStep order={order} />}
+            {step === "payment" && order && (
+              <div>
+                <PaymentStep 
+                  order={order}
+                  upiQr={upiQr}
+                  onSubmitPayment={handleSubmitPayment}
+                  isLoading={isLoading}
+                />
+                {apiError && (
+                  <p className="font-body text-[0.8rem] text-[#e05c5c] mt-4 text-center max-w-[700px]">
+                    ⚠ {apiError}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {step === "pending" && order && <ConfirmedStep order={order} />}
           </motion.div>
         </AnimatePresence>
       </div>

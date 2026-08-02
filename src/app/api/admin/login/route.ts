@@ -1,61 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { signAdminToken, sessionCookieOptions, COOKIE_NAME } from "@/lib/adminAuth";
+import {
+  authenticateAdmin,
+  createAdminSession,
+} from "@/lib/auth";
 
-// ── Admin credentials loaded from server-side env var only ──────────────────
-// Format: JSON array — [{"id":"a1","name":"Rishi","pin":"1234"}, ...]
-// Set ADMIN_CREDENTIALS in .env.local (local) and Vercel Environment Variables.
-// NEVER prefix this with NEXT_PUBLIC_
-interface AdminMember {
-  id: string;
-  name: string;
-  pin: string;
-}
-
-function getAdminCredentials(): AdminMember[] {
-  const raw = process.env.ADMIN_CREDENTIALS;
-  if (!raw) {
-    console.error("[admin/login] ADMIN_CREDENTIALS env var is not set.");
-    return [];
-  }
+export async function POST(request: NextRequest) {
   try {
-    return JSON.parse(raw) as AdminMember[];
-  } catch {
-    console.error("[admin/login] ADMIN_CREDENTIALS is not valid JSON.");
-    return [];
-  }
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const { memberId, pin } = await req.json();
-
-    const members = getAdminCredentials();
-    const member = members.find((m) => m.id === memberId && m.pin === pin);
-
-    if (!member) {
-      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    const { name, pin } = await request.json();
+    if (!name || !pin) {
+      return NextResponse.json(
+        { error: "Name and PIN required" },
+        { status: 400 }
+      );
     }
 
-    // Issue a signed JWT — NOT a plain JSON blob
-    const token = await signAdminToken({
-      adminId: member.id,
-      adminName: member.name,
+    const admin = authenticateAdmin(name, pin);
+    if (!admin) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
+    const token = createAdminSession(admin.id, admin.name);
+    const response = NextResponse.json({
+      admin: { id: admin.id, name: admin.name },
     });
 
-    const isProduction = process.env.NODE_ENV === "production";
-    const response = NextResponse.json({ ok: true, name: member.name });
-    response.cookies.set(COOKIE_NAME, token, sessionCookieOptions(isProduction));
+    response.cookies.set("admin_session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 12 * 60 * 60,
+      path: "/",
+    });
 
     return response;
-  } catch (err) {
-    console.error("[POST /api/admin/login]", err);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }
 }
 
 export async function DELETE() {
-  const response = NextResponse.json({ ok: true });
-  response.cookies.delete(COOKIE_NAME);
+  const response = NextResponse.json({ success: true });
+  response.cookies.delete("admin_session");
   return response;
 }

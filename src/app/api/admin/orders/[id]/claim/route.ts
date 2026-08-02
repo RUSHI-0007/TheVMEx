@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rejectOrder } from "@/lib/orders";
+import { claimOrder } from "@/lib/orders";
 import { getSessionFromRequest } from "@/lib/auth";
 
 export async function POST(
@@ -14,25 +14,16 @@ export async function POST(
   const { id: orderId } = await params;
 
   try {
-    const { reason } = await request.json();
-    if (!reason?.trim()) {
-      return NextResponse.json(
-        { error: "Rejection reason required" },
-        { status: 400 }
-      );
-    }
-
-    const order = await rejectOrder(
+    const order = await claimOrder(
       orderId,
       session.adminId,
-      session.adminName,
-      reason.trim()
+      session.adminName
     );
     return NextResponse.json({ order });
   } catch (error) {
     console.error(error);
     const message =
-      error instanceof Error ? error.message : "Failed to reject order";
+      error instanceof Error ? error.message : "Failed to claim order";
     return NextResponse.json({ error: message }, { status: 409 });
   }
 }

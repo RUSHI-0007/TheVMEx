@@ -1,566 +1,635 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ADMIN_TEAM_MEMBERS } from "@/lib/config";
-import type { Order } from "@/lib/db";
+import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
+import { ADMIN_TEAM_MEMBERS as ADMIN_TEAM } from "@/lib/config";
+import { Button } from "@/components/ui/Button";
+import { formatPayableAmount } from "@/lib/utils";
+import { OrderCountdown } from "@/components/ui/CountdownTimer";
+import { TicketScanner } from "@/components/admin/TicketScanner";
 
-// ─── Admin Login ──────────────────────────────────────────────────────────────
-function AdminLogin({ onLogin }: { onLogin: (name: string) => void }) {
-  const [memberId, setMemberId] = useState("");
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memberId, pin }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError("Invalid credentials. Check your ID and PIN.");
-      } else {
-        onLogin(data.name);
-      }
-    } catch {
-      setError("Network error. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-[100dvh] bg-[#0b0b0d] flex items-center justify-center p-8">
-      <div className="w-full max-w-[380px] border border-gold/20 bg-[#18151a] p-10">
-        <div className="text-center mb-8">
-          <p className="font-script text-[1rem] text-gold-muted mb-1">TheVMEx</p>
-          <h1 className="font-display text-[1.4rem] font-bold text-text-primary">
-            Admin Panel
-          </h1>
-          <p className="font-body text-[0.72rem] text-text-dim mt-1 tracking-[0.1em] uppercase">
-            Masquerade Night 2026
-          </p>
-        </div>
-
-        <div className="grid gap-4 mb-6">
-          <div>
-            <label className="block font-body text-[0.75rem] font-semibold tracking-[0.1em] uppercase text-text-muted mb-1.5" htmlFor="admin-member">Team Member</label>
-            <select
-              id="admin-member"
-              className="w-full px-4 py-3 bg-white/[0.03] border border-gold/20 text-text-primary font-body text-[0.9rem] outline-none transition-colors duration-300 focus:border-gold/50 focus:bg-gold/[0.03]"
-              value={memberId}
-              onChange={(e) => setMemberId(e.target.value)}
-            >
-              <option value="">Select your name</option>
-              {ADMIN_TEAM_MEMBERS.map((m) => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block font-body text-[0.75rem] font-semibold tracking-[0.1em] uppercase text-text-muted mb-1.5" htmlFor="admin-pin">PIN</label>
-            <input
-              id="admin-pin"
-              className="w-full px-4 py-3 bg-white/[0.03] border border-gold/20 text-text-primary font-body text-[0.9rem] outline-none transition-colors duration-300 focus:border-gold/50 focus:bg-gold/[0.03]"
-              type="password"
-              placeholder="Enter your PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            />
-          </div>
-        </div>
-
-        {error && (
-          <p className="font-body text-[0.78rem] text-[#e05c5c] mb-4">
-            ⚠ {error}
-          </p>
-        )}
-
-        <button
-          onClick={handleLogin}
-          disabled={!memberId || !pin || loading}
-          className={`relative inline-flex items-center justify-center gap-2 w-full py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-gold border border-gold transition-colors duration-400 whitespace-nowrap ${(!memberId || !pin) ? "opacity-50 cursor-not-allowed" : "hover:bg-gold-muted hover:border-gold-muted cursor-pointer"}`}
-          id="admin-login-btn"
-        >
-          {loading ? "Logging in…" : "Login"}
-        </button>
-      </div>
-    </div>
-  );
+interface AdminOrder {
+  orderId: string;
+  attendeeName: string;
+  phone: string;
+  email: string;
+  college: string;
+  year: string;
+  ticketTierId: string;
+  tierName: string;
+  quantity: number;
+  payableAmount: number;
+  baseAmount: number;
+  utr: string | null;
+  screenshotPath: string | null;
+  expiresAt: string | null;
+  claimedBy: string | null;
+  claimedByName: string | null;
+  createdAt: string;
+  status: string;
+  ticketId: string | null;
+  handledAt: string | null;
+  handledByName: string | null;
+  paymentMode: string | null;
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, { bg: string; color: string; border: string }> = {
-    pending:  { bg: "bg-gold/[0.12]", color: "text-gold", border: "border-gold/20" },
-    approved: { bg: "bg-[#2ea043]/[0.12]",  color: "text-[#3fb950]", border: "border-[#3fb950]/20" },
-    rejected: { bg: "bg-[#e05c5c]/[0.12]",  color: "text-[#e05c5c]", border: "border-[#e05c5c]/20" },
-    expired:  { bg: "bg-white/[0.05]", color: "text-text-dim", border: "border-text-dim/20" },
-    refunded: { bg: "bg-[#b464dc]/[0.12]", color: "text-[#b464dc]", border: "border-[#b464dc]/20" },
-  };
-  const c = colors[status] ?? colors.pending;
-  return (
-    <span className={`px-2.5 py-1 font-body text-[0.6rem] tracking-[0.15em] uppercase font-semibold border ${c.bg} ${c.color} ${c.border}`}>
-      {status}
-    </span>
-  );
+interface DbStats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  totalRevenue: number;
 }
 
-// ─── Rejection dialog ─────────────────────────────────────────────────────────
+interface AdminSession {
+  id: string;
+  name: string;
+}
+
 const REJECT_REASONS = [
-  "Amount mismatch — different amount received",
+  "Amount mismatch",
   "No matching transaction found",
-  "Duplicate UTR — already used for another order",
-  "Transaction not found in UPI history",
-  "Screenshot unclear / unreadable",
+  "Duplicate UTR",
+  "Screenshot unclear",
+  "Payment not received",
 ];
 
-function RejectDialog({
-  orderId,
-  onConfirm,
-  onCancel,
-}: {
-  orderId: string;
-  onConfirm: (reason: string) => void;
-  onCancel: () => void;
-}) {
-  const [reason, setReason] = useState("");
-  const [custom, setCustom] = useState("");
-  const finalReason = reason === "__custom__" ? custom : reason;
-
-  return (
-    <div
-      className="fixed inset-0 bg-[#0b0b0d]/85 backdrop-blur-sm z-[200] flex items-center justify-center p-6"
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.97 }}
-        className="w-full max-w-[440px] border border-[#e05c5c]/20 bg-[#18151a] p-8"
-      >
-        <h3 className="font-display text-[1.15rem] font-bold text-text-primary mb-1">
-          Reject Order
-        </h3>
-        <p className="font-body text-[0.75rem] text-text-dim mb-6">
-          {orderId}
-        </p>
-
-        <div className="grid gap-2 mb-4">
-          {REJECT_REASONS.map((r) => (
-            <label
-              key={r}
-              className={`flex gap-3 items-start cursor-pointer font-body text-[0.82rem] leading-[1.4] ${reason === r ? "text-text-primary" : "text-text-muted"}`}
-            >
-              <input
-                type="radio"
-                name="reject-reason"
-                value={r}
-                checked={reason === r}
-                onChange={() => setReason(r)}
-                className="mt-0.5 accent-gold"
-              />
-              {r}
-            </label>
-          ))}
-          <label className="flex gap-3 items-start cursor-pointer font-body text-[0.82rem] text-text-muted">
-            <input
-              type="radio"
-              name="reject-reason"
-              value="__custom__"
-              checked={reason === "__custom__"}
-              onChange={() => setReason("__custom__")}
-              className="mt-0.5 accent-gold"
-            />
-            Other (type below)
-          </label>
-          {reason === "__custom__" && (
-            <input
-              className="w-[calc(100%-1.5rem)] ml-6 px-4 py-3 bg-white/[0.03] border border-gold/20 text-text-primary font-body text-[0.9rem] outline-none transition-colors duration-300 focus:border-gold/50 focus:bg-gold/[0.03] mt-2"
-              placeholder="Describe the rejection reason"
-              value={custom}
-              onChange={(e) => setCustom(e.target.value)}
-              autoFocus
-            />
-          )}
-        </div>
-
-        <div className="flex gap-3 flex-wrap mt-6">
-          <button className="flex-1 relative inline-flex items-center justify-center gap-2 px-4 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-gold bg-transparent border border-gold/40 hover:text-[#0b0b0d] hover:border-gold hover:bg-gold transition-colors duration-400 whitespace-nowrap group" onClick={onCancel}>
-            <span className="absolute inset-0 bg-gold scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100 -z-10" />
-            Cancel
-          </button>
-          <button
-            onClick={() => finalReason && onConfirm(finalReason)}
-            disabled={!finalReason.trim()}
-            className={`flex-1 font-body text-[0.8rem] font-semibold tracking-[0.1em] uppercase py-3 border-none transition-colors duration-200 ${!finalReason.trim() ? "bg-[#e05c5c]/20 text-[#e05c5c]/50 cursor-not-allowed" : "bg-[#c0392b] text-white cursor-pointer hover:bg-[#a93226]"}`}
-          >
-            Confirm Reject
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── Order Row ────────────────────────────────────────────────────────────────
-function ExpiryTimer({ expiresAt }: { expiresAt: number }) {
-  const [remaining, setRemaining] = useState(0);
-  useEffect(() => {
-    const tick = () => setRemaining(Math.max(0, expiresAt - Math.floor(Date.now() / 1000)));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [expiresAt]);
-  const mins = Math.floor(remaining / 60);
-  const secs = remaining % 60;
-  const urgent = remaining < 300;
-  if (remaining === 0) return <span className="text-[#e05c5c] text-[0.72rem] font-body">Expired</span>;
-  return (
-    <span className={`font-mono text-[0.8rem] ${urgent ? "text-[#e05c5c]" : "text-gold-muted"}`}>
-      {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
-    </span>
-  );
-}
-
-function OrderCard({
-  order,
-  onApprove,
-  onReject,
-  onResendEmail,
-}: {
-  order: Order;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
-  onResendEmail: (id: string) => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [resending, setResending] = useState(false);
-
-  return (
-    <div className="border border-gold/[0.12] bg-[#18151a] mb-px">
-      {/* Header row */}
-      <div
-        className="grid grid-cols-[1fr_auto] gap-4 p-4 md:px-5 cursor-pointer items-center hover:bg-white/[0.02] transition-colors"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex flex-wrap gap-4 items-center">
-          <span className="font-mono text-[0.8rem] text-gold-muted tracking-[0.05em]">{order.id}</span>
-          <span className="font-display text-[1rem] text-text-primary font-semibold">
-            ₹{order.payable_amount}
-          </span>
-          <StatusBadge status={order.status} />
-          {order.status === "approved" && (
-            <span className={`font-body text-[0.6rem] px-2 py-0.5 rounded-full border ${order.email_sent ? "text-[#3fb950] border-[#3fb950]/30 bg-[#3fb950]/5" : "text-[#e05c5c] border-[#e05c5c]/30 bg-[#e05c5c]/5"}`}>
-              {order.email_sent ? "✓ Email Sent" : "⚠ Email Failed"}
-            </span>
-          )}
-          <span className="font-body text-[0.75rem] text-text-muted">{order.attendee_name}</span>
-          <span className="font-body text-[0.72rem] text-text-dim">{order.ticket_tier_label} × {order.quantity}</span>
-          {order.status === "pending" && <ExpiryTimer expiresAt={order.expires_at} />}
-        </div>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={`shrink-0 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}>
-          <path d="M3 5l4 4 4-4" stroke="#8a8a93" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-
-      {/* Expanded detail */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden"
-          >
-            <div className="p-5 border-t border-gold/[0.08] grid gap-6 bg-[#0b0b0d]/30">
-              {/* Attendee info */}
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
-                {[
-                  ["Phone", order.attendee_phone],
-                  ["Email", order.attendee_email],
-                  ["College", order.attendee_college],
-                  ["Year", order.attendee_year],
-                  ["UTR", order.utr ?? "—"],
-                  ["Created", new Date(order.created_at * 1000).toLocaleTimeString("en-IN")],
-                ].map(([l, v]) => (
-                  <div key={l}>
-                    <p className="font-body text-[0.58rem] tracking-[0.15em] uppercase text-text-dim mb-1">{l}</p>
-                    <p className="font-body text-[0.82rem] text-text-muted">{v}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Screenshot */}
-              {order.screenshot_path && (
-                <div>
-                  <p className="font-body text-[0.6rem] tracking-[0.15em] uppercase text-text-dim mb-2">Payment Screenshot</p>
-                  <a href={order.screenshot_path} target="_blank" rel="noopener noreferrer">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={order.screenshot_path}
-                      alt="Payment screenshot"
-                      className="max-w-[220px] max-h-[200px] object-cover border border-gold/15"
-                    />
-                  </a>
-                </div>
-              )}
-
-              {/* Handled by info */}
-              {order.handled_by_name && (
-                <p className="font-body text-[0.72rem] text-text-dim">
-                  {order.status === "approved" ? "Approved" : "Rejected"} by <strong className="text-gold-muted">{order.handled_by_name}</strong>
-                  {order.rejection_reason && ` · Reason: ${order.rejection_reason}`}
-                </p>
-              )}
-
-              {/* Action buttons */}
-              {order.status === "pending" && (
-                <div className="flex gap-3 flex-wrap">
-                  <button
-                    id={`approve-${order.id}`}
-                    onClick={() => onApprove(order.id)}
-                    className="font-body text-[0.75rem] font-semibold tracking-[0.1em] uppercase px-6 py-2.5 bg-[#2ea043]/15 text-[#3fb950] border border-[#2ea043]/30 cursor-pointer hover:bg-[#2ea043]/25 transition-colors"
-                  >
-                    ✓ Approve
-                  </button>
-                  <button
-                    id={`reject-${order.id}`}
-                    onClick={() => onReject(order.id)}
-                    className="font-body text-[0.75rem] font-semibold tracking-[0.1em] uppercase px-6 py-2.5 bg-[#e05c5c]/15 text-[#e05c5c] border border-[#e05c5c]/30 cursor-pointer hover:bg-[#e05c5c]/25 transition-colors"
-                  >
-                    ✕ Reject
-                  </button>
-                </div>
-              )}
-
-              {/* Resend email button for approved orders */}
-              {order.status === "approved" && (
-                <div className="flex gap-3 flex-wrap mt-2">
-                  <button
-                    onClick={async () => {
-                      setResending(true);
-                      await onResendEmail(order.id);
-                      setResending(false);
-                    }}
-                    disabled={resending}
-                    className={`font-body text-[0.75rem] font-semibold tracking-[0.05em] uppercase px-4 py-2 bg-gold/10 text-gold border border-gold/30 transition-colors ${resending ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gold/20"}`}
-                  >
-                    {resending ? "Sending..." : "Resend Email"}
-                  </button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ─── Main Admin Dashboard ─────────────────────────────────────────────────────
-function AdminDashboard({ adminName }: { adminName: string }) {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
-  const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected" | "expired" | "refunded">("pending");
+export default function AdminPage() {
+  const [session, setSession] = useState<AdminSession | null>(null);
+  const [loginForm, setLoginForm] = useState({ name: "", pin: "" });
+  const [loginError, setLoginError] = useState("");
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [auditLog, setAuditLog] = useState<
+    Array<{ action: string; adminName: string | null; details: string | null; createdAt: string }>
+  >([]);
+  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+  const [rejectReason, setRejectReason] = useState(REJECT_REASONS[0]);
+  const [customReason, setCustomReason] = useState("");
+  const [filter, setFilter] = useState<"all" | "mine">("all");
+  const [view, setView] = useState<"queue" | "attendees" | "scanner">("queue");
+  const [stats, setStats] = useState<DbStats | null>(null);
+  const [exportStatus, setExportStatus] = useState<"approved" | "all">("approved");
+  const [exporting, setExporting] = useState(false);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/orders");
-      if (!res.ok) return;
+      if (res.status === 401) {
+        setSession(null);
+        return;
+      }
       const data = await res.json();
+      setSession(data.admin);
       setOrders(data.orders ?? []);
     } catch {
-      // silent
-    } finally {
-      setLoading(false);
+      /* polling failure — silent retry */
     }
   }, []);
 
-  // Poll every 8 seconds for live updates
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/health");
+      const data = await res.json();
+      if (data.ok) setStats(data.stats);
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => {
     fetchOrders();
-    const id = setInterval(fetchOrders, 8000);
-    return () => clearInterval(id);
-  }, [fetchOrders]);
-
-  const handleApprove = async (orderId: string) => {
-    const res = await fetch(`/api/admin/orders/${orderId}/approve`, { method: "POST" });
-    const data = await res.json();
-    if (res.ok) {
-      setStatusMsg({ text: `Order ${orderId} approved ✓`, ok: true });
+    fetchStats();
+    pollRef.current = setInterval(() => {
       fetchOrders();
-    } else {
-      setStatusMsg({ text: `Failed to approve order: ${data.error}`, ok: false });
+      fetchStats();
+    }, 5000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [fetchOrders, fetchStats]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Login failed");
+      setSession(data.admin);
+      fetchOrders();
+    } catch (e) {
+      setLoginError(e instanceof Error ? e.message : "Login failed");
     }
-    setTimeout(() => setStatusMsg(null), 5000);
-  };
-
-  const handleResendEmail = async (orderId: string) => {
-    const res = await fetch(`/api/admin/orders/${orderId}/resend-email`, { method: "POST" });
-    const data = await res.json();
-    if (res.ok && data.ok) {
-      setStatusMsg({ text: `Email resent for order ${orderId} ✓`, ok: true });
-      fetchOrders();
-    } else {
-      setStatusMsg({ text: `Failed to resend email: ${data.error}`, ok: false });
-    }
-    setTimeout(() => setStatusMsg(null), 5000);
-  };
-
-
-  const handleReject = async (orderId: string, reason: string) => {
-    setRejectTarget(null);
-    const res = await fetch(`/api/admin/orders/${orderId}/reject`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setStatusMsg({ text: `Order ${orderId} rejected.`, ok: true });
-      fetchOrders();
-    } else if (data.error === "already_handled") {
-      setStatusMsg({ text: "This order was already handled.", ok: false });
-      fetchOrders();
-    } else {
-      setStatusMsg({ text: `Error: ${data.error}`, ok: false });
-    }
-    setTimeout(() => setStatusMsg(null), 5000);
   };
 
   const handleLogout = async () => {
     await fetch("/api/admin/login", { method: "DELETE" });
-    window.location.reload();
+    setSession(null);
+    setSelectedOrder(null);
   };
 
-  const filteredOrders = orders.filter((o) => filter === "all" || o.status === filter);
-  const pendingCount = orders.filter((o) => o.status === "pending").length;
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const url = `/api/admin/export?status=${exportStatus}`;
+      const link = document.createElement("a");
+      link.href = url;
+      link.click();
+    } finally {
+      setTimeout(() => setExporting(false), 1500);
+    }
+  };
 
-  return (
-    <div className="min-h-[100dvh] bg-[#0b0b0d] font-body text-text-primary">
-      {/* Header */}
-      <header className="border-b border-gold/[0.12] p-4 px-6 flex items-center justify-between bg-[#151316] sticky top-0 z-50">
-        <div>
-          <p className="font-display text-[1rem] font-bold text-text-primary">TheVMEx Admin</p>
-          <p className="text-[0.68rem] text-text-dim tracking-[0.1em]">Logged in as <strong className="text-gold-muted">{adminName}</strong></p>
-        </div>
-        <div className="flex items-center gap-4">
-          {pendingCount > 0 && (
-            <span className="font-body text-[0.65rem] tracking-[0.1em] uppercase bg-gold/15 text-gold px-2.5 py-1 border border-gold/25">
-              {pendingCount} pending
-            </span>
-          )}
-          <button onClick={fetchOrders} className="bg-transparent border border-gold/20 px-3.5 py-1.5 text-text-muted text-[0.72rem] cursor-pointer tracking-[0.1em] hover:bg-gold/5 hover:text-gold transition-colors">
-            Refresh
-          </button>
-          <button onClick={handleLogout} className="bg-transparent border-none text-text-dim text-[0.72rem] cursor-pointer hover:text-white transition-colors">
-            Logout
-          </button>
-        </div>
-      </header>
+  const openOrder = async (order: AdminOrder) => {
+    setActionError("");
+    setSelectedOrder(order);
 
-      <div className="max-w-[1100px] mx-auto p-8 px-6">
-        {/* Status message */}
-        <AnimatePresence>
-          {statusMsg && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className={`px-5 py-3 mb-6 border font-body text-[0.82rem] ${statusMsg.ok ? "border-[#3fb950]/30 bg-[#3fb950]/10 text-[#3fb950]" : "border-[#e05c5c]/30 bg-[#e05c5c]/10 text-[#e05c5c]"}`}
-            >
-              {statusMsg.text}
-            </motion.div>
-          )}
-        </AnimatePresence>
+    try {
+      await fetch(`/api/admin/orders/${order.orderId}/claim`, {
+        method: "POST",
+      });
+      fetchOrders();
 
-        {/* Filters */}
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {(["pending", "approved", "rejected", "expired", "refunded", "all"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`font-body text-[0.68rem] tracking-[0.12em] uppercase px-3.5 py-1.5 border transition-colors duration-200 cursor-pointer ${filter === f ? "bg-gold text-[#0b0b0d] border-gold" : "bg-transparent text-text-muted border-gold/20 hover:border-gold/50"}`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
+      const res = await fetch(`/api/admin/orders/${order.orderId}`);
+      const data = await res.json();
+      if (data.auditLog) setAuditLog(data.auditLog);
+    } catch {
+      /* claim optional */
+    }
+  };
 
-        {/* Orders list */}
-        {loading ? (
-          <p className="text-text-dim text-[0.82rem] text-center p-12">Loading orders…</p>
-        ) : filteredOrders.length === 0 ? (
-          <p className="text-text-dim text-[0.82rem] text-center p-12">No {filter} orders.</p>
-        ) : (
-          <div>
-            {filteredOrders.map((o) => (
-              <OrderCard
-                key={o.id}
-                order={o}
-                onApprove={handleApprove}
-                onReject={(id) => setRejectTarget(id)}
-                onResendEmail={handleResendEmail}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+  const handleApprove = async () => {
+    if (!selectedOrder) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      const res = await fetch(
+        `/api/admin/orders/${selectedOrder.orderId}/approve`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Approve failed");
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Approve failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-      {/* Reject dialog */}
-      <AnimatePresence>
-        {rejectTarget && (
-          <RejectDialog
-            orderId={rejectTarget}
-            onConfirm={(reason) => handleReject(rejectTarget, reason)}
-            onCancel={() => setRejectTarget(null)}
-          />
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+  const handleReject = async () => {
+    if (!selectedOrder) return;
+    const reason =
+      rejectReason === "Custom" ? customReason.trim() : rejectReason;
+    if (!reason) {
+      setActionError("Please provide a rejection reason");
+      return;
+    }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-export default function AdminPage() {
-  const [adminName, setAdminName] = useState<string | null>(null);
-  const [checking, setChecking] = useState(true);
-
-  // Check if already logged in (session cookie exists)
-  useEffect(() => {
-    fetch("/api/admin/orders")
-      .then((r) => {
-        if (r.ok) {
-          // Session valid — but we don't have the name from cookie directly
-          // so just set a placeholder that triggers dashboard
-          const session = document.cookie.includes("vmex_admin_session");
-          if (session) setAdminName("Admin");
+    setActionLoading(true);
+    setActionError("");
+    try {
+      const res = await fetch(
+        `/api/admin/orders/${selectedOrder.orderId}/reject`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason }),
         }
-      })
-      .catch(() => {})
-      .finally(() => setChecking(false));
-  }, []);
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Reject failed");
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Reject failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-  if (checking) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!selectedOrder) return;
+      if (e.key === "a" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleApprove();
+      }
+      if (e.key === "r" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleReject();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOrder]);
+
+  if (!session) {
     return (
-      <div className="min-h-[100dvh] bg-[#0b0b0d] flex items-center justify-center">
-        <p className="font-body text-[0.8rem] text-text-dim">Loading…</p>
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center px-4">
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-sm bg-bg-secondary border border-gold/20 p-8"
+        >
+          <h1 className="font-display text-2xl text-gold mb-6 text-center">
+            Admin Login
+          </h1>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-text-muted mb-2">
+                Team Member
+              </label>
+              <select
+                value={loginForm.name}
+                onChange={(e) =>
+                  setLoginForm({ ...loginForm, name: e.target.value })
+                }
+                required
+              >
+                <option value="">Select name</option>
+                {ADMIN_TEAM.map((m) => (
+                  <option key={m.id} value={m.name}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-text-muted mb-2">
+                PIN
+              </label>
+              <input
+                type="password"
+                value={loginForm.pin}
+                onChange={(e) =>
+                  setLoginForm({ ...loginForm, pin: e.target.value })
+                }
+                placeholder="Enter PIN"
+                required
+              />
+            </div>
+          </div>
+          {loginError && (
+            <p className="text-red-400 text-sm mt-4">{loginError}</p>
+          )}
+          <Button type="submit" className="w-full mt-6">
+            Login
+          </Button>
+          <Link
+            href="/"
+            className="block text-center text-text-muted text-xs mt-4 hover:text-gold"
+          >
+            ← Back to site
+          </Link>
+        </form>
       </div>
     );
   }
 
-  if (!adminName) {
-    return <AdminLogin onLogin={setAdminName} />;
-  }
+  const filteredOrders =
+    filter === "mine"
+      ? orders.filter((o) => o.claimedBy === session.id)
+      : orders;
 
-  return <AdminDashboard adminName={adminName} />;
+  return (
+    <div className="min-h-screen bg-bg-primary">
+      <header className="border-b border-gold/10 bg-bg-secondary px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-xl text-gold">Admin Panel</h1>
+            <p className="text-text-muted text-xs">
+              {session.name} · {orders.length} pending · auto-refresh 5s
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            {/* Export */}
+            <div className="flex items-center gap-2">
+              <select
+                value={exportStatus}
+                onChange={(e) => setExportStatus(e.target.value as "approved" | "all")}
+                className="text-xs py-1 px-2 border border-gold/20 bg-bg-primary text-text-muted"
+              >
+                <option value="approved">Approved only</option>
+                <option value="all">All statuses</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={exporting}
+                className="text-xs py-1 px-3 border border-gold/40 text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
+              >
+                {exporting ? "Downloading..." : "Export CSV"}
+              </button>
+            </div>
+            <Link href="/" className="text-text-muted text-sm hover:text-gold">
+              Site
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-text-muted text-sm hover:text-gold"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Live stats */}
+        {stats && (
+          <div className="grid grid-cols-4 gap-3 mt-4">
+            {[
+              { label: "Total Orders", value: stats.total },
+              { label: "✓ Approved", value: stats.approved },
+              { label: "⏳ Pending", value: stats.pending },
+              { label: "Revenue", value: `₹${Number(stats.totalRevenue ?? 0).toLocaleString("en-IN")}` },
+            ].map((s) => (
+              <div key={s.label} className="bg-bg-primary border border-gold/10 px-3 py-2">
+                <p className="text-text-muted text-xs">{s.label}</p>
+                <p className="font-display text-lg text-gold">{s.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* View toggle */}
+        <div className="flex gap-2 mt-4 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setView("queue")}
+            className={`px-4 py-1 text-xs uppercase tracking-widest border ${
+              view === "queue" ? "border-gold text-gold" : "border-gold/20 text-text-muted"
+            }`}
+          >
+            Verification Queue ({orders.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("attendees")}
+            className={`px-4 py-1 text-xs uppercase tracking-widest border ${
+              view === "attendees" ? "border-gold text-gold" : "border-gold/20 text-text-muted"
+            }`}
+          >
+            All Attendees {stats ? `(${stats.approved} approved)` : ""}
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("scanner")}
+            className={`px-4 py-1 text-xs uppercase tracking-widest border ${
+              view === "scanner" ? "border-gold text-gold" : "border-gold/20 text-text-muted"
+            }`}
+          >
+            📷 Entry Scanner
+          </button>
+        </div>
+      </header>
+
+      {view === "scanner" ? (
+        <TicketScanner />
+      ) : view === "attendees" ? (
+        <div className="p-4 md:p-8">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-text-muted text-sm">
+              Showing approved attendees. Use Export CSV above for full data.
+            </p>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="text-xs py-1 px-3 border border-gold/40 text-gold hover:bg-gold/10 transition-colors"
+            >
+              Download CSV
+            </button>
+          </div>
+          <p className="text-text-muted text-sm">
+            Download the CSV to see the full attendee list with name, phone, email, college, ticket ID and payment details.
+          </p>
+          <div className="mt-4 border border-gold/10 p-6 text-center">
+            <p className="font-display text-4xl text-gold mb-2">{stats?.approved ?? "—"}</p>
+            <p className="text-text-muted text-sm">Approved tickets</p>
+            <p className="text-text-muted text-xs mt-1">Click &quot;Export CSV&quot; in the header to download the full list</p>
+          </div>
+        </div>
+      ) : (
+      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-65px)]">
+        <aside className="lg:w-96 border-r border-gold/10 p-4 overflow-y-auto">
+          <div className="flex gap-2 mb-4">
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              className={`flex-1 py-2 text-xs uppercase tracking-widest border ${
+                filter === "all"
+                  ? "border-gold text-gold"
+                  : "border-gold/20 text-text-muted"
+              }`}
+            >
+              All ({orders.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("mine")}
+              className={`flex-1 py-2 text-xs uppercase tracking-widest border ${
+                filter === "mine"
+                  ? "border-gold text-gold"
+                  : "border-gold/20 text-text-muted"
+              }`}
+            >
+              Mine
+            </button>
+          </div>
+
+          {filteredOrders.length === 0 ? (
+            <p className="text-text-muted text-sm text-center py-8">
+              No pending orders
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {filteredOrders.map((order) => (
+                <button
+                  key={order.orderId}
+                  type="button"
+                  onClick={() => openOrder(order)}
+                  className={`w-full text-left p-4 border transition-colors ${
+                    selectedOrder?.orderId === order.orderId
+                      ? "border-gold bg-gold/5"
+                      : "border-gold/10 hover:border-gold/30"
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <p className="font-display text-lg text-gold tabular-nums">
+                      {formatPayableAmount(order.payableAmount)}
+                    </p>
+                    {order.claimedByName &&
+                      order.claimedBy !== session.id && (
+                        <span className="text-xs text-bronze">
+                          {order.claimedByName}
+                        </span>
+                      )}
+                  </div>
+                  <p className="text-text-primary text-sm mt-1">
+                    {order.attendeeName}
+                  </p>
+                  <p className="text-text-muted text-xs mt-1">
+                    {order.orderId} · {order.tierName} × {order.quantity}
+                  </p>
+                  {order.expiresAt && (
+                    <p className="text-text-muted text-xs mt-1">
+                      Expires{" "}
+                      <OrderCountdown expiresAt={order.expiresAt} />
+                    </p>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </aside>
+
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+          {!selectedOrder ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-text-muted">
+                Select an order to verify · Sorted by amount
+              </p>
+            </div>
+          ) : (
+            <div className="max-w-2xl">
+              <div className="bg-gold/10 border-2 border-gold p-6 mb-6 text-center">
+                <p className="text-xs uppercase tracking-widest text-gold mb-1">
+                  Match this amount in UPI
+                </p>
+                <p className="font-display text-5xl text-gold tabular-nums">
+                  {formatPayableAmount(selectedOrder.payableAmount)}
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <InfoBlock label="Order ID" value={selectedOrder.orderId} />
+                <InfoBlock label="Guest" value={selectedOrder.attendeeName} />
+                <InfoBlock label="Phone" value={selectedOrder.phone} />
+                <InfoBlock label="Email" value={selectedOrder.email} />
+                <InfoBlock label="College" value={selectedOrder.college} />
+                <InfoBlock label="Year" value={selectedOrder.year} />
+                <InfoBlock
+                  label="Tier"
+                  value={`${selectedOrder.tierName} × ${selectedOrder.quantity}`}
+                />
+                <InfoBlock
+                  label="UTR"
+                  value={selectedOrder.utr ?? "Not submitted"}
+                  highlight
+                />
+              </div>
+
+              {selectedOrder.screenshotPath && (
+                <div className="mb-6">
+                  <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
+                    Payment Screenshot (supporting evidence)
+                  </p>
+                  <img
+                    src={selectedOrder.screenshotPath}
+                    alt="Payment screenshot"
+                    className="max-w-full border border-gold/20 max-h-96 object-contain"
+                  />
+                </div>
+              )}
+
+              <div className="mb-6">
+                <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
+                  Rejection Reason
+                </p>
+                <select
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  className="mb-2"
+                >
+                  {REJECT_REASONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                  <option value="Custom">Custom reason</option>
+                </select>
+                {rejectReason === "Custom" && (
+                  <input
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    placeholder="Enter reason"
+                  />
+                )}
+              </div>
+
+              {actionError && (
+                <p className="text-red-400 text-sm mb-4">{actionError}</p>
+              )}
+
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleApprove}
+                  disabled={actionLoading}
+                  className="flex-1"
+                >
+                  {actionLoading ? "..." : "Approve (A)"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleReject}
+                  disabled={actionLoading}
+                  className="flex-1"
+                >
+                  {actionLoading ? "..." : "Reject (R)"}
+                </Button>
+              </div>
+
+              {auditLog.length > 0 && (
+                <div className="mt-8 border-t border-gold/10 pt-6">
+                  <p className="text-xs uppercase tracking-widest text-text-muted mb-4">
+                    Audit Log
+                  </p>
+                  <div className="space-y-2">
+                    {auditLog.map((entry, i) => (
+                      <p key={i} className="text-text-muted text-xs">
+                        {new Date(entry.createdAt).toLocaleString()} —{" "}
+                        {entry.action}
+                        {entry.adminName && ` by ${entry.adminName}`}
+                        {entry.details && `: ${entry.details}`}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+      )}
+    </div>
+  );
+}
+
+function InfoBlock({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-widest text-text-muted mb-1">
+        {label}
+      </p>
+      <p
+        className={`text-sm ${highlight ? "text-gold font-display text-lg" : "text-text-primary"}`}
+      >
+        {value}
+      </p>
+    </div>
+  );
 }
