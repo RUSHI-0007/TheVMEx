@@ -1,59 +1,121 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 @theme {
-  --color-gold: #d4af37;
-  --color-gold-muted: #c9a24b;
-  --color-gold-dim: #8a6f24;
-  --color-bronze: #8c5a2b;
-  --color-accent-emerald: #1f3d2e;
-  
+  /* ─── Brand Colors ──────────────────────────────────────────────── */
+  --color-gold:         #d4af37;
+  --color-gold-muted:   #c9a24b;
+  --color-gold-dim:     #8a6f24;
+  --color-bronze:       #8c5a2b;
+
+  /* ─── Text hierarchy ────────────────────────────────────────────── */
+  --color-text-primary: #ede6da;
+  --color-text-muted:   #9a948c;
+  --color-text-dim:     #5e5a55;
+
+  /* ─── Surfaces ──────────────────────────────────────────────────── */
+  --color-bg-primary:   #0b0b0d;
+  --color-bg-secondary: #151316;
+  --color-bg-card:      #18151a;
+
+  /* ─── Typography ────────────────────────────────────────────────── */
   --font-display: "Playfair Display", "Cormorant Garamond", Georgia, serif;
-  --font-serif: "Cormorant Garamond", Georgia, serif;
-  --font-body: "Inter", "Manrope", system-ui, sans-serif;
-  --font-script: "Alex Brush", cursive;
+  --font-serif:   "Cormorant Garamond", Georgia, serif;
+  --font-body:    "Inter", "Manrope", system-ui, sans-serif;
+  --font-script:  "Alex Brush", cursive;
 }
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
-    @apply bg-[#0b0b0d] text-[#ede6da] font-body min-h-[100dvh] antialiased;
-    /* Subtle dark grain texture via SVG noise */
+    @apply bg-[#0b0b0d] text-[#ede6da] font-body min-h-[100dvh] antialiased overflow-x-hidden w-full;
+    /* Subtle dark grain texture */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 300px 300px;
   }
-  
+
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        rgba(212, 175, 55, 0.04) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 60% 40% at 80% 100%,
-        rgba(140, 90, 43, 0.04) 0%,
-        transparent 70%
-      );
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212,175,55,0.05) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(140,90,43,0.04) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
+  /* ─── Scrollbar ─────────────────────────────────────────────────── */
+  ::-webkit-scrollbar       { width: 5px; }
+  ::-webkit-scrollbar-track { background: #0b0b0d; }
+  ::-webkit-scrollbar-thumb { background: #8a6f24; border-radius: 3px; }
+
+  /* ─── Selection ─────────────────────────────────────────────────── */
+  ::selection { background: rgba(212,175,55,0.25); color: #ede6da; }
+
+  /* ─── Focus visible ─────────────────────────────────────────────── */
+  :focus-visible { outline: 1px solid rgba(212,175,55,0.6); outline-offset: 2px; }
+}
+
+@layer components {
+  /* ─── Gold CTA button ───────────────────────────────────────────── */
+  .btn-gold {
+    @apply relative inline-flex items-center justify-center gap-2
+           px-7 py-3
+           font-body text-[0.8125rem] font-semibold tracking-[0.1em] uppercase
+           text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37]
+           transition-colors duration-300 whitespace-nowrap
+           hover:bg-[#c9a24b] hover:border-[#c9a24b]
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  ::-webkit-scrollbar-track {
-    background: #0b0b0d;
+
+  /* ─── Gold outline button ───────────────────────────────────────── */
+  .btn-gold-outline {
+    @apply relative inline-flex items-center justify-center gap-2
+           px-7 py-3
+           font-body text-[0.8125rem] font-semibold tracking-[0.1em] uppercase
+           text-[#d4af37] bg-transparent border border-[#d4af37]/40
+           transition-all duration-300 whitespace-nowrap overflow-hidden
+           hover:text-[#0b0b0d] hover:border-[#d4af37] hover:bg-[#d4af37]
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  ::-webkit-scrollbar-thumb {
-    background: #8a6f24;
-    border-radius: 3px;
-  }
-  ::selection {
-    background: rgba(212, 175, 55, 0.25);
-    color: #ede6da;
-  }
+}
+
+@layer utilities {
+  /* ─── Hide scrollbar (keep scroll functionality) ────────────────── */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ─── Safe area for mobile bottom bars ─────────────────────────── */
+  .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+
+/* ─── Animations ────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes scanline {
+  0%, 100% { transform: translateY(-80px); opacity: 0; }
+  20%, 80%  { opacity: 1; }
+  50%       { transform: translateY(80px); }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { TICKET_TIERS, EVENT, PAYMENT } from "@/lib/config";
 import type { TicketTierId } from "@/lib/config";
@@ -500,6 +500,15 @@ export default function TicketBookingSection() {
   const [tiers, setTiers] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
 
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const scrollToSection = () => {
+    if (sectionRef.current) {
+      const top = sectionRef.current.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     const fetchTiers = async () => {
       try {
@@ -514,6 +523,12 @@ export default function TicketBookingSection() {
     };
     fetchTiers();
   }, []);
+
+  // Scroll to top of section on every step change (critical for mobile UX)
+  useEffect(() => {
+    scrollToSection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const validateForm = (): boolean => {
     const errors: Partial<AttendeeForm> = {};
@@ -613,7 +628,7 @@ export default function TicketBookingSection() {
   };
 
   return (
-    <section id="tickets" className="relative z-10 py-28 md:py-30 bg-[#151316]">
+    <section ref={sectionRef} id="tickets" className="relative z-10 py-28 md:py-30 bg-[#151316]">
       <div className="w-full max-w-[1200px] mx-auto px-6 sm:px-8">
         {/* Header */}
         <motion.div

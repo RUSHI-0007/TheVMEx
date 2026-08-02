@@ -35,27 +35,16 @@ function TicketLookupContent() {
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    if (initialQuery) {
-      handleSearch(initialQuery);
-    }
+    if (initialQuery) handleSearch(initialQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   const handleSearch = async (q?: string) => {
     const searchQuery = (q ?? query).trim();
-    if (!searchQuery) {
-      setError("Enter your order ID, phone, or email");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setSearched(true);
-
+    if (!searchQuery) { setError("Enter your order ID, phone, or email"); return; }
+    setLoading(true); setError(""); setSearched(true);
     try {
-      const res = await fetch(
-        `/api/orders/lookup?q=${encodeURIComponent(searchQuery)}`
-      );
+      const res = await fetch(`/api/orders/lookup?q=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Lookup failed");
       setOrders(data.orders);
@@ -68,106 +57,123 @@ function TicketLookupContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#151316] px-4 py-16 md:py-24 relative overflow-hidden text-text-primary selection:bg-gold/30 selection:text-gold">
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at center, #d4af37 0%, transparent 40%)" }} />
-      
-      <div className="max-w-xl mx-auto relative z-10">
-        {!isSuccess && (
+    <div className="min-h-screen bg-[#080809] text-[#ede6da] relative overflow-hidden">
+      {/* Background ambient glow */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,175,55,0.06) 0%, transparent 70%)" }}
+      />
+
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Top nav bar */}
+        <nav className="flex items-center justify-between px-5 py-5 border-b border-[#d4af37]/10">
           <Link
             href="/"
-            className="text-gold-muted text-[0.75rem] uppercase tracking-[0.2em] hover:text-gold mb-8 inline-block transition-colors"
+            className="inline-flex items-center gap-2 font-body text-[0.7rem] tracking-[0.15em] uppercase text-[#9a948c] hover:text-[#d4af37] transition-colors"
           >
-            ← Back to event
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M9 11L5 7l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Return to event
           </Link>
-        )}
+          <span className="font-display text-[1rem] font-bold text-[#d4af37]">My Ticket</span>
+        </nav>
 
-        {isSuccess ? (
-          <div className="text-center mb-10">
-            <h1 className="font-display text-[2.5rem] md:text-[3.2rem] text-gold mb-3 leading-none">
-              Payment Successful!
-            </h1>
-            <p className="font-body text-[0.95rem] text-text-muted">
-              Your ticket has been confirmed. See you at {EVENT.name}!
-            </p>
-          </div>
-        ) : (
-          <>
-            <h1 className="font-display text-3xl md:text-4xl text-text-primary mb-2">
-              Check Your Ticket
-            </h1>
-            <p className="font-body text-[0.85rem] text-text-muted mb-8">
-              Look up by order ID, phone number, or email
-            </p>
-
-            <div className="flex gap-3 mb-8">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="VMX-XXXXXX or phone/email"
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="flex-1 px-4 py-3 bg-[#0b0b0d] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"
-              />
-              <Button variant="gold" onClick={() => handleSearch()} disabled={loading} className="px-8">
-                {loading ? "..." : "Search"}
-              </Button>
+        <div className="flex-1 px-5 py-10 sm:py-16 max-w-lg mx-auto w-full">
+          {/* Success hero */}
+          {isSuccess && (
+            <div className="text-center mb-10">
+              <div className="w-16 h-16 border border-emerald-500/40 bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <path d="M7 14l5 5 9-9" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h1 className="font-display text-[2rem] sm:text-[2.6rem] text-[#d4af37] mb-2 leading-tight">
+                Payment Successful
+              </h1>
+              <p className="font-body text-[0.88rem] text-[#9a948c]">
+                Your booking is confirmed. See you at {EVENT.name}!
+              </p>
             </div>
-          </>
-        )}
+          )}
 
-        {error && (
-          <div className="border border-[#e05c5c]/40 bg-[#e05c5c]/5 p-4 mb-6 rounded-sm text-center">
-            <p className="font-body text-[0.8rem] text-[#e05c5c] font-semibold tracking-wide">⚠ {error}</p>
-          </div>
-        )}
-
-        {searched && !loading && orders.length === 0 && !error && (
-          <div className="border border-gold/20 bg-[#0b0b0d] p-10 text-center shadow-[0_0_20px_rgba(212,175,55,0.05)] rounded-sm">
-            <p className="font-display text-[1.5rem] text-gold mb-2">
-              No orders found
-            </p>
-            <p className="font-body text-[0.85rem] text-text-muted">
-              Double-check your order ID or contact details
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-8">
-          {orders.map((order) => (
-            <div key={order.orderId}>
-              {order.status === "approved" && order.ticketId ? (
-                <DigitalTicket order={order} />
-              ) : (
-                <OrderStatusCard order={order} />
-              )}
+          {/* Search form */}
+          {!isSuccess && (
+            <div className="mb-8">
+              <h1 className="font-display text-[2rem] sm:text-[2.5rem] text-[#ede6da] mb-1">
+                Check Your Ticket
+              </h1>
+              <p className="font-body text-[0.82rem] text-[#9a948c] mb-6">
+                Look up by order ID, phone number, or email
+              </p>
+              <div className="flex gap-2.5">
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="VMX-XXXXXX or phone/email"
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="flex-1 px-4 py-3 bg-[#151316] border border-[#d4af37]/20 text-[#ede6da] font-body text-[0.9rem] outline-none focus:border-[#d4af37]/60 transition-colors min-w-0"
+                />
+                <Button variant="gold" onClick={() => handleSearch()} disabled={loading} className="px-6 shrink-0">
+                  {loading ? "..." : "Find"}
+                </Button>
+              </div>
             </div>
-          ))}
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="border border-[#e05c5c]/30 bg-[#e05c5c]/[0.07] px-4 py-3 mb-6">
+              <p className="font-body text-[0.8rem] text-[#e05c5c]">{error}</p>
+            </div>
+          )}
+
+          {/* No results */}
+          {searched && !loading && orders.length === 0 && !error && (
+            <div className="border border-[#d4af37]/15 bg-[#151316] px-6 py-10 text-center">
+              <p className="font-display text-[1.3rem] text-[#d4af37] mb-1">No orders found</p>
+              <p className="font-body text-[0.82rem] text-[#9a948c]">
+                Double-check your order ID or contact details
+              </p>
+            </div>
+          )}
+
+          {/* Results */}
+          <div className="space-y-6">
+            {orders.map((order) => (
+              <div key={order.orderId}>
+                {order.status === "approved" && order.ticketId ? (
+                  <DigitalTicket order={order} />
+                ) : (
+                  <OrderStatusCard order={order} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {isSuccess && (
+            <div className="mt-10 text-center">
+              <Link
+                href="/"
+                className="font-body text-[0.72rem] tracking-[0.18em] uppercase text-[#9a948c] hover:text-[#d4af37] transition-colors"
+              >
+                Return to Home Page
+              </Link>
+            </div>
+          )}
         </div>
-        
-        {isSuccess && (
-          <div className="mt-8 text-center">
-            <Link
-              href="/"
-              className="text-gold-muted text-[0.75rem] uppercase tracking-[0.2em] hover:text-gold transition-colors"
-            >
-              ← Return to Home Page
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
 function OrderStatusCard({ order }: { order: OrderResult }) {
-  const statusConfig: Record<
-    string,
-    { label: string; color: string; message: string }
-  > = {
+  const statusConfig: Record<string, { label: string; color: string; message: string }> = {
     pending_verification: {
       label: "Pending Verification",
-      color: "text-gold",
-      message:
-        "Your payment is being verified. This usually takes a few minutes.",
+      color: "text-[#d4af37]",
+      message: "Your payment is being verified. This usually takes a few minutes.",
     },
     rejected: {
       label: "Rejected",
@@ -176,128 +182,112 @@ function OrderStatusCard({ order }: { order: OrderResult }) {
     },
     expired: {
       label: "Expired",
-      color: "text-text-muted",
-      message:
-        "This order has expired. Please create a new booking if you'd like to attend.",
+      color: "text-[#9a948c]",
+      message: "This order has expired. Please create a new booking if you'd like to attend.",
     },
   };
 
-  const config = statusConfig[order.status] ?? {
-    label: order.status,
-    color: "text-text-muted",
-    message: "",
-  };
+  const config = statusConfig[order.status] ?? { label: order.status, color: "text-[#9a948c]", message: "" };
 
   return (
-    <div className="bg-[#0b0b0d] border border-gold/30 p-8 shadow-[0_0_25px_rgba(212,175,55,0.08)] rounded-sm relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gold/30"></div>
-      <p className={`font-display text-[1.8rem] ${config.color} mb-2`}>
-        {config.label}
-      </p>
-      <p className="font-body text-[0.85rem] text-text-muted mb-6">{config.message}</p>
-      <div className="space-y-3 font-body text-[0.85rem]">
-        <p className="flex justify-between border-b border-gold/10 pb-2">
-          <span className="text-gold-muted uppercase tracking-widest text-[0.7rem]">Order ID</span>
-          <span className="text-text-primary font-mono">{order.orderId}</span>
-        </p>
-        <p className="flex justify-between border-b border-gold/10 pb-2">
-          <span className="text-gold-muted uppercase tracking-widest text-[0.7rem]">Amount</span>
-          <span className="text-gold font-bold">
-            {formatPayableAmount(order.payableAmount)}
-          </span>
-        </p>
-        <p className="flex justify-between pb-2">
-          <span className="text-gold-muted uppercase tracking-widest text-[0.7rem]">Tier</span>
-          <span className="text-text-primary text-right">
-            {order.tierName} <span className="text-gold-muted mx-1">×</span> {order.quantity}
-          </span>
-        </p>
-      </div>
-      {order.status === "pending_verification" && order.expiresAt && (
-        <div className="mt-6 pt-4 border-t border-gold/20 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
-          <p className="font-body text-gold-muted text-[0.75rem] uppercase tracking-widest">
-            Expires in <OrderCountdown expiresAt={order.expiresAt} />
-          </p>
+    <div className="bg-[#0f0d10] border border-[#d4af37]/20 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#d4af37]/40 to-transparent" />
+      <div className="p-6">
+        <p className={`font-display text-[1.5rem] ${config.color} mb-1`}>{config.label}</p>
+        <p className="font-body text-[0.82rem] text-[#9a948c] mb-5">{config.message}</p>
+        <div className="space-y-2.5 text-[0.82rem]">
+          {[
+            { label: "Order ID", value: order.orderId, mono: true },
+            { label: "Amount",   value: formatPayableAmount(order.payableAmount), gold: true },
+            { label: "Tier",     value: `${order.tierName} × ${order.quantity}` },
+          ].map(({ label, value, mono, gold }) => (
+            <div key={label} className="flex justify-between items-center border-b border-[#d4af37]/[0.07] pb-2.5 last:border-0 last:pb-0">
+              <span className="font-body text-[0.65rem] tracking-[0.18em] uppercase text-[#5e5a55]">{label}</span>
+              <span className={`font-body ${mono ? "font-mono text-[0.78rem] text-[#9a948c]" : gold ? "text-[#d4af37] font-bold" : "text-[#ede6da]"} text-right break-all max-w-[60%]`}>
+                {value}
+              </span>
+            </div>
+          ))}
         </div>
-      )}
+        {order.status === "pending_verification" && order.expiresAt && (
+          <div className="mt-5 pt-4 border-t border-[#d4af37]/10 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#d4af37] animate-pulse" />
+            <p className="font-body text-[#c9a24b] text-[0.72rem] tracking-[0.12em] uppercase">
+              Expires in <OrderCountdown expiresAt={order.expiresAt} />
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 function DigitalTicket({ order }: { order: OrderResult }) {
   return (
-    <div className="relative border border-gold/50 bg-[#0b0b0d] shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-sm overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gold/30 via-gold to-gold/30" />
+    <div className="relative bg-[#0f0d10] border border-[#d4af37]/40 overflow-hidden shadow-[0_0_40px_rgba(212,175,55,0.1)]">
+      {/* Top shimmer bar */}
+      <div className="h-px bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
 
-      <div className="p-8 md:p-10">
-        <div className="flex items-start justify-between mb-8">
+      <div className="p-6 sm:p-8">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-6">
           <div>
-            <p className="font-body text-[0.65rem] uppercase tracking-[0.3em] text-gold-muted mb-1">
+            <p className="font-body text-[0.6rem] tracking-[0.28em] uppercase text-[#c9a24b] mb-1">
               TheVMEx Presents
             </p>
-            <h2 className="font-display text-[2rem] md:text-[2.5rem] text-gold leading-none">
+            <h2 className="font-display text-[1.7rem] sm:text-[2.2rem] text-[#d4af37] leading-none">
               {EVENT.name}
             </h2>
-            <p className="font-body text-[0.8rem] text-text-muted mt-2 uppercase tracking-widest">{EVENT.date}</p>
+            <p className="font-body text-[0.72rem] text-[#9a948c] mt-1.5 tracking-widest uppercase">
+              {EVENT.date}
+            </p>
           </div>
-          <span className="font-body text-[0.65rem] uppercase tracking-widest px-3 py-1.5 border border-gold/40 text-gold rounded-sm bg-gold/10">Confirmed</span>
+          <span className="shrink-0 font-body text-[0.58rem] tracking-[0.15em] uppercase border border-emerald-500/40 text-emerald-400 px-2.5 py-1 bg-emerald-900/20">
+            Confirmed
+          </span>
         </div>
 
-        <div className="border-t border-b border-gold/20 py-6 my-6 grid grid-cols-2 gap-y-6 gap-x-4 bg-[#151316]/50 -mx-8 md:-mx-10 px-8 md:px-10">
-          <div>
-            <p className="font-body text-[0.65rem] uppercase tracking-[0.2em] text-gold-muted mb-1">
-              Guest
-            </p>
-            <p className="font-display text-[1.4rem] text-text-primary">
-              {order.attendeeName}
-            </p>
-          </div>
-          <div>
-            <p className="font-body text-[0.65rem] uppercase tracking-[0.2em] text-gold-muted mb-1">
-              Ticket ID
-            </p>
-            <p className="font-display text-[1.4rem] text-gold">{order.ticketId}</p>
-          </div>
-          <div>
-            <p className="font-body text-[0.65rem] uppercase tracking-[0.2em] text-gold-muted mb-1">
-              Tier
-            </p>
-            <p className="font-body text-[0.95rem] text-text-primary">
-              {order.tierName} <span className="text-gold-muted mx-1">×</span> {order.quantity}
-            </p>
-          </div>
-          <div>
-            <p className="font-body text-[0.65rem] uppercase tracking-[0.2em] text-gold-muted mb-1">
-              Amount Paid
-            </p>
-            <p className="font-body text-[0.95rem] text-text-primary">
-              {formatCurrency(order.baseAmount)}
-            </p>
-          </div>
+        {/* Ticket details grid */}
+        <div className="border-t border-b border-[#d4af37]/15 py-5 grid grid-cols-2 gap-x-4 gap-y-4 mb-6">
+          {[
+            { label: "Guest",       value: order.attendeeName, display: true },
+            { label: "Ticket ID",   value: order.ticketId ?? "", gold: true },
+            { label: "Tier",        value: `${order.tierName} × ${order.quantity}` },
+            { label: "Amount Paid", value: formatCurrency(order.baseAmount) },
+          ].map(({ label, value, display, gold }) => (
+            <div key={label}>
+              <p className="font-body text-[0.58rem] tracking-[0.2em] uppercase text-[#5e5a55] mb-1">{label}</p>
+              <p className={`font-body leading-snug break-words ${display ? "font-semibold text-[1rem] text-[#ede6da]" : gold ? "font-display text-[1rem] text-[#d4af37]" : "text-[0.88rem] text-[#ede6da]"}`}>
+                {value}
+              </p>
+            </div>
+          ))}
         </div>
 
+        {/* QR code */}
         {order.ticketQr && (
-          <div className="text-center mt-8">
-            <div className="inline-block p-4 bg-white rounded-sm shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+          <div className="text-center">
+            <div className="inline-block p-4 bg-white shadow-[0_0_30px_rgba(255,255,255,0.15)]">
               <img
                 src={order.ticketQr}
                 alt="Ticket QR Code"
-                className="w-40 h-40 object-contain"
+                className="w-40 h-40 sm:w-48 sm:h-48 object-contain"
               />
             </div>
-            <p className="font-body text-[0.7rem] uppercase tracking-[0.2em] text-gold-muted mt-4">
-              Scan this QR code at entry
+            <p className="font-body text-[0.62rem] tracking-[0.2em] uppercase text-[#5e5a55] mt-4">
+              Show this QR code at the entry gate
             </p>
           </div>
         )}
 
-        <p className="text-center font-mono text-[0.7rem] text-text-dim mt-8 opacity-50">
-          ORDER REF: {order.orderId}
+        {/* Footer ref */}
+        <p className="text-center font-mono text-[0.6rem] text-[#3a3836] mt-6">
+          REF: {order.orderId}
         </p>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gold/30 via-gold to-gold/30" />
+      {/* Bottom shimmer bar */}
+      <div className="h-px bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
     </div>
   );
 }
@@ -306,8 +296,13 @@ export default function TicketPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#151316] flex items-center justify-center">
-          <p className="font-body text-[0.8rem] uppercase tracking-[0.3em] text-gold animate-pulse">Loading Ticket...</p>
+        <div className="min-h-screen bg-[#080809] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border border-[#d4af37]/30 border-t-[#d4af37] rounded-full animate-spin" />
+            <p className="font-body text-[0.7rem] tracking-[0.25em] uppercase text-[#5e5a55]">
+              Loading
+            </p>
+          </div>
         </div>
       }
     >

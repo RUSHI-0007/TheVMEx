@@ -52,7 +52,7 @@ export default function AboutSection() {
       <div className="w-full max-w-[1200px] mx-auto px-6 sm:px-8">
 
         {/* ── Part 1: About the Event ──────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           {/* Left: text */}
           <motion.div
             initial="hidden"
@@ -91,9 +91,14 @@ export default function AboutSection() {
             {/* Dress code callout */}
             <motion.div
               variants={fadeUp}
-              className="inline-flex items-start gap-4 py-5 px-6 border border-gold/20 bg-gold/[0.03] max-w-[480px]"
+              className="inline-flex items-start gap-4 py-4 px-5 border border-gold/20 bg-gold/[0.03] max-w-full sm:max-w-[480px]"
             >
-              <span className="text-xl mt-0.5">🎭</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mt-0.5 shrink-0 opacity-80" aria-hidden>
+                <ellipse cx="12" cy="10" rx="8" ry="6" stroke="#c9a24b" strokeWidth="1.3"/>
+                <path d="M4 10 C4 10 1 11 1 14 C1 17 4 18 4 18" stroke="#c9a24b" strokeWidth="1.3" strokeLinecap="round"/>
+                <path d="M20 10 C20 10 23 11 23 14 C23 17 20 18 20 18" stroke="#c9a24b" strokeWidth="1.3" strokeLinecap="round"/>
+                <line x1="8" y1="8" x2="16" y2="8" stroke="#c9a24b" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+              </svg>
               <div>
                 <p className="font-body text-[0.65rem] tracking-[0.2em] uppercase text-gold-muted mb-1">
                   Dress Code

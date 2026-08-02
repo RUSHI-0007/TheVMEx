@@ -85,7 +85,7 @@ export default function GallerySection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-3 auto-rows-[200px] md:auto-rows-[240px] gap-0.5 mb-5"
+          className="grid grid-cols-2 md:grid-cols-3 auto-rows-[160px] md:auto-rows-[220px] gap-0.5 mb-5"
         >
           {GALLERY_ITEMS.map((item, i) => (
             <motion.div
@@ -94,7 +94,7 @@ export default function GallerySection() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              className={`relative overflow-hidden cursor-zoom-in group bg-[#0b0b0d] ${item.className}`}
+              className={`relative overflow-hidden cursor-zoom-in group bg-[#0b0b0d] ${i >= 3 ? "max-md:hidden" : ""} ${item.className}`}
               onClick={() => setSelectedItem(item)}
             >
               {item.type === "image" ? (

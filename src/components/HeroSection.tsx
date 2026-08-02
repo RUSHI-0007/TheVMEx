@@ -2,24 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import GoldDivider from "@/components/GoldDivider";
 import { EVENT } from "@/lib/config";
 
-// ─── Countdown timer ───────────────────────────────────────────────────────
+// ─── Countdown ─────────────────────────────────────────────────────────────
 function useCountdown(targetISO: string) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
+  const [t, setT] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   useEffect(() => {
     const target = new Date(targetISO).getTime();
     const tick = () => {
       const diff = target - Date.now();
-      if (diff <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-      setTimeLeft({
-        days: Math.floor(diff / 86400000),
-        hours: Math.floor((diff % 86400000) / 3600000),
+      if (diff <= 0) { setT({ days: 0, hours: 0, minutes: 0, seconds: 0 }); return; }
+      setT({
+        days:    Math.floor(diff / 86400000),
+        hours:   Math.floor((diff % 86400000) / 3600000),
         minutes: Math.floor((diff % 3600000) / 60000),
         seconds: Math.floor((diff % 60000) / 1000),
       });
@@ -28,38 +23,17 @@ function useCountdown(targetISO: string) {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [targetISO]);
-
-  return timeLeft;
+  return t;
 }
 
-function CountdownBlock({ value, label }: { value: number; label: string }) {
+function CountdownUnit({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center min-w-[60px]">
-      <span className="font-display text-[clamp(2rem,5vw,3rem)] font-bold text-[#d4af37] leading-none tracking-tighter">
+    <div className="flex flex-col items-center">
+      <span className="font-display text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-[#d4af37] leading-none tabular-nums tracking-tighter">
         {String(value).padStart(2, "0")}
       </span>
-      <span className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-[#5e5a55] mt-1.5">
+      <span className="font-body text-[0.5rem] tracking-[0.22em] uppercase text-[#5e5a55] mt-1.5">
         {label}
-      </span>
-    </div>
-  );
-}
-
-function CountdownSeparator() {
-  return (
-    <span className="font-display text-[clamp(1.5rem,4vw,2.5rem)] text-[#8a6f24] leading-none self-start pt-1">
-      :
-    </span>
-  );
-}
-
-// ─── Info chip ─────────────────────────────────────────────────────────────
-function InfoChip({ icon, text }: { icon: string; text: string }) {
-  return (
-    <div className="inline-flex items-center gap-2 px-4 py-2 border border-[#d4af37]/20 bg-[#d4af37]/5">
-      <span className="text-xs">{icon}</span>
-      <span className="font-body text-xs font-medium tracking-wide text-[#9a948c]">
-        {text}
       </span>
     </div>
   );
@@ -71,29 +45,38 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      if (menuOpen) setMenuOpen(false);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [menuOpen]);
 
-  const navLinks = [
-    { label: "About", href: "#about" },
-    { label: "Lineup", href: "#lineup" },
+  const links = [
+    { label: "About",   href: "#about" },
+    { label: "Lineup",  href: "#lineup" },
     { label: "Details", href: "#details" },
     { label: "Gallery", href: "#gallery" },
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 px-8 h-[70px] flex items-center justify-between transition-all duration-500 ease-in-out ${scrolled ? "bg-[#0b0b0d]/90 backdrop-blur-md border-b border-[#d4af37]/10" : "bg-transparent border-b border-transparent"}`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 h-[64px] flex items-center justify-between px-5 md:px-8 transition-all duration-500 ${
+        scrolled
+          ? "bg-[#0b0b0d]/95 backdrop-blur-md border-b border-[#d4af37]/10 shadow-[0_1px_20px_rgba(0,0,0,0.4)]"
+          : "bg-transparent border-b border-transparent"
+      }`}
+    >
       {/* Wordmark */}
-      <a href="#" className="flex flex-col gap-[1px]">
-        <span className="font-script text-[0.78rem] text-[#c9a24b] leading-none">presents</span>
-        <span className="font-display text-[1.2rem] font-bold text-[#ede6da] tracking-wider">TheVMEx</span>
+      <a href="#" className="flex flex-col gap-[1px] shrink-0" aria-label="TheVMEx home">
+        <span className="font-script text-[0.72rem] text-[#c9a24b] leading-none">presents</span>
+        <span className="font-display text-[1.1rem] font-bold text-[#ede6da] tracking-wider">TheVMEx</span>
       </a>
 
       {/* Desktop nav */}
-      <nav className="hidden md:flex items-center gap-10" aria-label="Main navigation">
-        {navLinks.map((l) => (
+      <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
+        {links.map((l) => (
           <a
             key={l.href}
             href={l.href}
@@ -102,29 +85,34 @@ function Navbar() {
             {l.label}
           </a>
         ))}
-        <a href="#tickets" className="relative inline-flex items-center justify-center gap-2 px-5 py-2 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37] hover:bg-[#c9a24b] hover:border-[#c9a24b] transition-colors duration-300 whitespace-nowrap">
+        <a
+          href="#tickets"
+          className="btn-gold py-2 px-5 text-[0.75rem]"
+        >
           Book Tickets
         </a>
       </nav>
 
       {/* Mobile hamburger */}
       <button
+        type="button"
         id="mobile-menu-toggle"
-        aria-label="Toggle menu"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
         onClick={() => setMenuOpen(!menuOpen)}
-        className="md:hidden p-1 text-[#d4af37]"
+        className="md:hidden p-2 text-[#d4af37] -mr-1"
       >
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
           {menuOpen ? (
             <>
-              <line x1="3" y1="3" x2="19" y2="19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="19" y1="3" x2="3" y2="19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="4" y1="4" x2="18" y2="18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="18" y1="4" x2="4" y2="18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </>
           ) : (
             <>
-              <line x1="3" y1="6" x2="19" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="3" y1="11" x2="19" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="3" y1="16" x2="19" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="3" y1="6"  x2="19" y2="6"  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="3" y1="11" x2="19" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="3" y1="16" x2="19" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </>
           )}
         </svg>
@@ -132,18 +120,22 @@ function Navbar() {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="md:hidden fixed top-[70px] left-0 right-0 bg-[#0b0b0d]/95 border-b border-[#d4af37]/10 px-8 pt-6 pb-8 flex flex-col gap-5">
-          {navLinks.map((l) => (
+        <div className="md:hidden fixed inset-x-0 top-[64px] bg-[#0b0b0d]/98 backdrop-blur-md border-b border-[#d4af37]/10 px-6 py-6 flex flex-col gap-4 z-40">
+          {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setMenuOpen(false)}
-              className="font-body text-[0.85rem] tracking-[0.14em] uppercase text-[#9a948c]"
+              className="font-body text-[0.85rem] tracking-[0.14em] uppercase text-[#9a948c] hover:text-[#d4af37] transition-colors py-1"
             >
               {l.label}
             </a>
           ))}
-          <a href="#tickets" className="relative inline-flex items-center justify-center gap-2 px-6 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37] transition-colors duration-300 whitespace-nowrap" onClick={() => setMenuOpen(false)}>
+          <a
+            href="#tickets"
+            onClick={() => setMenuOpen(false)}
+            className="btn-gold mt-2 justify-center"
+          >
             Book Tickets
           </a>
         </div>
@@ -152,16 +144,16 @@ function Navbar() {
   );
 }
 
-// ─── Hero Section ──────────────────────────────────────────────────────────
+// ─── Hero ──────────────────────────────────────────────────────────────────
 export default function HeroSection() {
   const countdown = useCountdown(EVENT.dateISO);
 
   const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 28 },
+    hidden: { opacity: 0, y: 24 },
     show: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, delay: i * 0.14, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+      transition: { duration: 0.8, delay: i * 0.13, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
     }),
   };
 
@@ -171,43 +163,37 @@ export default function HeroSection() {
 
       <section
         id="hero"
-        className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-6 pt-32 pb-20 overflow-hidden"
+        className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-5 sm:px-8 pt-24 pb-16 overflow-hidden"
       >
-        {/* Ambient background glow */}
+        {/* Ambient glow */}
         <div
-          aria-hidden="true"
+          aria-hidden
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 40%, rgba(212,175,55,0.06) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 38%, rgba(212,175,55,0.07) 0%, transparent 70%)" }}
         />
-
-        {/* Subtle horizontal scan lines texture overlay */}
+        {/* Scan lines */}
         <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(212,175,55,0.012) 3px, rgba(212,175,55,0.012) 4px)" }}
+          aria-hidden
+          className="absolute inset-0 pointer-events-none opacity-40"
+          style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(212,175,55,0.008) 3px, rgba(212,175,55,0.008) 4px)" }}
         />
 
         {/* Content */}
-        <div className="relative z-10 w-full max-w-[860px]">
+        <div className="relative z-10 w-full max-w-[820px] mx-auto">
 
-          {/* "presents" script accent */}
+          {/* Script label */}
           <motion.p
-            custom={0}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            className="font-script text-[clamp(1.2rem,3vw,1.6rem)] text-[#c9a24b] mb-1 leading-none"
+            custom={0} initial="hidden" animate="show" variants={fadeUp}
+            className="font-script text-[clamp(1.1rem,3vw,1.5rem)] text-[#c9a24b] mb-1 leading-none"
           >
             TheVMEx presents
           </motion.p>
 
-          {/* Event title */}
+          {/* Title */}
           <motion.h1
-            custom={1}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            className="font-display text-[clamp(2.8rem,9vw,6.5rem)] font-black tracking-wide leading-none text-[#ede6da] mb-2"
+            custom={1} initial="hidden" animate="show" variants={fadeUp}
+            className="font-display font-black tracking-wide leading-[0.92] text-[#ede6da] mb-3"
+            style={{ fontSize: "clamp(2.6rem, 11vw, 7rem)" }}
           >
             MASQUERADE
             <br />
@@ -216,63 +202,75 @@ export default function HeroSection() {
 
           {/* Subtitle */}
           <motion.p
-            custom={2}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            className="font-serif text-[clamp(1rem,2.5vw,1.3rem)] italic text-[#9a948c] mb-10 leading-relaxed"
+            custom={2} initial="hidden" animate="show" variants={fadeUp}
+            className="font-serif italic text-[#9a948c] mb-8 leading-relaxed"
+            style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)" }}
           >
             An Evening Shrouded in Mystery &amp; Elegance
           </motion.p>
 
           {/* Info chips */}
           <motion.div
-            custom={3}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            className="flex flex-wrap justify-center gap-3 mb-10"
+            custom={3} initial="hidden" animate="show" variants={fadeUp}
+            className="flex flex-wrap justify-center gap-2 mb-8"
           >
-            <InfoChip icon="🗓" text={EVENT.date} />
-            <InfoChip icon="📍" text={EVENT.venue} />
-            <InfoChip icon="🎵" text={`Ft. ${EVENT.artist}`} />
+            {[
+              { icon: "calendar", text: EVENT.date },
+              { icon: "pin",      text: EVENT.venue },
+              { icon: "music",    text: `Ft. ${EVENT.artist}` },
+            ].map(({ icon, text }) => (
+              <div
+                key={text}
+                className="inline-flex items-center gap-2 px-3.5 py-2 border border-[#d4af37]/18 bg-[#d4af37]/[0.04] backdrop-blur-sm"
+              >
+                {icon === "calendar" && (
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#c9a24b" strokeWidth="1.2" strokeLinecap="round">
+                    <rect x="1" y="2" width="10" height="9" rx="1"/><line x1="1" y1="5" x2="11" y2="5"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="8" y1="1" x2="8" y2="3"/>
+                  </svg>
+                )}
+                {icon === "pin" && (
+                  <svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="#c9a24b" strokeWidth="1.2" strokeLinecap="round">
+                    <path d="M5 1C3.07 1 1.5 2.57 1.5 4.5c0 2.83 3.5 6.5 3.5 6.5s3.5-3.67 3.5-6.5C8.5 2.57 6.93 1 5 1z"/><circle cx="5" cy="4.5" r="1.2"/>
+                  </svg>
+                )}
+                {icon === "music" && (
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#c9a24b" strokeWidth="1.2" strokeLinecap="round">
+                    <path d="M4.5 9V3l6-1v6"/><circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="8" r="1.5"/>
+                  </svg>
+                )}
+                <span className="font-body text-[0.72rem] font-medium tracking-wide text-[#9a948c]">{text}</span>
+              </div>
+            ))}
           </motion.div>
 
-          {/* CTA buttons */}
+          {/* CTAs */}
           <motion.div
-            custom={4}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
-            className="flex flex-wrap justify-center gap-4 mb-16"
+            custom={4} initial="hidden" animate="show" variants={fadeUp}
+            className="flex flex-col sm:flex-row justify-center gap-3 mb-12"
           >
-            <a href="#tickets" id="hero-book-cta" className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37] hover:bg-[#c9a24b] hover:border-[#c9a24b] transition-colors duration-300 whitespace-nowrap">
+            <a href="#tickets" id="hero-book-cta" className="btn-gold px-9 py-3.5">
               Book Your Ticket
             </a>
-            <a href="#about" id="hero-details-cta" className="relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#d4af37] bg-transparent border border-[#d4af37]/40 hover:text-[#0b0b0d] hover:border-[#d4af37] hover:bg-[#d4af37] transition-all duration-300 whitespace-nowrap group">
-              <span className="absolute inset-0 bg-[#d4af37] scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100 -z-10" />
+            <a href="#about" id="hero-details-cta" className="btn-gold-outline px-9 py-3.5">
               View Details
             </a>
           </motion.div>
 
           {/* Countdown */}
           <motion.div
-            custom={5}
-            initial="hidden"
-            animate="show"
-            variants={fadeUp}
+            custom={5} initial="hidden" animate="show" variants={fadeUp}
           >
-            <p className="font-body text-[0.6rem] tracking-[0.25em] uppercase text-[#5e5a55] mb-4">
+            <p className="font-body text-[0.55rem] tracking-[0.28em] uppercase text-[#5e5a55] mb-4">
               Event begins in
             </p>
-            <div className="flex items-start justify-center gap-4">
-              <CountdownBlock value={countdown.days} label="Days" />
-              <CountdownSeparator />
-              <CountdownBlock value={countdown.hours} label="Hours" />
-              <CountdownSeparator />
-              <CountdownBlock value={countdown.minutes} label="Minutes" />
-              <CountdownSeparator />
-              <CountdownBlock value={countdown.seconds} label="Seconds" />
+            <div className="flex items-start justify-center gap-3 sm:gap-5">
+              <CountdownUnit value={countdown.days}    label="Days" />
+              <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
+              <CountdownUnit value={countdown.hours}   label="Hours" />
+              <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
+              <CountdownUnit value={countdown.minutes} label="Mins" />
+              <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
+              <CountdownUnit value={countdown.seconds} label="Secs" />
             </div>
           </motion.div>
         </div>
@@ -281,25 +279,31 @@ export default function HeroSection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
-          aria-hidden="true"
+          transition={{ delay: 2.2, duration: 1 }}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
+          aria-hidden
         >
-          <span className="font-body text-[0.55rem] tracking-[0.2em] uppercase text-[#5e5a55]">
-            Scroll
-          </span>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M9 3v12M4 10l5 5 5-5" stroke="#8a6f24" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          <span className="font-body text-[0.5rem] tracking-[0.22em] uppercase text-[#5e5a55]">Scroll</span>
+          <motion.div animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 3v10M4 9l4 4 4-4" stroke="#8a6f24" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.div>
         </motion.div>
       </section>
 
-      <GoldDivider />
+      {/* Gold divider built inline to avoid import */}
+      <div className="relative flex items-center justify-center py-6 overflow-hidden">
+        <div className="flex-1 max-w-[220px] h-px opacity-50 bg-[linear-gradient(to_right,transparent,var(--color-gold-muted),var(--color-gold),var(--color-gold-muted),transparent)]" />
+        <div className="mx-4 flex items-center gap-2">
+          <span className="w-1 h-1 bg-[#8a6f24] rotate-45" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="opacity-60">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" stroke="#d4af37" strokeWidth="1" fill="rgba(212,175,55,0.15)" />
+          </svg>
+          <span className="w-1 h-1 bg-[#8a6f24] rotate-45" />
+        </div>
+        <div className="flex-1 max-w-[220px] h-px opacity-50 bg-[linear-gradient(to_right,transparent,var(--color-gold-muted),var(--color-gold),var(--color-gold-muted),transparent)]" />
+      </div>
     </>
   );
 }

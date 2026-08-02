@@ -72,7 +72,7 @@ function HeadlinerCard({ performer }: { performer: Performer }) {
 
       <div className="flex flex-col">
         {/* Visual panel */}
-        <div className="bg-[#0f0d10] h-[400px] md:h-[500px] flex flex-col items-center justify-center relative overflow-hidden border-b border-gold/10">
+        <div className="bg-[#0f0d10] h-[260px] md:h-[440px] flex flex-col items-center justify-center relative overflow-hidden border-b border-gold/10">
           {/* Background image */}
           <div
             className="absolute inset-0 bg-cover bg-center opacity-90 transition-transform duration-[10s] hover:scale-105"
@@ -88,7 +88,7 @@ function HeadlinerCard({ performer }: { performer: Performer }) {
         </div>
 
         {/* Info panel */}
-        <div className="p-10 flex flex-col items-center text-center">
+        <div className="p-6 sm:p-10 flex flex-col items-center text-center">
           <p className="font-body text-[0.6rem] tracking-[0.25em] uppercase text-gold-muted mb-2">
             {performer.role}
           </p>
