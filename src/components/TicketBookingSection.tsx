@@ -543,6 +543,25 @@ export default function TicketBookingSection() {
         return;
       }
       
+      if (data.mode === "cashfree" && data.paymentSessionId) {
+        try {
+          // @ts-ignore
+          const { load } = await import("@cashfreepayments/cashfree-js");
+          const cashfree = await load({
+            mode: "sandbox", 
+          });
+          
+          await cashfree.checkout({
+            paymentSessionId: data.paymentSessionId,
+            redirectTarget: "_self"
+          });
+        } catch (e) {
+          setApiError("Failed to open Cashfree gateway.");
+          setIsLoading(false);
+        }
+        return;
+      }
+
       setOrder(data.order);
       setUpiQr(data.upiQr);
       setStep("payment");

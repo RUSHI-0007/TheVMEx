@@ -272,9 +272,10 @@ export async function approveByCashfree(orderId: string): Promise<ReturnType<typ
         eq(orders.orderId, orderId),
         eq(orders.status, "pending_verification")
       )
-    );
+    )
+    .returning();
 
-  if (result.changes === 0) {
+  if (result.length === 0) {
     // Already processed — idempotent, not an error
     return getOrderByOrderId(orderId);
   }
@@ -387,9 +388,10 @@ export async function approveOrder(
         eq(orders.orderId, orderId),
         eq(orders.status, "pending_verification")
       )
-    );
+    )
+    .returning();
 
-  if (result.changes === 0) {
+  if (result.length === 0) {
     const order = await getOrderByOrderId(orderId);
     if (order?.status === "approved") {
       throw new Error(
@@ -435,9 +437,10 @@ export async function rejectOrder(
         eq(orders.orderId, orderId),
         eq(orders.status, "pending_verification")
       )
-    );
+    )
+    .returning();
 
-  if (result.changes === 0) {
+  if (result.length === 0) {
     const order = await getOrderByOrderId(orderId);
     if (order?.handledByName) {
       throw new Error(`Already handled by ${order.handledByName}`);

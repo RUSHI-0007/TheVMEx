@@ -233,17 +233,19 @@ export default function AdminPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#151316] flex items-center justify-center px-4 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at center, #d4af37 0%, transparent 40%)" }} />
         <form
           onSubmit={handleLogin}
-          className="w-full max-w-sm bg-bg-secondary border border-gold/20 p-8"
+          className="w-full max-w-sm bg-[#0b0b0d]/90 backdrop-blur-md border border-gold/40 p-10 shadow-[0_0_30px_rgba(212,175,55,0.1)] relative z-10"
         >
-          <h1 className="font-display text-2xl text-gold mb-6 text-center">
-            Admin Login
+          <div className="absolute top-0 left-0 w-full h-1 bg-gold/50"></div>
+          <h1 className="font-display text-[2.2rem] font-bold text-text-primary mb-8 text-center">
+            Admin <span className="text-gold italic">Login</span>
           </h1>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-xs uppercase tracking-widest text-text-muted mb-2">
+              <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2">
                 Team Member
               </label>
               <select
@@ -251,9 +253,9 @@ export default function AdminPage() {
                 onChange={(e) =>
                   setLoginForm({ ...loginForm, name: e.target.value })
                 }
-                required
+                className="w-full px-4 py-3 bg-[#0b0b0d] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50 appearance-none"
               >
-                <option value="">Select name</option>
+                <option value="">Select your name</option>
                 {ADMIN_TEAM.map((m) => (
                   <option key={m.id} value={m.name}>
                     {m.name}
@@ -262,8 +264,8 @@ export default function AdminPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-widest text-text-muted mb-2">
-                PIN
+              <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2">
+                Admin Password
               </label>
               <input
                 type="password"
@@ -271,23 +273,18 @@ export default function AdminPage() {
                 onChange={(e) =>
                   setLoginForm({ ...loginForm, pin: e.target.value })
                 }
-                placeholder="Enter PIN"
-                required
+                className="w-full px-4 py-3 bg-[#0b0b0d]/50 border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"
               />
             </div>
           </div>
           {loginError && (
-            <p className="text-red-400 text-sm mt-4">{loginError}</p>
+            <p className="font-body text-[0.75rem] text-[#e05c5c] mt-4 font-semibold tracking-wide text-center">⚠ {loginError}</p>
           )}
-          <Button type="submit" className="w-full mt-6">
-            Login
-          </Button>
-          <Link
-            href="/"
-            className="block text-center text-text-muted text-xs mt-4 hover:text-gold"
-          >
-            ← Back to site
-          </Link>
+          <div className="mt-8">
+            <Button type="submit" variant="gold" className="w-full justify-center">
+              Enter Dashboard →
+            </Button>
+          </div>
         </form>
       </div>
     );
@@ -299,72 +296,47 @@ export default function AdminPage() {
       : orders;
 
   return (
-    <div className="min-h-screen bg-bg-primary">
-      <header className="border-b border-gold/10 bg-bg-secondary px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-xl text-gold">Admin Panel</h1>
-            <p className="text-text-muted text-xs">
-              {session.name} · {orders.length} pending · auto-refresh 5s
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Export */}
-            <div className="flex items-center gap-2">
-              <select
-                value={exportStatus}
-                onChange={(e) => setExportStatus(e.target.value as "approved" | "all")}
-                className="text-xs py-1 px-2 border border-gold/20 bg-bg-primary text-text-muted"
-              >
-                <option value="approved">Approved only</option>
-                <option value="all">All statuses</option>
-              </select>
-              <button
-                type="button"
-                onClick={handleExport}
-                disabled={exporting}
-                className="text-xs py-1 px-3 border border-gold/40 text-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
-              >
-                {exporting ? "Downloading..." : "Export CSV"}
-              </button>
-            </div>
-            <Link href="/" className="text-text-muted text-sm hover:text-gold">
-              Site
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-text-muted text-sm hover:text-gold"
-            >
-              Logout
-            </button>
-          </div>
+    <div className="min-h-screen bg-[#151316] flex flex-col text-text-primary selection:bg-gold/30 selection:text-gold">
+      <header className="border-b border-gold/20 p-6 md:px-10 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#0b0b0d]">
+        <div>
+          <h1 className="font-display text-[1.8rem] font-bold tracking-wide">
+            Masquerade <span className="text-gold italic">Admin</span>
+          </h1>
+          <p className="font-body text-[0.8rem] text-text-muted mt-1">
+            Logged in as <strong className="text-gold">{session.name}</strong>
+          </p>
         </div>
 
-        {/* Live stats */}
+        <div className="flex gap-4 items-center">
+          <Button variant="outline" onClick={handleLogout} className="text-xs py-2 px-4">
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      <div className="bg-[#0b0b0d] border-b border-gold/10 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
         {stats && (
-          <div className="grid grid-cols-4 gap-3 mt-4">
+          <div className="flex gap-6 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
             {[
-              { label: "Total Orders", value: stats.total },
-              { label: "✓ Approved", value: stats.approved },
+              { label: "Total Bookings", value: stats.total },
+              { label: "Approved Tickets", value: stats.approved },
               { label: "⏳ Pending", value: stats.pending },
               { label: "Revenue", value: `₹${Number(stats.totalRevenue ?? 0).toLocaleString("en-IN")}` },
             ].map((s) => (
-              <div key={s.label} className="bg-bg-primary border border-gold/10 px-3 py-2">
-                <p className="text-text-muted text-xs">{s.label}</p>
-                <p className="font-display text-lg text-gold">{s.value}</p>
+              <div key={s.label} className="min-w-fit">
+                <p className="font-body text-[0.65rem] uppercase tracking-[0.15em] text-text-muted mb-1">{s.label}</p>
+                <p className="font-display text-[1.4rem] font-bold text-gold">{s.value}</p>
               </div>
             ))}
           </div>
         )}
 
-        {/* View toggle */}
-        <div className="flex gap-2 mt-4 flex-wrap">
+        <div className="flex gap-2 rounded-sm p-1 bg-[#151316] border border-gold/10">
           <button
             type="button"
             onClick={() => setView("queue")}
-            className={`px-4 py-1 text-xs uppercase tracking-widest border ${
-              view === "queue" ? "border-gold text-gold" : "border-gold/20 text-text-muted"
+            className={`px-5 py-2 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
+              view === "queue" ? "bg-gold/10 text-gold font-bold" : "text-text-muted hover:text-text-primary hover:bg-white/5"
             }`}
           >
             Verification Queue ({orders.length})
@@ -372,60 +344,56 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => setView("attendees")}
-            className={`px-4 py-1 text-xs uppercase tracking-widest border ${
-              view === "attendees" ? "border-gold text-gold" : "border-gold/20 text-text-muted"
+            className={`px-5 py-2 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
+              view === "attendees" ? "bg-gold/10 text-gold font-bold" : "text-text-muted hover:text-text-primary hover:bg-white/5"
             }`}
           >
-            All Attendees {stats ? `(${stats.approved} approved)` : ""}
+            All Attendees
           </button>
           <button
             type="button"
             onClick={() => setView("scanner")}
-            className={`px-4 py-1 text-xs uppercase tracking-widest border ${
-              view === "scanner" ? "border-gold text-gold" : "border-gold/20 text-text-muted"
+            className={`px-5 py-2 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
+              view === "scanner" ? "bg-gold/10 text-gold font-bold" : "text-text-muted hover:text-text-primary hover:bg-white/5"
             }`}
           >
-            📷 Entry Scanner
+            📷 Scanner
           </button>
         </div>
-      </header>
+      </div>
 
       {view === "scanner" ? (
         <TicketScanner />
       ) : view === "attendees" ? (
-        <div className="p-4 md:p-8">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-text-muted text-sm">
-              Showing approved attendees. Use Export CSV above for full data.
-            </p>
-            <button
-              type="button"
-              onClick={handleExport}
-              className="text-xs py-1 px-3 border border-gold/40 text-gold hover:bg-gold/10 transition-colors"
-            >
+        <div className="p-6 md:p-10 max-w-[1200px] mx-auto w-full">
+          <div className="mb-8 flex items-center justify-between flex-wrap gap-4 border-b border-gold/10 pb-6">
+            <div>
+              <h2 className="font-display text-[1.5rem] text-gold mb-1">Approved Attendees</h2>
+              <p className="font-body text-[0.8rem] text-text-muted max-w-[600px]">
+                These are the guests whose tickets have been successfully paid and verified. Download the CSV to see the full list with contact details and ticket IDs.
+              </p>
+            </div>
+            <Button variant="gold" onClick={handleExport} className="whitespace-nowrap">
               Download CSV
-            </button>
+            </Button>
           </div>
-          <p className="text-text-muted text-sm">
-            Download the CSV to see the full attendee list with name, phone, email, college, ticket ID and payment details.
-          </p>
-          <div className="mt-4 border border-gold/10 p-6 text-center">
-            <p className="font-display text-4xl text-gold mb-2">{stats?.approved ?? "—"}</p>
-            <p className="text-text-muted text-sm">Approved tickets</p>
-            <p className="text-text-muted text-xs mt-1">Click &quot;Export CSV&quot; in the header to download the full list</p>
+          <div className="mt-8 border border-gold/20 bg-[#0b0b0d] p-10 text-center shadow-[0_0_20px_rgba(212,175,55,0.05)]">
+            <p className="font-display text-[3.5rem] text-gold mb-2 font-bold">{stats?.approved ?? "—"}</p>
+            <p className="font-body text-[0.85rem] uppercase tracking-[0.2em] text-gold-muted mb-4">Total Confirmed Tickets</p>
+            <p className="font-body text-[0.8rem] text-text-dim max-w-[400px] mx-auto">Click "Download CSV" to export the full verified guest list for the entry desk or marketing.</p>
           </div>
         </div>
       ) : (
-      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-65px)]">
-        <aside className="lg:w-96 border-r border-gold/10 p-4 overflow-y-auto">
-          <div className="flex gap-2 mb-4">
+      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-140px)]">
+        <aside className="lg:w-[400px] border-r border-gold/10 p-6 overflow-y-auto bg-[#0b0b0d]/50">
+          <div className="flex gap-2 mb-6">
             <button
               type="button"
               onClick={() => setFilter("all")}
-              className={`flex-1 py-2 text-xs uppercase tracking-widest border ${
+              className={`flex-1 py-3 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
                 filter === "all"
-                  ? "border-gold text-gold"
-                  : "border-gold/20 text-text-muted"
+                  ? "bg-gold text-black font-bold"
+                  : "bg-[#151316] border border-gold/20 text-text-muted hover:border-gold/50 hover:text-gold-muted"
               }`}
             >
               All ({orders.length})
@@ -433,10 +401,10 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => setFilter("mine")}
-              className={`flex-1 py-2 text-xs uppercase tracking-widest border ${
+              className={`flex-1 py-3 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
                 filter === "mine"
-                  ? "border-gold text-gold"
-                  : "border-gold/20 text-text-muted"
+                  ? "bg-gold text-black font-bold"
+                  : "bg-[#151316] border border-gold/20 text-text-muted hover:border-gold/50 hover:text-gold-muted"
               }`}
             >
               Mine
@@ -444,43 +412,46 @@ export default function AdminPage() {
           </div>
 
           {filteredOrders.length === 0 ? (
-            <p className="text-text-muted text-sm text-center py-8">
-              No pending orders
-            </p>
+            <div className="flex flex-col items-center justify-center h-48 opacity-50">
+              <p className="font-body text-[0.8rem] text-gold uppercase tracking-[0.15em]">
+                Queue Empty
+              </p>
+            </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {filteredOrders.map((order) => (
                 <button
                   key={order.orderId}
                   type="button"
                   onClick={() => openOrder(order)}
-                  className={`w-full text-left p-4 border transition-colors ${
+                  className={`w-full text-left p-5 border transition-all duration-300 rounded-sm relative overflow-hidden group ${
                     selectedOrder?.orderId === order.orderId
-                      ? "border-gold bg-gold/5"
-                      : "border-gold/10 hover:border-gold/30"
+                      ? "border-gold bg-[#151316] shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                      : "border-gold/10 bg-[#0b0b0d] hover:border-gold/40 hover:bg-[#151316]"
                   }`}
                 >
+                  {selectedOrder?.orderId === order.orderId && <div className="absolute top-0 left-0 w-1 h-full bg-gold" />}
                   <div className="flex justify-between items-start">
-                    <p className="font-display text-lg text-gold tabular-nums">
+                    <p className="font-display text-[1.4rem] font-bold text-gold tabular-nums">
                       {formatPayableAmount(order.payableAmount)}
                     </p>
                     {order.claimedByName &&
                       order.claimedBy !== session.id && (
-                        <span className="text-xs text-bronze">
-                          {order.claimedByName}
+                        <span className="font-body text-[0.65rem] uppercase tracking-wider px-2 py-1 bg-bronze/10 text-bronze rounded-sm">
+                          Claimed: {order.claimedByName}
                         </span>
                       )}
                   </div>
-                  <p className="text-text-primary text-sm mt-1">
+                  <p className="font-body text-[0.95rem] text-text-primary mt-2 font-semibold">
                     {order.attendeeName}
                   </p>
-                  <p className="text-text-muted text-xs mt-1">
+                  <p className="font-body text-[0.75rem] text-text-muted mt-1 tracking-wide">
                     {order.orderId} · {order.tierName} × {order.quantity}
                   </p>
                   {order.expiresAt && (
-                    <p className="text-text-muted text-xs mt-1">
-                      Expires{" "}
-                      <OrderCountdown expiresAt={order.expiresAt} />
+                    <p className="font-body text-[0.7rem] text-text-dim mt-2 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
+                      Expires in <OrderCountdown expiresAt={order.expiresAt} />
                     </p>
                   )}
                 </button>
@@ -489,25 +460,26 @@ export default function AdminPage() {
           )}
         </aside>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto bg-[#151316]">
           {!selectedOrder ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-text-muted">
-                Select an order to verify · Sorted by amount
+            <div className="flex items-center justify-center h-full opacity-50">
+              <p className="font-body text-[0.85rem] uppercase tracking-[0.2em] text-gold">
+                Select an order from the queue
               </p>
             </div>
           ) : (
-            <div className="max-w-2xl">
-              <div className="bg-gold/10 border-2 border-gold p-6 mb-6 text-center">
-                <p className="text-xs uppercase tracking-widest text-gold mb-1">
-                  Match this amount in UPI
+            <div className="max-w-[700px] mx-auto">
+              <div className="bg-[#0b0b0d] border border-gold/40 p-8 mb-8 text-center shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gold/50"></div>
+                <p className="font-body text-[0.7rem] uppercase tracking-[0.2em] text-gold-muted mb-2">
+                  Match this exact amount in UPI history
                 </p>
-                <p className="font-display text-5xl text-gold tabular-nums">
+                <p className="font-display text-[4rem] font-bold text-gold tabular-nums">
                   {formatPayableAmount(selectedOrder.payableAmount)}
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <InfoBlock label="Order ID" value={selectedOrder.orderId} />
                 <InfoBlock label="Guest" value={selectedOrder.attendeeName} />
                 <InfoBlock label="Phone" value={selectedOrder.phone} />
@@ -519,85 +491,92 @@ export default function AdminPage() {
                   value={`${selectedOrder.tierName} × ${selectedOrder.quantity}`}
                 />
                 <InfoBlock
-                  label="UTR"
+                  label="UTR Number"
                   value={selectedOrder.utr ?? "Not submitted"}
                   highlight
                 />
               </div>
 
               {selectedOrder.screenshotPath && (
-                <div className="mb-6">
-                  <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
-                    Payment Screenshot (supporting evidence)
+                <div className="mb-8 p-6 bg-[#0b0b0d] border border-gold/20 rounded-sm">
+                  <p className="font-body text-[0.7rem] uppercase tracking-[0.15em] text-gold-muted mb-4">
+                    Payment Screenshot Evidence
                   </p>
                   <img
                     src={selectedOrder.screenshotPath}
                     alt="Payment screenshot"
-                    className="max-w-full border border-gold/20 max-h-96 object-contain"
+                    className="max-w-full rounded-sm max-h-[500px] object-contain border border-white/5"
                   />
                 </div>
               )}
 
-              <div className="mb-6">
-                <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
-                  Rejection Reason
+              <div className="mb-8 p-6 bg-[#0b0b0d] border border-gold/20 rounded-sm">
+                <p className="font-body text-[0.7rem] uppercase tracking-[0.15em] text-gold-muted mb-4">
+                  Rejection Reason (If Applicable)
                 </p>
                 <select
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  className="mb-2"
+                  className="w-full px-4 py-3 bg-[#151316] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm mb-3 appearance-none"
                 >
                   {REJECT_REASONS.map((r) => (
                     <option key={r} value={r}>
                       {r}
                     </option>
                   ))}
-                  <option value="Custom">Custom reason</option>
+                  <option value="Custom">Other (Custom reason)</option>
                 </select>
                 {rejectReason === "Custom" && (
                   <input
                     value={customReason}
                     onChange={(e) => setCustomReason(e.target.value)}
-                    placeholder="Enter reason"
+                    placeholder="Enter custom rejection reason"
+                    className="w-full px-4 py-3 bg-[#151316] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm"
                   />
                 )}
               </div>
 
               {actionError && (
-                <p className="text-red-400 text-sm mb-4">{actionError}</p>
+                <p className="font-body text-[0.8rem] text-[#e05c5c] mb-6 font-semibold tracking-wide">⚠ {actionError}</p>
               )}
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 mb-10">
                 <Button
+                  variant="gold"
                   onClick={handleApprove}
                   disabled={actionLoading}
-                  className="flex-1"
+                  className="flex-1 py-4 text-[0.9rem]"
                 >
-                  {actionLoading ? "..." : "Approve (A)"}
+                  {actionLoading ? "Processing..." : "Approve Order (A)"}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleReject}
                   disabled={actionLoading}
-                  className="flex-1"
+                  className="flex-1 py-4 text-[0.9rem] border-[#e05c5c] text-[#e05c5c] hover:bg-[#e05c5c] hover:text-black focus:ring-[#e05c5c]/30"
                 >
-                  {actionLoading ? "..." : "Reject (R)"}
+                  {actionLoading ? "Processing..." : "Reject Order (R)"}
                 </Button>
               </div>
 
               {auditLog.length > 0 && (
-                <div className="mt-8 border-t border-gold/10 pt-6">
-                  <p className="text-xs uppercase tracking-widest text-text-muted mb-4">
-                    Audit Log
+                <div className="mt-12 border-t border-gold/10 pt-8">
+                  <p className="font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-6">
+                    Order Audit Log
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     {auditLog.map((entry, i) => (
-                      <p key={i} className="text-text-muted text-xs">
-                        {new Date(entry.createdAt).toLocaleString()} —{" "}
-                        {entry.action}
-                        {entry.adminName && ` by ${entry.adminName}`}
-                        {entry.details && `: ${entry.details}`}
-                      </p>
+                      <div key={i} className="flex gap-4 items-start">
+                        <div className="w-2 h-2 rounded-full bg-gold/50 mt-1.5" />
+                        <div>
+                          <p className="font-body text-[0.85rem] text-text-primary">
+                            <span className="font-bold text-gold">{entry.action.toUpperCase()}</span>
+                            {entry.adminName && <span className="text-text-muted"> by {entry.adminName}</span>}
+                          </p>
+                          {entry.details && <p className="font-body text-[0.8rem] text-text-muted mt-0.5">{entry.details}</p>}
+                          <p className="font-mono text-[0.65rem] text-text-dim mt-1">{new Date(entry.createdAt).toLocaleString()}</p>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -621,12 +600,12 @@ function InfoBlock({
   highlight?: boolean;
 }) {
   return (
-    <div>
-      <p className="text-xs uppercase tracking-widest text-text-muted mb-1">
+    <div className="bg-[#151316] p-4 border border-gold/10 rounded-sm">
+      <p className="font-body text-[0.65rem] uppercase tracking-[0.15em] text-gold-muted mb-1.5">
         {label}
       </p>
       <p
-        className={`text-sm ${highlight ? "text-gold font-display text-lg" : "text-text-primary"}`}
+        className={`font-body ${highlight ? "text-gold font-mono text-[1.1rem] font-bold" : "text-text-primary text-[0.95rem]"}`}
       >
         {value}
       </p>

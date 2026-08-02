@@ -78,6 +78,13 @@ export async function createCashfreeOrder(
   };
 }
 
+/** Fetch an order's status from Cashfree by its orderId. */
+export async function fetchCashfreeOrder(orderId: string) {
+  const client = createClient();
+  const response = await client.PGFetchOrder(orderId);
+  return response.data;
+}
+
 /**
  * Verify an incoming Cashfree webhook signature.
  * rawBody must be the raw request body string (not parsed JSON).
