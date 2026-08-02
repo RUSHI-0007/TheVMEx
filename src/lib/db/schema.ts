@@ -1,6 +1,6 @@
-import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, real, index } from "drizzle-orm/pg-core";
 
-export const orders = sqliteTable(
+export const orders = pgTable(
   "orders",
   {
     id: text("id").primaryKey(),
@@ -14,23 +14,15 @@ export const orders = sqliteTable(
     email: text("email").notNull(),
     college: text("college").notNull(),
     year: text("year").notNull(),
-    utr: text("utr"),
+    utr: text("utr").unique(),
     screenshotPath: text("screenshot_path"),
     cashfreeOrderId: text("cashfree_order_id"),
-    paymentMode: text("payment_mode", {
-      enum: ["upi_manual", "cashfree"],
-    })
+    paymentMode: text("payment_mode")
+      .$type<"upi_manual" | "cashfree">()
       .notNull()
       .default("upi_manual"),
-    status: text("status", {
-      enum: [
-        "draft",
-        "pending_verification",
-        "approved",
-        "rejected",
-        "expired",
-      ],
-    })
+    status: text("status")
+      .$type<"draft" | "pending_verification" | "approved" | "rejected" | "expired">()
       .notNull()
       .default("draft"),
     expiresAt: text("expires_at"),
@@ -53,7 +45,7 @@ export const orders = sqliteTable(
   ]
 );
 
-export const orderAuditLog = sqliteTable("order_audit_log", {
+export const orderAuditLog = pgTable("order_audit_log", {
   id: text("id").primaryKey(),
   orderId: text("order_id").notNull(),
   action: text("action").notNull(),
