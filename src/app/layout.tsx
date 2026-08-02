@@ -74,7 +74,7 @@ export default function RootLayout({
         {/* Analytics slot — add GA/Plausible script here */}
         {/* <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX" /> */}
       </head>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased overflow-x-hidden w-full">{children}</body>
     </html>
   );
 }

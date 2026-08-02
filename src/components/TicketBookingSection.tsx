@@ -174,11 +174,13 @@ function TierSelectionStep({
           </p>
           <div className="flex items-center gap-4">
             <button
+              type="button"
               onClick={() => onQty(Math.max(1, quantity - 1))}
               className="w-9 h-9 border border-gold/25 bg-transparent text-gold text-lg cursor-pointer flex items-center justify-center"
             >−</button>
             <span className="font-display text-[1.25rem] font-bold text-text-primary min-w-[2rem] text-center">{quantity}</span>
             <button
+              type="button"
               onClick={() => onQty(Math.min(10, quantity + 1))}
               className="w-9 h-9 border border-gold/25 bg-transparent text-gold text-lg cursor-pointer flex items-center justify-center"
             >+</button>
@@ -196,6 +198,7 @@ function TierSelectionStep({
       )}
 
       <button
+        type="button"
         onClick={onNext}
         disabled={!selected}
         className={`relative inline-flex items-center justify-center gap-2 px-8 py-3 font-body text-[0.8125rem] font-semibold tracking-wider uppercase text-[#0b0b0d] bg-gold border border-gold transition-colors duration-400 whitespace-nowrap ${selected ? "opacity-100 hover:bg-gold-muted hover:border-gold-muted cursor-pointer" : "opacity-40 cursor-not-allowed"}`}

@@ -30,7 +30,7 @@ export function Button({
   }
 
   return (
-    <button className={classes} {...props}>
+    <button type={props.type || "button"} className={classes} {...props}>
       {children}
     </button>
   );

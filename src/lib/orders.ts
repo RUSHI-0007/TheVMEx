@@ -12,7 +12,7 @@ import {
   generateTicketId,
   getTicketTier,
 } from "./utils";
-
+import { sendTicketEmail } from "./email";
 export async function getSoldCount(tierId: TicketTierId): Promise<number> {
   const db = getDb();
   const result = await db
@@ -281,7 +281,11 @@ export async function approveByCashfree(orderId: string): Promise<ReturnType<typ
   }
 
   await logAudit(orderId, "approved", "cashfree", "Cashfree Gateway", `Ticket: ${ticketId}`);
-  return getOrderByOrderId(orderId);
+  const approvedOrder = await getOrderByOrderId(orderId);
+  if (approvedOrder) {
+    sendTicketEmail(approvedOrder).catch(console.error);
+  }
+  return approvedOrder;
 }
 
 export async function lookupOrder(query: string) {
@@ -407,7 +411,11 @@ export async function approveOrder(
   }
 
   await logAudit(orderId, "approved", adminId, adminName, `Ticket: ${ticketId}`);
-  return getOrderByOrderId(orderId);
+  const approvedOrder = await getOrderByOrderId(orderId);
+  if (approvedOrder) {
+    sendTicketEmail(approvedOrder).catch(console.error);
+  }
+  return approvedOrder;
 }
 
 export async function rejectOrder(
