@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ADMIN_TEAM_MEMBERS as ADMIN_TEAM } from "@/lib/config";
-import { Button } from "@/components/ui/Button";
 import { formatPayableAmount } from "@/lib/utils";
 import { OrderCountdown } from "@/components/ui/CountdownTimer";
-import { TicketScanner } from "@/components/admin/TicketScanner";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface AdminOrder {
   orderId: string;
   attendeeName: string;
@@ -54,39 +53,609 @@ const REJECT_REASONS = [
   "Payment not received",
 ];
 
-export default function AdminPage() {
-  const [session, setSession] = useState<AdminSession | null>(null);
-  const [loginForm, setLoginForm] = useState({ name: "", pin: "" });
-  const [loginError, setLoginError] = useState("");
-  const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
-  const [auditLog, setAuditLog] = useState<
-    Array<{ action: string; adminName: string | null; details: string | null; createdAt: string }>
-  >([]);
-  const [actionError, setActionError] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+type Screen = "dashboard" | "queue" | "detail" | "attendees";
+
+// ─── Shared back button ───────────────────────────────────────────────────────
+function BackButton({ onClick, label = "Back" }: { onClick: () => void; label?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-2 font-body text-[0.75rem] tracking-[0.12em] uppercase text-text-muted hover:text-gold transition-colors duration-200 py-1"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {label}
+    </button>
+  );
+}
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+  return (
+    <div className="bg-[#0b0b0d] border border-gold/15 p-4 flex flex-col gap-1">
+      <p className="font-body text-[0.6rem] uppercase tracking-[0.18em] text-text-dim">{label}</p>
+      <p className={`font-display text-[1.6rem] font-bold tabular-nums leading-none ${accent ? "text-gold" : "text-text-primary"}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// ─── Login screen ─────────────────────────────────────────────────────────────
+function LoginScreen({ onLogin }: { onLogin: (session: AdminSession) => void }) {
+  const [form, setForm] = useState({ name: "", pin: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Login failed");
+      onLogin(data.admin);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0b0b0d] flex items-center justify-center px-6">
+      <form onSubmit={handleSubmit} className="w-full max-w-[360px]">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <p className="font-body text-[0.65rem] tracking-[0.25em] uppercase text-text-dim mb-3">TheVMEx</p>
+          <h1 className="font-display text-[2rem] font-bold text-text-primary">Admin Panel</h1>
+          <div className="w-12 h-px bg-gold/40 mx-auto mt-3" />
+        </div>
+
+        <div className="space-y-5 mb-8">
+          <div>
+            <label className="block font-body text-[0.7rem] font-semibold tracking-[0.15em] uppercase text-gold-muted mb-2">
+              Name
+            </label>
+            <select
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+              className="w-full px-4 py-3.5 bg-[#151316] border border-gold/20 text-text-primary font-body text-[0.95rem] outline-none focus:border-gold/60 transition-colors appearance-none"
+            >
+              <option value="">Select your name</option>
+              {ADMIN_TEAM.map((m) => (
+                <option key={m.id} value={m.name}>{m.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block font-body text-[0.7rem] font-semibold tracking-[0.15em] uppercase text-gold-muted mb-2">
+              PIN
+            </label>
+            <input
+              type="password"
+              value={form.pin}
+              onChange={(e) => setForm({ ...form, pin: e.target.value })}
+              required
+              placeholder="••••••"
+              className="w-full px-4 py-3.5 bg-[#151316] border border-gold/20 text-text-primary font-body text-[0.95rem] outline-none focus:border-gold/60 transition-colors"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p className="font-body text-[0.78rem] text-[#e05c5c] mb-5 text-center tracking-wide">{error}</p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 bg-gold text-[#0b0b0d] font-body font-bold text-[0.85rem] tracking-[0.15em] uppercase transition-colors hover:bg-gold/90 disabled:opacity-50"
+        >
+          {loading ? "Verifying..." : "Enter Dashboard"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+// ─── Dashboard home screen ────────────────────────────────────────────────────
+function DashboardScreen({
+  session,
+  stats,
+  pendingCount,
+  onNavigate,
+  onLogout,
+  exporting,
+  onExport,
+}: {
+  session: AdminSession;
+  stats: DbStats | null;
+  pendingCount: number;
+  onNavigate: (screen: Screen) => void;
+  onLogout: () => void;
+  exporting: boolean;
+  onExport: () => void;
+}) {
+  const router = useRouter();
+  return (
+    <div className="min-h-screen bg-[#0b0b0d] flex flex-col">
+      {/* Top bar */}
+      <header className="px-5 py-4 border-b border-gold/10 flex items-center justify-between">
+        <div>
+          <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim">TheVMEx Admin</p>
+          <p className="font-display text-[1.1rem] font-bold text-text-primary mt-0.5">{session.name}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onLogout}
+          className="font-body text-[0.7rem] tracking-[0.12em] uppercase text-text-dim hover:text-[#e05c5c] transition-colors border border-gold/15 px-3 py-2"
+        >
+          Sign Out
+        </button>
+      </header>
+
+      <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        {/* Stats grid */}
+        {stats && (
+          <div>
+            <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim mb-3">Live Statistics</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <StatCard label="Total Bookings" value={stats.total} />
+              <StatCard label="Confirmed" value={stats.approved} accent />
+              <StatCard label="Pending Review" value={stats.pending} />
+              <StatCard label="Revenue" value={`₹${Number(stats.totalRevenue ?? 0).toLocaleString("en-IN")}`} accent />
+            </div>
+          </div>
+        )}
+
+        {/* Primary actions */}
+        <div>
+          <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim mb-3">Actions</p>
+          <div className="space-y-2.5">
+            {/* Verification Queue */}
+            <button
+              type="button"
+              onClick={() => onNavigate("queue")}
+              className="w-full flex items-center justify-between px-5 py-5 bg-[#151316] border border-gold/20 hover:border-gold/50 hover:bg-[#1a1720] transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M2 5h14M2 9h14M2 13h8" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-body text-[0.9rem] font-semibold text-text-primary">Verification Queue</p>
+                  <p className="font-body text-[0.72rem] text-text-muted mt-0.5">Review pending payments</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {pendingCount > 0 && (
+                  <span className="w-6 h-6 rounded-full bg-gold text-[#0b0b0d] font-body font-bold text-[0.7rem] flex items-center justify-center">
+                    {pendingCount}
+                  </span>
+                )}
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 12l4-4-4-4" stroke="#9a948c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Scanner */}
+            <button
+              type="button"
+              onClick={() => router.push("/admin/scanner")}
+              className="w-full flex items-center justify-between px-5 py-5 bg-[#151316] border border-gold/20 hover:border-gold/50 hover:bg-[#1a1720] transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M2 2h5v5H2zM11 2h5v5h-5zM2 11h5v5H2z" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" />
+                    <rect x="12" y="12" width="2" height="2" fill="#d4af37" />
+                    <rect x="15" y="12" width="2" height="2" fill="#d4af37" />
+                    <rect x="12" y="15" width="2" height="2" fill="#d4af37" />
+                    <rect x="15" y="15" width="2" height="2" fill="#d4af37" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-body text-[0.9rem] font-semibold text-text-primary">Ticket Scanner</p>
+                  <p className="font-body text-[0.72rem] text-text-muted mt-0.5">Scan QR codes at entry gate</p>
+                </div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 12l4-4-4-4" stroke="#9a948c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {/* Guest list / export */}
+            <button
+              type="button"
+              onClick={() => onNavigate("attendees")}
+              className="w-full flex items-center justify-between px-5 py-5 bg-[#151316] border border-gold/20 hover:border-gold/50 hover:bg-[#1a1720] transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <circle cx="7" cy="5" r="3" stroke="#d4af37" strokeWidth="1.5" />
+                    <path d="M1 16c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M13 8l2 2 3-3" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-body text-[0.9rem] font-semibold text-text-primary">Guest List</p>
+                  <p className="font-body text-[0.72rem] text-text-muted mt-0.5">
+                    {stats ? `${stats.approved} confirmed attendees` : "View & export attendees"}
+                  </p>
+                </div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 12l4-4-4-4" stroke="#9a948c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Queue list screen ─────────────────────────────────────────────────────────
+function QueueScreen({
+  orders,
+  session,
+  onSelect,
+  onBack,
+}: {
+  orders: AdminOrder[];
+  session: AdminSession;
+  onSelect: (order: AdminOrder) => void;
+  onBack: () => void;
+}) {
+  const [filter, setFilter] = useState<"all" | "mine">("all");
+  const filtered = filter === "mine" ? orders.filter((o) => o.claimedBy === session.id) : orders;
+
+  return (
+    <div className="min-h-screen bg-[#0b0b0d] flex flex-col">
+      <header className="px-5 py-4 border-b border-gold/10">
+        <BackButton onClick={onBack} />
+        <div className="flex items-center justify-between mt-3">
+          <h1 className="font-display text-[1.3rem] font-bold text-text-primary">Verification Queue</h1>
+          <span className="font-body text-[0.7rem] bg-gold/10 border border-gold/20 text-gold px-3 py-1">
+            {orders.length} pending
+          </span>
+        </div>
+      </header>
+
+      {/* Filter tabs */}
+      <div className="flex border-b border-gold/10 bg-[#0b0b0d]">
+        {(["all", "mine"] as const).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`flex-1 py-3 font-body text-[0.72rem] tracking-[0.12em] uppercase transition-colors ${
+              filter === f
+                ? "text-gold border-b-2 border-gold bg-gold/5"
+                : "text-text-dim hover:text-text-muted"
+            }`}
+          >
+            {f === "all" ? `All (${orders.length})` : `Mine`}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 px-6 text-center">
+            <div className="w-10 h-px bg-gold/20 mb-4" />
+            <p className="font-body text-[0.8rem] tracking-[0.15em] uppercase text-text-dim">Queue is empty</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gold/[0.07]">
+            {filtered.map((order) => (
+              <button
+                key={order.orderId}
+                type="button"
+                onClick={() => onSelect(order)}
+                className="w-full text-left px-5 py-4 hover:bg-[#151316] transition-colors duration-150 active:bg-[#1a1720]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-[1.2rem] font-bold text-gold tabular-nums">
+                      {formatPayableAmount(order.payableAmount)}
+                    </p>
+                    <p className="font-body text-[0.9rem] font-semibold text-text-primary mt-0.5 truncate">
+                      {order.attendeeName}
+                    </p>
+                    <p className="font-body text-[0.72rem] text-text-muted mt-0.5">
+                      {order.tierName} × {order.quantity}
+                    </p>
+                    {order.expiresAt && (
+                      <p className="font-body text-[0.68rem] text-text-dim mt-1 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gold/60 animate-pulse" />
+                        Expires in <OrderCountdown expiresAt={order.expiresAt} />
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {order.claimedByName && order.claimedBy !== session.id && (
+                      <span className="font-body text-[0.6rem] uppercase tracking-wider px-2 py-1 bg-[#2a1f0e] text-[#c9813a] border border-[#c9813a]/20">
+                        {order.claimedByName}
+                      </span>
+                    )}
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-30 mt-1">
+                      <path d="M5 10.5l3.5-3.5L5 3.5" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Order detail screen ───────────────────────────────────────────────────────
+function OrderDetailScreen({
+  order,
+  onBack,
+  onApprove,
+  onReject,
+  loading,
+  error,
+}: {
+  order: AdminOrder;
+  onBack: () => void;
+  onApprove: () => void;
+  onReject: (reason: string) => void;
+  loading: boolean;
+  error: string;
+}) {
+  const [showRejectSheet, setShowRejectSheet] = useState(false);
   const [rejectReason, setRejectReason] = useState(REJECT_REASONS[0]);
   const [customReason, setCustomReason] = useState("");
-  const [filter, setFilter] = useState<"all" | "mine">("all");
-  const [view, setView] = useState<"queue" | "attendees" | "scanner">("queue");
-  const [stats, setStats] = useState<DbStats | null>(null);
-  const [exportStatus, setExportStatus] = useState<"approved" | "all">("approved");
+
+  const handleRejectConfirm = () => {
+    const reason = rejectReason === "Custom" ? customReason.trim() : rejectReason;
+    if (!reason) return;
+    onReject(reason);
+    setShowRejectSheet(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#151316] flex flex-col">
+      <header className="px-5 py-4 border-b border-gold/10 bg-[#0b0b0d]">
+        <BackButton onClick={onBack} label="Back to Queue" />
+      </header>
+
+      <div className="flex-1 overflow-y-auto pb-32">
+        {/* Amount hero */}
+        <div className="bg-[#0b0b0d] border-b border-gold/10 px-5 py-8 text-center">
+          <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim mb-2">
+            Verify this exact amount in UPI history
+          </p>
+          <p className="font-display text-[3.5rem] font-bold text-gold tabular-nums leading-none">
+            {formatPayableAmount(order.payableAmount)}
+          </p>
+        </div>
+
+        {/* Key info */}
+        <div className="px-5 py-5 space-y-3">
+          <Row label="Guest Name" value={order.attendeeName} large />
+          <Row label="Phone" value={order.phone} />
+          <Row label="UTR Number" value={order.utr ?? "Not submitted"} highlight />
+          <Row label="Order ID" value={order.orderId} mono />
+          <Row label="Tier" value={`${order.tierName} × ${order.quantity}`} />
+          <Row label="College" value={order.college} />
+          <Row label="Year" value={order.year} />
+          <Row label="Email" value={order.email} />
+        </div>
+
+        {/* Screenshot */}
+        {order.screenshotPath && (
+          <div className="px-5 pb-5">
+            <p className="font-body text-[0.6rem] tracking-[0.18em] uppercase text-text-dim mb-3">
+              Payment Screenshot
+            </p>
+            <img
+              src={order.screenshotPath}
+              alt="Payment screenshot"
+              className="w-full max-h-[60vh] object-contain border border-gold/10"
+            />
+          </div>
+        )}
+
+        {error && (
+          <div className="mx-5 mb-4 px-4 py-3 bg-[#e05c5c]/10 border border-[#e05c5c]/30">
+            <p className="font-body text-[0.8rem] text-[#e05c5c]">{error}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Fixed action bar at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0b0b0d] border-t border-gold/10 p-4 grid grid-cols-2 gap-3 safe-area-inset-bottom">
+        <button
+          type="button"
+          onClick={() => setShowRejectSheet(true)}
+          disabled={loading}
+          className="py-4 border border-[#e05c5c]/50 text-[#e05c5c] font-body font-semibold text-[0.82rem] tracking-[0.1em] uppercase hover:bg-[#e05c5c]/10 transition-colors disabled:opacity-40"
+        >
+          Reject
+        </button>
+        <button
+          type="button"
+          onClick={onApprove}
+          disabled={loading}
+          className="py-4 bg-gold text-[#0b0b0d] font-body font-bold text-[0.82rem] tracking-[0.1em] uppercase hover:bg-gold/90 transition-colors disabled:opacity-40"
+        >
+          {loading ? "Processing..." : "Approve"}
+        </button>
+      </div>
+
+      {/* Reject bottom sheet */}
+      {showRejectSheet && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowRejectSheet(false)}
+          />
+          {/* Sheet */}
+          <div className="relative bg-[#151316] border-t border-gold/20 rounded-t-xl p-6 pb-10">
+            <div className="w-10 h-1 bg-gold/20 rounded-full mx-auto mb-6" />
+            <p className="font-body text-[0.7rem] tracking-[0.18em] uppercase text-text-dim mb-4">
+              Select Rejection Reason
+            </p>
+            <div className="space-y-2 mb-5">
+              {[...REJECT_REASONS, "Custom"].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRejectReason(r)}
+                  className={`w-full text-left px-4 py-3.5 font-body text-[0.88rem] border transition-colors ${
+                    rejectReason === r
+                      ? "border-[#e05c5c]/60 bg-[#e05c5c]/10 text-[#e05c5c]"
+                      : "border-gold/10 text-text-muted hover:border-gold/30 hover:text-text-primary"
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            {rejectReason === "Custom" && (
+              <input
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
+                placeholder="Type reason..."
+                className="w-full px-4 py-3 bg-[#0b0b0d] border border-gold/20 text-text-primary font-body text-[0.9rem] outline-none mb-4 focus:border-gold/50"
+              />
+            )}
+            <button
+              type="button"
+              onClick={handleRejectConfirm}
+              disabled={loading || (rejectReason === "Custom" && !customReason.trim())}
+              className="w-full py-4 bg-[#e05c5c] text-white font-body font-bold text-[0.82rem] tracking-[0.12em] uppercase hover:bg-[#c94a4a] transition-colors disabled:opacity-40"
+            >
+              Confirm Rejection
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Row helper ───────────────────────────────────────────────────────────────
+function Row({
+  label,
+  value,
+  highlight,
+  large,
+  mono,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+  large?: boolean;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-gold/[0.07]">
+      <p className="font-body text-[0.68rem] tracking-[0.15em] uppercase text-text-dim shrink-0 pt-0.5">{label}</p>
+      <p
+        className={`text-right font-body break-all ${
+          highlight
+            ? "text-gold font-bold text-[1rem] font-mono"
+            : large
+            ? "text-text-primary font-semibold text-[0.95rem]"
+            : mono
+            ? "text-text-muted text-[0.78rem] font-mono"
+            : "text-text-primary text-[0.88rem]"
+        }`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// ─── Attendees / export screen ─────────────────────────────────────────────────
+function AttendeesScreen({
+  stats,
+  onBack,
+}: {
+  stats: DbStats | null;
+  onBack: () => void;
+}) {
   const [exporting, setExporting] = useState(false);
+
+  const handleExport = () => {
+    setExporting(true);
+    const link = document.createElement("a");
+    link.href = "/api/admin/export?status=approved";
+    link.click();
+    setTimeout(() => setExporting(false), 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0b0b0d] flex flex-col">
+      <header className="px-5 py-4 border-b border-gold/10">
+        <BackButton onClick={onBack} />
+        <h1 className="font-display text-[1.3rem] font-bold text-text-primary mt-3">Guest List</h1>
+      </header>
+      <div className="flex-1 p-5">
+        <div className="border border-gold/20 bg-[#151316] p-8 text-center mb-6">
+          <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim mb-3">Confirmed Tickets</p>
+          <p className="font-display text-[4rem] font-bold text-gold tabular-nums leading-none">
+            {stats?.approved ?? "—"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={exporting}
+          className="w-full py-4 bg-gold text-[#0b0b0d] font-body font-bold text-[0.85rem] tracking-[0.15em] uppercase hover:bg-gold/90 transition-colors disabled:opacity-50"
+        >
+          {exporting ? "Preparing CSV..." : "Download Guest List (CSV)"}
+        </button>
+        <p className="font-body text-[0.7rem] text-text-dim text-center mt-4">
+          Exports all confirmed attendees with name, phone, ticket ID, and college.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Root page ─────────────────────────────────────────────────────────────────
+export default function AdminPage() {
+  const [session, setSession] = useState<AdminSession | null>(null);
+  const [screen, setScreen] = useState<Screen>("dashboard");
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [stats, setStats] = useState<DbStats | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState("");
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/orders");
-      if (res.status === 401) {
-        setSession(null);
-        return;
-      }
+      if (res.status === 401) { setSession(null); return; }
       const data = await res.json();
       setSession(data.admin);
       setOrders(data.orders ?? []);
-    } catch {
-      /* polling failure — silent retry */
-    }
+    } catch { /* silent polling failure */ }
   }, []);
 
   const fetchStats = useCallback(async () => {
@@ -104,63 +673,23 @@ export default function AdminPage() {
       fetchOrders();
       fetchStats();
     }, 5000);
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [fetchOrders, fetchStats]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginForm),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Login failed");
-      setSession(data.admin);
-      fetchOrders();
-    } catch (e) {
-      setLoginError(e instanceof Error ? e.message : "Login failed");
-    }
-  };
 
   const handleLogout = async () => {
     await fetch("/api/admin/login", { method: "DELETE" });
     setSession(null);
-    setSelectedOrder(null);
+    setScreen("dashboard");
   };
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const url = `/api/admin/export?status=${exportStatus}`;
-      const link = document.createElement("a");
-      link.href = url;
-      link.click();
-    } finally {
-      setTimeout(() => setExporting(false), 1500);
-    }
-  };
-
-  const openOrder = async (order: AdminOrder) => {
+  const handleSelectOrder = async (order: AdminOrder) => {
     setActionError("");
     setSelectedOrder(order);
-
+    setScreen("detail");
     try {
-      await fetch(`/api/admin/orders/${order.orderId}/claim`, {
-        method: "POST",
-      });
+      await fetch(`/api/admin/orders/${order.orderId}/claim`, { method: "POST" });
       fetchOrders();
-
-      const res = await fetch(`/api/admin/orders/${order.orderId}`);
-      const data = await res.json();
-      if (data.auditLog) setAuditLog(data.auditLog);
-    } catch {
-      /* claim optional */
-    }
+    } catch { /* claim optional */ }
   };
 
   const handleApprove = async () => {
@@ -168,14 +697,13 @@ export default function AdminPage() {
     setActionLoading(true);
     setActionError("");
     try {
-      const res = await fetch(
-        `/api/admin/orders/${selectedOrder.orderId}/approve`,
-        { method: "POST" }
-      );
+      const res = await fetch(`/api/admin/orders/${selectedOrder.orderId}/approve`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Approve failed");
       setSelectedOrder(null);
+      setScreen("queue");
       fetchOrders();
+      fetchStats();
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Approve failed");
     } finally {
@@ -183,30 +711,22 @@ export default function AdminPage() {
     }
   };
 
-  const handleReject = async () => {
+  const handleReject = async (reason: string) => {
     if (!selectedOrder) return;
-    const reason =
-      rejectReason === "Custom" ? customReason.trim() : rejectReason;
-    if (!reason) {
-      setActionError("Please provide a rejection reason");
-      return;
-    }
-
     setActionLoading(true);
     setActionError("");
     try {
-      const res = await fetch(
-        `/api/admin/orders/${selectedOrder.orderId}/reject`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reason }),
-        }
-      );
+      const res = await fetch(`/api/admin/orders/${selectedOrder.orderId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Reject failed");
       setSelectedOrder(null);
+      setScreen("queue");
       fetchOrders();
+      fetchStats();
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Reject failed");
     } finally {
@@ -214,401 +734,52 @@ export default function AdminPage() {
     }
   };
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!selectedOrder) return;
-      if (e.key === "a" && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        handleApprove();
-      }
-      if (e.key === "r" && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        handleReject();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedOrder]);
-
   if (!session) {
+    return <LoginScreen onLogin={(s) => { setSession(s); fetchOrders(); }} />;
+  }
+
+  if (screen === "queue") {
     return (
-      <div className="min-h-screen bg-[#151316] flex items-center justify-center px-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at center, #d4af37 0%, transparent 40%)" }} />
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-sm bg-[#0b0b0d]/90 backdrop-blur-md border border-gold/40 p-10 shadow-[0_0_30px_rgba(212,175,55,0.1)] relative z-10"
-        >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gold/50"></div>
-          <h1 className="font-display text-[2.2rem] font-bold text-text-primary mb-8 text-center">
-            Admin <span className="text-gold italic">Login</span>
-          </h1>
-          <div className="space-y-6">
-            <div>
-              <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2">
-                Team Member
-              </label>
-              <select
-                value={loginForm.name}
-                onChange={(e) =>
-                  setLoginForm({ ...loginForm, name: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-[#0b0b0d] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50 appearance-none"
-              >
-                <option value="">Select your name</option>
-                {ADMIN_TEAM.map((m) => (
-                  <option key={m.id} value={m.name}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2">
-                Admin Password
-              </label>
-              <input
-                type="password"
-                value={loginForm.pin}
-                onChange={(e) =>
-                  setLoginForm({ ...loginForm, pin: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-[#0b0b0d]/50 border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"
-              />
-            </div>
-          </div>
-          {loginError && (
-            <p className="font-body text-[0.75rem] text-[#e05c5c] mt-4 font-semibold tracking-wide text-center">⚠ {loginError}</p>
-          )}
-          <div className="mt-8">
-            <Button type="submit" variant="gold" className="w-full justify-center">
-              Enter Dashboard →
-            </Button>
-          </div>
-        </form>
-      </div>
+      <QueueScreen
+        orders={orders}
+        session={session}
+        onSelect={handleSelectOrder}
+        onBack={() => setScreen("dashboard")}
+      />
     );
   }
 
-  const filteredOrders =
-    filter === "mine"
-      ? orders.filter((o) => o.claimedBy === session.id)
-      : orders;
+  if (screen === "detail" && selectedOrder) {
+    return (
+      <OrderDetailScreen
+        order={selectedOrder}
+        onBack={() => { setSelectedOrder(null); setScreen("queue"); }}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        loading={actionLoading}
+        error={actionError}
+      />
+    );
+  }
+
+  if (screen === "attendees") {
+    return (
+      <AttendeesScreen
+        stats={stats}
+        onBack={() => setScreen("dashboard")}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#151316] flex flex-col text-text-primary selection:bg-gold/30 selection:text-gold">
-      <header className="border-b border-gold/20 p-6 md:px-10 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#0b0b0d]">
-        <div>
-          <h1 className="font-display text-[1.8rem] font-bold tracking-wide">
-            Masquerade <span className="text-gold italic">Admin</span>
-          </h1>
-          <p className="font-body text-[0.8rem] text-text-muted mt-1">
-            Logged in as <strong className="text-gold">{session.name}</strong>
-          </p>
-        </div>
-
-        <div className="flex gap-4 items-center">
-          <Button variant="outline" onClick={handleLogout} className="text-xs py-2 px-4">
-            Logout
-          </Button>
-        </div>
-      </header>
-
-      <div className="bg-[#0b0b0d] border-b border-gold/10 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
-        {stats && (
-          <div className="flex gap-6 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-            {[
-              { label: "Total Bookings", value: stats.total },
-              { label: "Approved Tickets", value: stats.approved },
-              { label: "⏳ Pending", value: stats.pending },
-              { label: "Revenue", value: `₹${Number(stats.totalRevenue ?? 0).toLocaleString("en-IN")}` },
-            ].map((s) => (
-              <div key={s.label} className="min-w-fit">
-                <p className="font-body text-[0.65rem] uppercase tracking-[0.15em] text-text-muted mb-1">{s.label}</p>
-                <p className="font-display text-[1.4rem] font-bold text-gold">{s.value}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="flex gap-2 rounded-sm p-1 bg-[#151316] border border-gold/10">
-          <button
-            type="button"
-            onClick={() => setView("queue")}
-            className={`px-5 py-2 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
-              view === "queue" ? "bg-gold/10 text-gold font-bold" : "text-text-muted hover:text-text-primary hover:bg-white/5"
-            }`}
-          >
-            Verification Queue ({orders.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("attendees")}
-            className={`px-5 py-2 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
-              view === "attendees" ? "bg-gold/10 text-gold font-bold" : "text-text-muted hover:text-text-primary hover:bg-white/5"
-            }`}
-          >
-            All Attendees
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("scanner")}
-            className={`px-5 py-2 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
-              view === "scanner" ? "bg-gold/10 text-gold font-bold" : "text-text-muted hover:text-text-primary hover:bg-white/5"
-            }`}
-          >
-            📷 Scanner
-          </button>
-        </div>
-      </div>
-
-      {view === "scanner" ? (
-        <TicketScanner />
-      ) : view === "attendees" ? (
-        <div className="p-6 md:p-10 max-w-[1200px] mx-auto w-full">
-          <div className="mb-8 flex items-center justify-between flex-wrap gap-4 border-b border-gold/10 pb-6">
-            <div>
-              <h2 className="font-display text-[1.5rem] text-gold mb-1">Approved Attendees</h2>
-              <p className="font-body text-[0.8rem] text-text-muted max-w-[600px]">
-                These are the guests whose tickets have been successfully paid and verified. Download the CSV to see the full list with contact details and ticket IDs.
-              </p>
-            </div>
-            <Button variant="gold" onClick={handleExport} className="whitespace-nowrap">
-              Download CSV
-            </Button>
-          </div>
-          <div className="mt-8 border border-gold/20 bg-[#0b0b0d] p-10 text-center shadow-[0_0_20px_rgba(212,175,55,0.05)]">
-            <p className="font-display text-[3.5rem] text-gold mb-2 font-bold">{stats?.approved ?? "—"}</p>
-            <p className="font-body text-[0.85rem] uppercase tracking-[0.2em] text-gold-muted mb-4">Total Confirmed Tickets</p>
-            <p className="font-body text-[0.8rem] text-text-dim max-w-[400px] mx-auto">Click "Download CSV" to export the full verified guest list for the entry desk or marketing.</p>
-          </div>
-        </div>
-      ) : (
-      <div className="flex flex-col lg:flex-row min-h-[calc(100vh-140px)]">
-        <aside className="lg:w-[400px] border-r border-gold/10 p-6 overflow-y-auto bg-[#0b0b0d]/50">
-          <div className="flex gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setFilter("all")}
-              className={`flex-1 py-3 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
-                filter === "all"
-                  ? "bg-gold text-black font-bold"
-                  : "bg-[#151316] border border-gold/20 text-text-muted hover:border-gold/50 hover:text-gold-muted"
-              }`}
-            >
-              All ({orders.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter("mine")}
-              className={`flex-1 py-3 font-body text-[0.75rem] uppercase tracking-wider transition-colors rounded-sm ${
-                filter === "mine"
-                  ? "bg-gold text-black font-bold"
-                  : "bg-[#151316] border border-gold/20 text-text-muted hover:border-gold/50 hover:text-gold-muted"
-              }`}
-            >
-              Mine
-            </button>
-          </div>
-
-          {filteredOrders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 opacity-50">
-              <p className="font-body text-[0.8rem] text-gold uppercase tracking-[0.15em]">
-                Queue Empty
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredOrders.map((order) => (
-                <button
-                  key={order.orderId}
-                  type="button"
-                  onClick={() => openOrder(order)}
-                  className={`w-full text-left p-5 border transition-all duration-300 rounded-sm relative overflow-hidden group ${
-                    selectedOrder?.orderId === order.orderId
-                      ? "border-gold bg-[#151316] shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                      : "border-gold/10 bg-[#0b0b0d] hover:border-gold/40 hover:bg-[#151316]"
-                  }`}
-                >
-                  {selectedOrder?.orderId === order.orderId && <div className="absolute top-0 left-0 w-1 h-full bg-gold" />}
-                  <div className="flex justify-between items-start">
-                    <p className="font-display text-[1.4rem] font-bold text-gold tabular-nums">
-                      {formatPayableAmount(order.payableAmount)}
-                    </p>
-                    {order.claimedByName &&
-                      order.claimedBy !== session.id && (
-                        <span className="font-body text-[0.65rem] uppercase tracking-wider px-2 py-1 bg-bronze/10 text-bronze rounded-sm">
-                          Claimed: {order.claimedByName}
-                        </span>
-                      )}
-                  </div>
-                  <p className="font-body text-[0.95rem] text-text-primary mt-2 font-semibold">
-                    {order.attendeeName}
-                  </p>
-                  <p className="font-body text-[0.75rem] text-text-muted mt-1 tracking-wide">
-                    {order.orderId} · {order.tierName} × {order.quantity}
-                  </p>
-                  {order.expiresAt && (
-                    <p className="font-body text-[0.7rem] text-text-dim mt-2 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
-                      Expires in <OrderCountdown expiresAt={order.expiresAt} />
-                    </p>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </aside>
-
-        <main className="flex-1 p-6 md:p-10 overflow-y-auto bg-[#151316]">
-          {!selectedOrder ? (
-            <div className="flex items-center justify-center h-full opacity-50">
-              <p className="font-body text-[0.85rem] uppercase tracking-[0.2em] text-gold">
-                Select an order from the queue
-              </p>
-            </div>
-          ) : (
-            <div className="max-w-[700px] mx-auto">
-              <div className="bg-[#0b0b0d] border border-gold/40 p-8 mb-8 text-center shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gold/50"></div>
-                <p className="font-body text-[0.7rem] uppercase tracking-[0.2em] text-gold-muted mb-2">
-                  Match this exact amount in UPI history
-                </p>
-                <p className="font-display text-[4rem] font-bold text-gold tabular-nums">
-                  {formatPayableAmount(selectedOrder.payableAmount)}
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <InfoBlock label="Order ID" value={selectedOrder.orderId} />
-                <InfoBlock label="Guest" value={selectedOrder.attendeeName} />
-                <InfoBlock label="Phone" value={selectedOrder.phone} />
-                <InfoBlock label="Email" value={selectedOrder.email} />
-                <InfoBlock label="College" value={selectedOrder.college} />
-                <InfoBlock label="Year" value={selectedOrder.year} />
-                <InfoBlock
-                  label="Tier"
-                  value={`${selectedOrder.tierName} × ${selectedOrder.quantity}`}
-                />
-                <InfoBlock
-                  label="UTR Number"
-                  value={selectedOrder.utr ?? "Not submitted"}
-                  highlight
-                />
-              </div>
-
-              {selectedOrder.screenshotPath && (
-                <div className="mb-8 p-6 bg-[#0b0b0d] border border-gold/20 rounded-sm">
-                  <p className="font-body text-[0.7rem] uppercase tracking-[0.15em] text-gold-muted mb-4">
-                    Payment Screenshot Evidence
-                  </p>
-                  <img
-                    src={selectedOrder.screenshotPath}
-                    alt="Payment screenshot"
-                    className="max-w-full rounded-sm max-h-[500px] object-contain border border-white/5"
-                  />
-                </div>
-              )}
-
-              <div className="mb-8 p-6 bg-[#0b0b0d] border border-gold/20 rounded-sm">
-                <p className="font-body text-[0.7rem] uppercase tracking-[0.15em] text-gold-muted mb-4">
-                  Rejection Reason (If Applicable)
-                </p>
-                <select
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#151316] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm mb-3 appearance-none"
-                >
-                  {REJECT_REASONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                  <option value="Custom">Other (Custom reason)</option>
-                </select>
-                {rejectReason === "Custom" && (
-                  <input
-                    value={customReason}
-                    onChange={(e) => setCustomReason(e.target.value)}
-                    placeholder="Enter custom rejection reason"
-                    className="w-full px-4 py-3 bg-[#151316] border border-gold/30 text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm"
-                  />
-                )}
-              </div>
-
-              {actionError && (
-                <p className="font-body text-[0.8rem] text-[#e05c5c] mb-6 font-semibold tracking-wide">⚠ {actionError}</p>
-              )}
-
-              <div className="flex gap-4 mb-10">
-                <Button
-                  variant="gold"
-                  onClick={handleApprove}
-                  disabled={actionLoading}
-                  className="flex-1 py-4 text-[0.9rem]"
-                >
-                  {actionLoading ? "Processing..." : "Approve Order (A)"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleReject}
-                  disabled={actionLoading}
-                  className="flex-1 py-4 text-[0.9rem] border-[#e05c5c] text-[#e05c5c] hover:bg-[#e05c5c] hover:text-black focus:ring-[#e05c5c]/30"
-                >
-                  {actionLoading ? "Processing..." : "Reject Order (R)"}
-                </Button>
-              </div>
-
-              {auditLog.length > 0 && (
-                <div className="mt-12 border-t border-gold/10 pt-8">
-                  <p className="font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-6">
-                    Order Audit Log
-                  </p>
-                  <div className="space-y-4">
-                    {auditLog.map((entry, i) => (
-                      <div key={i} className="flex gap-4 items-start">
-                        <div className="w-2 h-2 rounded-full bg-gold/50 mt-1.5" />
-                        <div>
-                          <p className="font-body text-[0.85rem] text-text-primary">
-                            <span className="font-bold text-gold">{entry.action.toUpperCase()}</span>
-                            {entry.adminName && <span className="text-text-muted"> by {entry.adminName}</span>}
-                          </p>
-                          {entry.details && <p className="font-body text-[0.8rem] text-text-muted mt-0.5">{entry.details}</p>}
-                          <p className="font-mono text-[0.65rem] text-text-dim mt-1">{new Date(entry.createdAt).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </main>
-      </div>
-      )}
-    </div>
-  );
-}
-
-function InfoBlock({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div className="bg-[#151316] p-4 border border-gold/10 rounded-sm">
-      <p className="font-body text-[0.65rem] uppercase tracking-[0.15em] text-gold-muted mb-1.5">
-        {label}
-      </p>
-      <p
-        className={`font-body ${highlight ? "text-gold font-mono text-[1.1rem] font-bold" : "text-text-primary text-[0.95rem]"}`}
-      >
-        {value}
-      </p>
-    </div>
+    <DashboardScreen
+      session={session}
+      stats={stats}
+      pendingCount={orders.length}
+      onNavigate={setScreen}
+      onLogout={handleLogout}
+      exporting={false}
+      onExport={() => {}}
+    />
   );
 }
