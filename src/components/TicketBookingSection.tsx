@@ -524,8 +524,15 @@ export default function TicketBookingSection() {
     fetchTiers();
   }, []);
 
-  // Scroll to top of section on every step change (critical for mobile UX)
+  // Track if this is the first render — skip scroll on initial mount
+  const isMounted = useRef(false);
+
+  // Scroll to top of section only when user navigates between steps (not on page load)
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     scrollToSection();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
