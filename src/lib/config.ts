@@ -127,9 +127,7 @@ export const FAQS = [
 // They are kept in ADMIN_CREDENTIALS env var (server-side only).
 // This array is used only for the client-side name dropdown in /admin.
 export const ADMIN_TEAM_MEMBERS = [
-  { id: "a1", name: "Rishi" },
-  { id: "a2", name: "Aditi" },
-  { id: "a3", name: "Dev" },
+  { id: "a1", name: "Manthan" },
 // ← Add names here; add matching credentials to ADMIN_CREDENTIALS env var
 ] as const;
 
