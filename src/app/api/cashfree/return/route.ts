@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     if (order.status === "approved") {
       // Already processed via webhook
-      return NextResponse.redirect(new URL(`/ticket?orderId=${orderId}`, request.url));
+      return NextResponse.redirect(new URL(`/ticket?orderId=${orderId}&success=true`, request.url));
     }
 
     // Verify status directly with Cashfree securely
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     
     if (cfOrder.order_status === "PAID") {
       await approveOrder(orderId, "system", "Cashfree Gateway");
-      return NextResponse.redirect(new URL(`/ticket?orderId=${orderId}`, request.url));
+      return NextResponse.redirect(new URL(`/ticket?orderId=${orderId}&success=true`, request.url));
     } else {
       // Not paid (failed or user abandoned)
       return NextResponse.redirect(new URL(`/#tickets`, request.url));
