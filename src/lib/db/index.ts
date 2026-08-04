@@ -3,12 +3,9 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import path from "path";
 import fs from "fs";
 import * as schema from './schema';
-import dotenv from "dotenv";
-
-// Load environment variables (mostly needed for local dev scripts)
-dotenv.config({ path: ".env.local" });
 
 const connectionString = process.env.DATABASE_URL;
+
 
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
