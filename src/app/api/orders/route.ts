@@ -111,11 +111,22 @@ export async function POST(request: NextRequest) {
     const upiQr = await generateQrDataUrl(upiUrl);
 
     return NextResponse.json({ order, upiQr, upiUrl, mode: "upi_manual" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("[POST /api/orders] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to create order";
-    const stack = error instanceof Error ? error.stack : undefined;
-    return NextResponse.json({ error: message, stack, raw: String(error) }, { status: 400 });
+    
+    // Extract Axios-specific details if it's an AxiosError (Cashfree SDK uses Axios)
+    const axiosData = error.isAxiosError ? {
+      url: error.config?.url,
+      responseData: error.response?.data,
+      status: error.response?.status,
+    } : undefined;
+
+    return NextResponse.json({ 
+      error: message, 
+      axiosDetails: axiosData,
+      raw: String(error) 
+    }, { status: 400 });
   }
 }
 
