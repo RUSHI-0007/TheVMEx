@@ -1,27 +1,33 @@
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import path from "path";
 import fs from "fs";
-import * as schema from './schema';
-
-const connectionString = process.env.DATABASE_URL;
-
+import * as schema from "./schema";
 
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let sqlClient: ReturnType<typeof postgres> | null = null;
 
 export function getDb() {
   if (dbInstance) return dbInstance;
 
+  const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error('DATABASE_URL is not set in the environment variables.');
+    throw new Error("DATABASE_URL is not set.");
   }
 
-  const sql = neon(connectionString);
-  dbInstance = drizzle(sql, { schema });
+  // Use connection_limit=1 for serverless — prevents exhausting the pool
+  sqlClient = postgres(connectionString, {
+    max: 1,
+    ssl: "require",
+    idle_timeout: 20,
+    connect_timeout: 10,
+  });
+
+  dbInstance = drizzle(sqlClient, { schema });
   return dbInstance;
 }
 
-// Keep the uploads directory logic for legacy screenshot support
+// Keep uploads dir for legacy screenshot support
 const IS_VERCEL = !!process.env.VERCEL;
 const DATA_DIR = IS_VERCEL
   ? "/tmp/masquerade-data"
