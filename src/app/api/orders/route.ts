@@ -112,10 +112,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ order, upiQr, upiUrl, mode: "upi_manual" });
   } catch (error) {
-    console.error(error);
-    const message =
-      error instanceof Error ? error.message : "Failed to create order";
-    return NextResponse.json({ error: message }, { status: 400 });
+    console.error("[POST /api/orders] Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to create order";
+    const stack = error instanceof Error ? error.stack : undefined;
+    return NextResponse.json({ error: message, stack, raw: String(error) }, { status: 400 });
   }
 }
 
