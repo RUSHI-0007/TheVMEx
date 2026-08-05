@@ -19,6 +19,7 @@ export function getDb() {
   sqlClient = postgres(connectionString, {
     max: 1,
     ssl: "require",
+    prepare: false, // Required for Supabase Transaction Pooler (PgBouncer/Supavisor)
     idle_timeout: 20,
     connect_timeout: 10,
   });
