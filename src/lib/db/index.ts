@@ -21,6 +21,11 @@ export function getDb() {
     connectionString = connectionString.replace(":6543/", ":5432/");
   }
 
+  // Strip sslmode=require from connection string because pg overrides rejectUnauthorized: false
+  if (connectionString.includes("?sslmode=require")) {
+    connectionString = connectionString.replace("?sslmode=require", "");
+  }
+
   // Use connection_limit=1 for serverless — prevents exhausting the pool
   if (!sqlPool) {
     sqlPool = new Pool({
