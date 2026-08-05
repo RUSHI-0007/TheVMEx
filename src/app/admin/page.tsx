@@ -309,14 +309,16 @@ function DashboardScreen({
 }
 
 // ─── Queue list screen ─────────────────────────────────────────────────────────
-function QueueScreen({
+function VerificationQueueScreen({
   orders,
   session,
+  loading,
   onSelect,
   onBack,
 }: {
   orders: AdminOrder[];
   session: AdminSession;
+  loading?: boolean;
   onSelect: (order: AdminOrder) => void;
   onBack: () => void;
 }) {
@@ -354,7 +356,12 @@ function QueueScreen({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-48 px-6 text-center">
+            <div className="w-10 h-px bg-gold/20 mb-4" />
+            <p className="font-body text-[0.8rem] tracking-[0.15em] uppercase text-text-dim animate-pulse">Loading Queue...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 px-6 text-center">
             <div className="w-10 h-px bg-gold/20 mb-4" />
             <p className="font-body text-[0.8rem] tracking-[0.15em] uppercase text-text-dim">Queue is empty</p>
@@ -740,9 +747,10 @@ export default function AdminPage() {
 
   if (screen === "queue") {
     return (
-      <QueueScreen
+      <VerificationQueueScreen
         orders={orders}
         session={session}
+        loading={actionLoading}
         onSelect={handleSelectOrder}
         onBack={() => setScreen("dashboard")}
       />
