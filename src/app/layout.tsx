@@ -2,47 +2,60 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://the-vmex.vercel.app"), 
-  title: "Masquerade Night 2026 — TheVMEx | Ft. Poltergeist · 21 Aug",
+  metadataBase: new URL("https://www.thevmex.in"), 
+  title: "TheVMEx | The VM Experience — Masquerade Night 2026",
   description:
-    "TheVMEx presents Masquerade Night — an evening of mystery, elegance, and live music. Ft. Poltergeist. Friday, 21st August 2026. Book your tickets now.",
+    "Welcome to The VM Experience (TheVMEx). Join us for Masquerade Night — an exclusive evening of mystery, elegance, and live music featuring Poltergeist. Friday, 21st August 2026.",
   keywords: [
-    "Masquerade Night",
     "TheVMEx",
+    "thevmex",
+    "The VM Experience",
+    "the vm experience",
+    "VMEx",
+    "Masquerade Night",
+    "Masquerade Night Pune",
     "college event",
     "live music",
     "Poltergeist",
     "2026",
     "ticket booking",
+    "exclusive events"
   ],
-  authors: [{ name: "TheVMEx" }],
+  authors: [{ name: "TheVMEx (The VM Experience)" }],
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://the-vmex.vercel.app",
-    siteName: "TheVMEx — Masquerade Night",
-    title: "Masquerade Night 2026 — TheVMEx | Ft. Poltergeist",
+    url: "https://www.thevmex.in",
+    siteName: "TheVMEx — The VM Experience",
+    title: "TheVMEx | The VM Experience — Masquerade Night 2026",
     description:
-      "An evening shrouded in mystery & elegance. Live music by Poltergeist. Friday, 21st August 2026. Book now.",
+      "Welcome to The VM Experience. An exclusive evening shrouded in mystery & elegance. Live music by Poltergeist. Friday, 21st August 2026. Book now.",
     images: [
       {
         url: "/og-image.jpg", // ← Add event poster here
         width: 1200,
         height: 630,
-        alt: "TheVMEx — Masquerade Night 2026",
+        alt: "TheVMEx — The VM Experience | Masquerade Night 2026",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Masquerade Night 2026 — TheVMEx",
+    title: "TheVMEx | The VM Experience",
     description:
-      "An evening shrouded in mystery & elegance. Live music by Poltergeist. 21 Aug 2026.",
+      "Welcome to The VM Experience. An exclusive evening shrouded in mystery & elegance. Live music by Poltergeist. 21 Aug 2026.",
     images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
