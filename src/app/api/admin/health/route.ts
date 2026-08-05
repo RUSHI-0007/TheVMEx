@@ -27,11 +27,13 @@ export async function GET() {
       stats: result[0],
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Health check error:", error, error?.stack);
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : "DB error",
+        error: error?.message || String(error),
+        details: error?.stack || "no stack",
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

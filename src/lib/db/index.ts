@@ -10,9 +10,15 @@ let sqlPool: Pool | null = null;
 export function getDb() {
   if (dbInstance) return dbInstance;
 
-  const connectionString = process.env.DATABASE_URL;
+  let connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set.");
+  }
+
+  // Force Session pooler (5432) instead of Transaction pooler (6543)
+  // because Transaction pooler does not support prepared statements with pg driver
+  if (connectionString.includes(":6543/")) {
+    connectionString = connectionString.replace(":6543/", ":5432/");
   }
 
   // Use connection_limit=1 for serverless — prevents exhausting the pool
