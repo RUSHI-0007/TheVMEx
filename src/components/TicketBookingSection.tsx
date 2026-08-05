@@ -521,7 +521,13 @@ export default function TicketBookingSection() {
       try {
         const res = await fetch("/api/tiers");
         const data = await res.json();
-        setTiers(data.tiers ?? []);
+        const loadedTiers = data.tiers ?? [];
+        setTiers(loadedTiers);
+        
+        // Auto-select if there's only one tier
+        if (loadedTiers.length === 1 && !tierId) {
+          setTierId(loadedTiers[0].id);
+        }
       } catch {
         setApiError("Failed to load ticket availability");
       } finally {
@@ -529,7 +535,7 @@ export default function TicketBookingSection() {
       }
     };
     fetchTiers();
-  }, []);
+  }, [tierId]);
 
   // Track if this is the first render — skip scroll on initial mount
   const isMounted = useRef(false);
