@@ -42,14 +42,13 @@ export async function POST(request: NextRequest) {
     }
 
     const ext = path.extname(screenshot.name) || ".jpg";
-    const filename = `${uuidv4()}${ext}`;
-    const uploadsDir = getUploadsDir();
-    const filepath = path.join(uploadsDir, filename);
-
+    const mimeType = screenshot.type || "image/jpeg";
     const buffer = Buffer.from(await screenshot.arrayBuffer());
-    fs.writeFileSync(filepath, buffer);
+    
+    // Store as Base64 Data URL directly in the database because Vercel /tmp is ephemeral
+    const base64 = buffer.toString('base64');
+    const relativePath = `data:${mimeType};base64,${base64}`;
 
-    const relativePath = `/api/uploads/${filename}`;
     const order = await submitPaymentProof(orderId, utr, relativePath);
 
     return NextResponse.json({ order });
