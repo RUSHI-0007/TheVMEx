@@ -45,14 +45,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
     type: "video",
     src: "/videos/video3.mp4",
     alt: "video3",
-    className: "col-span-1 row-span-1",
-  },
-  {
-    id: 6,
-    type: "image",
-    src: "https://images.unsplash.com/photo-1470229722913-7c092bb4ace4?q=80&w=800&auto=format&fit=crop",
-    alt: "Concert stage",
-    className: "col-span-1 row-span-1",
+    className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
   },
 ];
 
