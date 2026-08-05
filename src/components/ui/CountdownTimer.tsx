@@ -82,3 +82,27 @@ export function OrderCountdown({ expiresAt }: { expiresAt: string }) {
     <span className="font-display text-gold tabular-nums">{remaining}</span>
   );
 }
+
+export function EarlyBirdCountdown({ targetDate }: { targetDate: string }) {
+  const [time, setTime] = useState(getTimeLeft(targetDate));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(getTimeLeft(targetDate));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  if (time.expired) {
+    return <span className="text-red-500 font-semibold tracking-wide">SALE ENDED</span>;
+  }
+
+  return (
+    <div className="flex items-center gap-2 font-display text-sm">
+      <span className="text-text-muted">Ends in:</span>
+      <span className="text-gold font-bold tabular-nums">
+        {time.days}d {String(time.hours).padStart(2, "0")}h {String(time.minutes).padStart(2, "0")}m {String(time.seconds).padStart(2, "0")}s
+      </span>
+    </div>
+  );
+}

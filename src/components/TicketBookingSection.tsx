@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { TICKET_TIERS, EVENT, PAYMENT } from "@/lib/config";
 import type { TicketTierId } from "@/lib/config";
-import { OrderCountdown } from "@/components/ui/CountdownTimer";
+import { OrderCountdown, EarlyBirdCountdown } from "@/components/ui/CountdownTimer";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
@@ -112,6 +112,13 @@ function TierSelectionStep({
 
   return (
     <div>
+      <div className="mb-6 border border-gold/20 bg-gold/[0.02] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h4 className="font-display text-lg text-gold mb-1">Early Bird Sale</h4>
+          <p className="font-body text-xs text-text-muted">Grab your tickets before the price goes up!</p>
+        </div>
+        <EarlyBirdCountdown targetDate="2026-08-07T23:59:00+05:30" />
+      </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 mb-10">
         {tiers.map((tier) => {
           const isSoldOut = (tier.available as number) === 0;

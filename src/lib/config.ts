@@ -19,7 +19,7 @@ export const EVENT = {
   artist: "Poltergeist",
   dressCode: "Formal / Semi-Formal · Masks encouraged",
   ageRestriction: "18+",
-  upiId: "thevmex@upi", // ← Replace with actual UPI ID
+  upiId: "khairemanthan-1@okhdfcbank",
   upiName: "TheVMEx Events",
   adminPassword: process.env.ADMIN_PASSWORD, // Set ADMIN_PASSWORD in .env.local / Vercel env vars
   pendingExpiryMinutes: 60,
@@ -41,49 +41,20 @@ export const EVENT = {
 
 export const TICKET_TIERS = [
   {
-    id: "stag",
-    label: "Stag",
-    description: "Single entry — come alone, leave with a story.",
+    id: "earlybird",
+    label: "Early Bird",
+    description: "Limited time early bird ticket for Masquerade Night.",
     price: 499,
-    inclusions: ["1 Entry pass", "Welcome drink", "Access to all performances"],
-    totalInventory: 200,
-    available: 200, // This should come from DB in real usage
-    badge: null as string | null,
-    highlighted: false,
-  },
-  {
-    id: "couple",
-    label: "Couple",
-    description: "Two tickets, one unforgettable night.",
-    price: 899,
     inclusions: [
-      "2 Entry passes",
-      "Welcome drinks for two",
-      "Access to all performances",
-      "Priority queue",
+      "1 Entry pass",
+      "Welcome drink",
+      "Access to all performances"
     ],
     totalInventory: 100,
-    available: 100,
-    badge: "Most Popular",
+    available: 100, // This should come from DB in real usage
+    badge: "Ends Aug 7",
     highlighted: true,
-  },
-  {
-    id: "group",
-    label: "Group of 5",
-    description: "Five friends, one legendary memory.",
-    price: 1999,
-    inclusions: [
-      "5 Entry passes",
-      "Welcome drinks for all",
-      "Access to all performances",
-      "Priority queue",
-      "Reserved seating area",
-    ],
-    totalInventory: 30,
-    available: 30,
-    badge: "Best Value",
-    highlighted: false,
-  },
+  }
 ] as const;
 
 export type TicketTierId = (typeof TICKET_TIERS)[number]["id"];
