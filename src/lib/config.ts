@@ -18,7 +18,7 @@ export const EVENT = {
   venueAddress: null as string | null, // Set when confirmed
   artist: "Poltergeist",
   dressCode: "Formal / Semi-Formal · Masks encouraged",
-  ageRestriction: "18+",
+  ageRestriction: "21+",
   upiId: "khairemanthan-1@okhdfcbank",
   upiName: "TheVMEx Events",
   adminPassword: process.env.ADMIN_PASSWORD, // Set ADMIN_PASSWORD in .env.local / Vercel env vars
