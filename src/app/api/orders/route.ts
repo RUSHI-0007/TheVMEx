@@ -11,7 +11,7 @@ import { isValidEmail, isValidPhone } from "@/lib/utils";
 import { isCashfreeEnabled, createCashfreeOrder } from "@/lib/cashfree";
 
 const createOrderSchema = z.object({
-  ticketTierId: z.enum(["stag", "couple", "group"]),
+  ticketTierId: z.enum(["earlybird"]),
   quantity: z.number().int().min(1).max(10),
   attendeeName: z.string().min(2).max(100),
   phone: z.string().min(10).max(15),
