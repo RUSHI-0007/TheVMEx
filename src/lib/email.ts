@@ -13,9 +13,10 @@ export async function sendTicketEmail(order: any) {
 
   try {
     const ticketUrl = `https://the-vmex.vercel.app/ticket?orderId=${order.orderId}`;
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'TheVMEx <onboarding@resend.dev>';
     
     await resend.emails.send({
-      from: 'TheVMEx <tickets@the-vmex.com>', // Or verified domain
+      from: fromEmail,
       to: order.email,
       subject: `Your Ticket for ${EVENT.name} is Confirmed! 🎉`,
       html: `
