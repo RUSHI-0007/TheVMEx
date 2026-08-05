@@ -171,11 +171,14 @@ export async function submitPaymentProof(
   }
 
   const now = new Date().toISOString();
+  // Extend expiry by 7 days once UTR is submitted so admin has time to verify
+  const newExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await db
     .update(orders)
     .set({
       utr: utr.trim(),
       screenshotPath,
+      expiresAt: newExpiry,
       updatedAt: now,
     })
     .where(eq(orders.orderId, orderId));
