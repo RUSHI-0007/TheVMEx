@@ -1,11 +1,11 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import path from "path";
 import fs from "fs";
 import * as schema from "./schema";
 
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
-let sqlClient: ReturnType<typeof postgres> | null = null;
+let sqlPool: Pool | null = null;
 
 export function getDb() {
   if (dbInstance) return dbInstance;
@@ -16,15 +16,19 @@ export function getDb() {
   }
 
   // Use connection_limit=1 for serverless — prevents exhausting the pool
-  sqlClient = postgres(connectionString, {
-    max: 1,
-    ssl: "require",
-    prepare: false, // Required for Supabase Transaction Pooler (PgBouncer/Supavisor)
-    idle_timeout: 20,
-    connect_timeout: 10,
-  });
+  if (!sqlPool) {
+    sqlPool = new Pool({
+      connectionString,
+      max: 1,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      idleTimeoutMillis: 20000,
+      connectionTimeoutMillis: 10000,
+    });
+  }
 
-  dbInstance = drizzle(sqlClient, { schema });
+  dbInstance = drizzle(sqlPool, { schema });
   return dbInstance;
 }
 
