@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EVENT, FAQS } from "@/lib/config";
 
@@ -51,7 +51,7 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
 
 // ── Main export ────────────────────────────────────────────────────────────
 export default function EventDetailsSection() {
-  const details = [
+  const details: { icon: React.ReactNode; label: string; value: string; sub?: string; isTba?: boolean }[] = [
     {
       icon: (
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="rgba(201,162,75,1)" strokeWidth="1.2">
