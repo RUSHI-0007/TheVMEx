@@ -14,8 +14,8 @@ export const EVENT = {
   tagline: "An Evening Shrouded in Mystery & Elegance",
   date: "Friday, 21st August 2026",
   dateISO: "2026-08-21T20:00:00+05:30", // 8 PM IST
-  venue: "Venue to be announced",
-  venueAddress: null as string | null, // Set when confirmed
+  venue: "PIVO GARTEN",
+  venueAddress: "https://maps.app.goo.gl/1cveQgwLyPs8v3fo6?g_st=aw",
   artist: "Poltergeist",
   dressCode: "Formal / Semi-Formal · Masks encouraged",
   ageRestriction: "21+",
@@ -44,7 +44,7 @@ export const TICKET_TIERS = [
     id: "earlybird",
     label: "Early Bird",
     description: "Limited time early bird ticket for Masquerade Night.",
-    price: 499,
+    price: 399,
     inclusions: [
       "1 Entry pass",
       "Welcome drink",

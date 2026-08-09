@@ -116,7 +116,7 @@ export default function ContactSection() {
           <ContactRow
             label="Venue"
             value={EVENT.venue}
-            muted
+            href={EVENT.venueAddress ?? undefined}
             icon={
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -126,26 +126,7 @@ export default function ContactSection() {
           />
         </motion.div>
 
-        {/* Venue map placeholder */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="border border-gold/[0.08] py-10 px-6 text-center max-w-[600px]"
-        >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(201,162,75,0.35)" strokeWidth="1" className="mx-auto mb-3">
-            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-            <line x1="9" y1="3" x2="9" y2="18"/>
-            <line x1="15" y1="6" x2="15" y2="21"/>
-          </svg>
-          <p className="font-body text-[0.875rem] tracking-[0.2em] uppercase text-text-dim mb-1">
-            Venue map coming soon
-          </p>
-          <p className="font-serif text-[1rem] text-text-dim font-light italic">
-            Once confirmed, we&apos;ll drop the location right here
-          </p>
-        </motion.div>
+
 
       </div>
     </section>

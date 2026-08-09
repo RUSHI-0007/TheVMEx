@@ -61,19 +61,8 @@ async function getPendingPayableAmounts(): Promise<number[]> {
 export async function generateUniquePayableAmount(
   baseAmount: number
 ): Promise<number> {
-  const pendingAmounts = new Set(await getPendingPayableAmounts());
-  const paiseOptions = Array.from({ length: 99 }, (_, i) => i + 1);
-
-  for (let attempt = 0; attempt < 200; attempt++) {
-    const paise =
-      paiseOptions[Math.floor(Math.random() * paiseOptions.length)];
-    const amount = Math.round((baseAmount + paise / 100) * 100) / 100;
-    if (!pendingAmounts.has(amount)) {
-      return amount;
-    }
-  }
-
-  throw new Error("Unable to generate unique payable amount");
+  // Removing paise generation as per user request to keep flat amount
+  return baseAmount;
 }
 
 export interface CreateOrderInput {
