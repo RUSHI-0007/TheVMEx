@@ -1,4 +1,4 @@
-import { pgTable, text, integer, real, index } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, index, boolean } from "drizzle-orm/pg-core";
 
 export const orders = pgTable(
   "orders",
@@ -34,6 +34,8 @@ export const orders = pgTable(
     claimedBy: text("claimed_by"),
     claimedByName: text("claimed_by_name"),
     claimedAt: text("claimed_at"),
+    checkedIn: boolean("checked_in").default(false),
+    checkedInAt: text("checked_in_at"),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
   },
