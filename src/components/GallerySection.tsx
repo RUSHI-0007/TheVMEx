@@ -22,8 +22,8 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 2,
     type: "image",
-    src: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop",
-    alt: "Event crowd dancing",
+    src: "/images/image.png",
+    alt: "Event night",
     className: "col-span-1 row-span-1", 
   },
   {
@@ -36,8 +36,8 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 4,
     type: "image",
-    src: "https://images.unsplash.com/photo-1545128485-c400e7702796?q=80&w=800&auto=format&fit=crop",
-    alt: "Live music atmosphere",
+    src: "/images/image.png",
+    alt: "Event night",
     className: "col-span-2 row-span-1", // wide
   },
   {
@@ -47,13 +47,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
     alt: "video3",
     className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
   },
-  {
-    id: 6,
-    type: "image",
-    src: "/images/image.png",
-    alt: "Event night",
-    className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
-  },
+
 ];
 
 export default function GallerySection() {
