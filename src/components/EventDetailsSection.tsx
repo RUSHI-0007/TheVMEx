@@ -63,7 +63,7 @@ export default function EventDetailsSection() {
       ),
       label: "Date & Time",
       value: EVENT.date,
-      sub: "Doors 7:30 PM · Show 8:00 PM",
+      sub: "Doors open 5:00 PM onwards",
     },
     {
       icon: (
@@ -74,7 +74,6 @@ export default function EventDetailsSection() {
       ),
       label: "Venue",
       value: EVENT.venue,
-      isTba: true,
     },
     {
       icon: (

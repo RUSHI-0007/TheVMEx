@@ -16,8 +16,6 @@ const createOrderSchema = z.object({
   attendeeName: z.string().min(2).max(100),
   phone: z.string().min(10).max(15),
   email: z.string().email(),
-  college: z.string().min(2).max(150),
-  year: z.string().min(1).max(50),
 });
 
 export async function POST(request: NextRequest) {
@@ -52,8 +50,6 @@ export async function POST(request: NextRequest) {
         attendeeName: data.attendeeName,
         phone: data.phone,
         email: data.email,
-        college: data.college,
-        year: data.year,
         paymentMode: "cashfree",
       });
 
@@ -97,8 +93,6 @@ export async function POST(request: NextRequest) {
       attendeeName: data.attendeeName,
       phone: data.phone,
       email: data.email,
-      college: data.college,
-      year: data.year,
       paymentMode: "upi_manual",
     });
 

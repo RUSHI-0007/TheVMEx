@@ -13,8 +13,6 @@ interface AttendeeForm {
   attendeeName: string;
   phone: string;
   email: string;
-  college: string;
-  year: string;
 }
 
 interface OrderData {
@@ -117,7 +115,7 @@ function TierSelectionStep({
           <h4 className="font-display text-lg text-gold mb-1">Early Bird Sale</h4>
           <p className="font-body text-xs text-text-muted">Grab your tickets before the price goes up!</p>
         </div>
-        <EarlyBirdCountdown targetDate="2026-08-07T23:59:00+05:30" />
+        <EarlyBirdCountdown targetDate="2026-08-11T23:59:00+05:30" />
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 mb-10">
         {tiers.map((tier) => {
@@ -253,20 +251,6 @@ function AttendeeFormStep({
         {field("attendeeName", "Full Name *", "text", "As it will appear on your ticket")}
         {field("phone", "Phone Number *", "tel", "10-digit mobile")}
         {field("email", "Email Address *", "email", "you@email.com")}
-        {field("college", "College / Institution *", "text", "Your college")}
-        <div>
-          <label className="block font-body text-[0.75rem] font-bold tracking-[0.15em] uppercase text-gold-muted mb-2" htmlFor="attendee-year">Year / Category *</label>
-          <select
-            id="attendee-year"
-            className={`w-full px-4 py-3 bg-[#0b0b0d] border text-text-primary font-body text-[0.95rem] outline-none transition-all duration-300 rounded-sm shadow-inner appearance-none ${errors.year ? "border-[#e05c5c] focus:ring-1 focus:ring-[#e05c5c]/50 bg-[#e05c5c]/5" : "border-gold/30 focus:border-gold focus:ring-1 focus:ring-gold/30 hover:border-gold/50"}`}
-            value={form.year}
-            onChange={(e) => onChange({ year: e.target.value })}
-          >
-            <option value="">Select year</option>
-            {YEAR_OPTIONS.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-          {errors.year && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-2 font-semibold tracking-wide">⚠ {errors.year}</p>}
-        </div>
       </div>
 
       <div className="flex gap-4 flex-wrap mt-10">
@@ -313,8 +297,6 @@ function OrderSummaryStep({
           ["Attendee", form.attendeeName],
           ["Phone", form.phone],
           ["Email", form.email],
-          ["College", form.college],
-          ["Year", form.year],
           ["Event", `${EVENT.name} · ${EVENT.date}`],
         ].map(([label, value]) => (
           <div key={label} className="flex justify-between gap-4 pb-3 border-b border-gold/[0.07] mb-3">
@@ -498,7 +480,7 @@ export default function TicketBookingSection() {
   const [step, setStep] = useState<Step>("select");
   const [tierId, setTierId] = useState<TicketTierId | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [form, setForm] = useState<AttendeeForm>({ attendeeName: "", phone: "", email: "", college: "", year: "" });
+  const [form, setForm] = useState<AttendeeForm>({ attendeeName: "", phone: "", email: "" });
   const [formErrors, setFormErrors] = useState<Partial<AttendeeForm>>({});
   const [order, setOrder] = useState<OrderData | null>(null);
   const [upiQr, setUpiQr] = useState<string>("");
@@ -557,8 +539,6 @@ export default function TicketBookingSection() {
     else if (!/^\+?[0-9\s]{10,13}$/.test(form.phone.replace(/\s/g, ""))) errors.phone = "Enter a valid 10-digit number";
     if (!form.email.trim()) errors.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = "Enter a valid email address";
-    if (!form.college.trim()) errors.college = "College name is required";
-    if (!form.year) errors.year = "Please select your year";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };

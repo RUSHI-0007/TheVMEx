@@ -165,11 +165,10 @@ export default function AboutSection() {
             variants={fadeUp}
             className="font-serif text-[clamp(1rem,2.2vw,1.15rem)] text-text-muted leading-[1.9] mb-12"
           >
-            TheVMEx is a college event brand built on one principle: every
-            event should feel premium, not just planned. Our debut — the
-            Freshers Party 2025 — proved that college nights can be crafted
-            with the same care as the finest productions. Masquerade Night
-            is our next chapter.
+            TheVMEx is an event brand built on one principle: every event
+            should feel premium, not just planned. Our debut night — 2025 —
+            proved that evenings can be crafted with the same care as the
+            finest productions. Masquerade Night is our next chapter.
           </motion.p>
 
           {/* Stats */}
@@ -177,7 +176,7 @@ export default function AboutSection() {
             variants={fadeUp}
             className="grid grid-cols-2 md:grid-cols-3 gap-px bg-gold/10 border border-gold/10 mb-10"
           >
-            <StatPill value="500+" label="Attendees · Freshers Party" />
+            <StatPill value="500+" label="Attendees · 2025 Edition" />
             <StatPill value="1st" label="Flagship Event · 2025" />
             <StatPill value="2nd" label="Edition · Masquerade 2026" className="col-span-2 md:col-span-1" />
           </motion.div>

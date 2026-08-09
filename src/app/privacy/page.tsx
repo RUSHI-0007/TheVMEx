@@ -17,7 +17,6 @@ export default function PrivacyPage() {
               <li>Full Name</li>
               <li>Phone Number</li>
               <li>Email Address</li>
-              <li>College or Institution Name</li>
               <li>Year of Study</li>
             </ul>
           </section>

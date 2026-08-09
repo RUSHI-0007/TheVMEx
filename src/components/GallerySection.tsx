@@ -68,7 +68,7 @@ export default function GallerySection() {
             Glimpses<br />of the Night
           </h2>
           <p className="font-body text-[0.875rem] tracking-[0.2em] uppercase text-text-dim pb-1 shrink-0">
-            Freshers Party 2025
+            Past Nights
           </p>
         </motion.div>
 
@@ -126,7 +126,7 @@ export default function GallerySection() {
         </motion.div>
 
         <p className="font-body text-[0.875rem] tracking-[0.15em] uppercase text-text-dim text-center pt-4">
-          Tap any photo or video to view · From past events
+          Tap any photo or video to view
         </p>
       </div>
 

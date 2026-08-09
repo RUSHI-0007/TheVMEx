@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     "VMEx",
     "Masquerade Night",
     "Masquerade Night Pune",
-    "college event",
+    "event",
     "live music",
     "Poltergeist",
     "2026",

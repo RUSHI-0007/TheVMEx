@@ -32,7 +32,7 @@ export const EVENT = {
   ],
   pastEvents: [
     {
-      name: "Freshers Party 2025",
+      name: "TheVMEx Night 2025",
       attendees: 500,
       highlight: "The night that started it all",
     },
@@ -52,7 +52,7 @@ export const TICKET_TIERS = [
     ],
     totalInventory: 100,
     available: 100, // This should come from DB in real usage
-    badge: "Ends Aug 7",
+    badge: "Ends Aug 11",
     highlighted: true,
   }
 ] as const;
@@ -66,7 +66,7 @@ export const FAQS = [
   },
   {
     q: "When does entry open?",
-    a: "Doors open at 7:30 PM. The show starts at 8:00 PM sharp. Late entry may be subject to availability.",
+    a: "Doors open at 5:00 PM. The show starts at 5:00 PM onwards. Late entry subject to capacity.",
   },
   {
     q: "Is ID proof required at entry?",
@@ -74,11 +74,11 @@ export const FAQS = [
   },
   {
     q: "Is parking available?",
-    a: "Parking details will be shared once the venue is confirmed. We recommend using rideshare services for convenience.",
+    a: "Parking details will be shared at the venue. We recommend using rideshare services for convenience.",
   },
   {
     q: "Do I need to wear a mask?",
-    a: "Masks are strongly encouraged as part of the masquerade theme. Masked guests get priority entry and a special surprise!",
+    a: "Masks are strongly encouraged as part of the masquerade theme. Masked guests get priority entry and a special surprise! Masks will also be available at the venue.",
   },
   {
     q: "How long does payment verification take?",

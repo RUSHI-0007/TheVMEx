@@ -2,12 +2,13 @@ import QRCode from "qrcode";
 
 export async function generateQrDataUrl(data: string): Promise<string> {
   return QRCode.toDataURL(data, {
-    width: 280,
+    width: 400,
     margin: 2,
     color: {
-      dark: "#0B0B0D",
-      light: "#EDE6DA",
+      dark: "#000000",
+      light: "#FFFFFF",
     },
+    errorCorrectionLevel: "H",
   });
 }
 
