@@ -47,6 +47,13 @@ const GALLERY_ITEMS: GalleryItem[] = [
     alt: "video3",
     className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
   },
+  {
+    id: 6,
+    type: "image",
+    src: "/images/image.png",
+    alt: "Event night",
+    className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
+  },
 ];
 
 export default function GallerySection() {
