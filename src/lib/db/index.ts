@@ -15,11 +15,6 @@ export function getDb() {
     throw new Error("DATABASE_URL is not set.");
   }
 
-  // Force Session pooler (5432) instead of Transaction pooler (6543)
-  // because Transaction pooler does not support prepared statements with pg driver
-  if (connectionString.includes(":6543/")) {
-    connectionString = connectionString.replace(":6543/", ":5432/");
-  }
 
   // Strip sslmode=require from connection string because pg overrides rejectUnauthorized: false
   if (connectionString.includes("?sslmode=require")) {

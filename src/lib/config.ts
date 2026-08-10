@@ -44,7 +44,7 @@ export const TICKET_TIERS = [
     id: "earlybird",
     label: "Early Bird",
     description: "Limited time early bird ticket for Masquerade Night.",
-    price: 399,
+    price: 499,
     inclusions: [
       "1 Entry pass",
       "Welcome drink",

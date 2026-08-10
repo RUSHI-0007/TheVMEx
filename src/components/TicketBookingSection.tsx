@@ -375,7 +375,7 @@ function PaymentStep({
             ₹{order.payableAmount.toLocaleString("en-IN")}
           </p>
           <div className="bg-white p-4 rounded-xl mb-6 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
-            <img src="/images/Gpay_399.jpg" alt="UPI QR Code" className="w-48 h-48 object-contain" />
+            <img src="/images/Gpay_499.jpg" alt="UPI QR Code" className="w-48 h-48 object-contain" />
           </div>
 
           <div className="mt-6 border-t border-gold/10 w-full pt-4">
