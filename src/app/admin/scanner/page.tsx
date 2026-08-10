@@ -302,8 +302,19 @@ export default function ScannerPage() {
 
   return (
     <div className="min-h-screen bg-[#000] flex flex-col">
+
+      {/* Video element ALWAYS in DOM so ref is valid when startCamera sets srcObject */}
+      <video
+        ref={videoRef}
+        className={`fixed inset-0 w-full h-full object-cover z-0 ${cameraActive ? "block" : "hidden"}`}
+        playsInline
+        autoPlay
+        muted
+      />
+      <canvas ref={canvasRef} className="hidden" />
+
       {/* Top bar */}
-      <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-4 bg-black/60 backdrop-blur-md border-b border-gold/10">
+      <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-4 bg-black/60 backdrop-blur-md border-b border-gold/10">
         <button
           type="button"
           onClick={() => { stopCamera(); router.back(); }}
@@ -324,15 +335,15 @@ export default function ScannerPage() {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      {!cameraActive ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-[#0b0b0d] pt-20">
+      {/* Dashboard panel — shown when camera is off */}
+      {!cameraActive && (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-[#0b0b0d] pt-20 relative z-10">
           <div className="w-full max-w-md space-y-6">
             
             <div className="text-center">
               <h1 className="font-display text-3xl text-gold mb-2">Offline Scanner</h1>
               <p className="text-text-muted text-sm leading-relaxed">
-                This scanner works completely offline. You must "Prepare" before doors open to download the guest list.
+                This scanner works completely offline. You must &quot;Prepare&quot; before doors open to download the guest list.
               </p>
             </div>
 
@@ -380,75 +391,66 @@ export default function ScannerPage() {
             </div>
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* Camera overlays — shown when camera is active */}
+      {cameraActive && (
         <>
-          {/* Full-screen camera — fixed so it always fills the display */}
-          <div className="fixed inset-0 bg-black z-0">
-            <video
-              ref={videoRef}
-              className="absolute inset-0 w-full h-full object-cover"
-              playsInline
-              autoPlay
-              muted
-            />
-            <canvas ref={canvasRef} className="hidden" />
-
-            {/* Scan frame overlay */}
-            {cameraActive && status === "scanning" && (
-              <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
-                <div className="absolute inset-0 bg-black/40" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 10% 25%, 90% 25%, 90% 75%, 10% 75%, 10% 25%)" }} />
-                <div className="relative w-64 h-64">
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-gold" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-gold" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-gold" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-gold" />
-                  <div className="absolute left-1 right-1 h-px bg-gold/60 animate-[scanline_2s_ease-in-out_infinite]" style={{ top: "50%" }} />
-                </div>
+          {/* Scan frame overlay */}
+          {status === "scanning" && (
+            <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 bg-black/40" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 10% 25%, 90% 25%, 90% 75%, 10% 75%, 10% 25%)" }} />
+              <div className="relative w-64 h-64">
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-gold" />
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-gold" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-gold" />
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-gold" />
+                <div className="absolute left-1 right-1 h-px bg-gold/60 animate-[scanline_2s_ease-in-out_infinite]" style={{ top: "50%" }} />
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Result overlay for found/invalid/already_checked_in */}
-            {(status === "found" || status === "invalid" || status === "already_checked_in" || status === "error") && (
-              <div className={`fixed inset-0 z-10 flex flex-col items-center justify-center p-6 ${
-                status === "found" ? "bg-emerald-900/90 backdrop-blur-sm" : 
-                status === "already_checked_in" ? "bg-amber-900/90 backdrop-blur-sm" :
-                "bg-red-900/90 backdrop-blur-sm"
+          {/* Result overlay */}
+          {(status === "found" || status === "invalid" || status === "already_checked_in" || status === "error") && (
+            <div className={`fixed inset-0 z-10 flex flex-col items-center justify-center p-6 ${
+              status === "found" ? "bg-emerald-900/90 backdrop-blur-sm" : 
+              status === "already_checked_in" ? "bg-amber-900/90 backdrop-blur-sm" :
+              "bg-red-900/90 backdrop-blur-sm"
+            }`}>
+              <div className={`text-center ${
+                status === "found" ? "text-emerald-400" : 
+                status === "already_checked_in" ? "text-amber-400" :
+                "text-[#ff6b6b]"
               }`}>
-                <div className={`text-center ${
-                  status === "found" ? "text-emerald-400" : 
-                  status === "already_checked_in" ? "text-amber-400" :
-                  "text-[#ff6b6b]"
-                }`}>
-                  {status === "found" ? (
-                    <svg width="80" height="80" viewBox="0 0 64 64" fill="none" className="mx-auto mb-4">
-                      <circle cx="32" cy="32" r="30" stroke="currentColor" strokeWidth="3" />
-                      <path d="M20 32l9 9 15-15" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : status === "already_checked_in" ? (
-                    <svg width="80" height="80" viewBox="0 0 64 64" fill="none" className="mx-auto mb-4">
-                      <path d="M32 4a28 28 0 100 56 28 28 0 000-56zM32 16v18l12 12" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  ) : (
-                    <svg width="80" height="80" viewBox="0 0 64 64" fill="none" className="mx-auto mb-4">
-                      <circle cx="32" cy="32" r="30" stroke="currentColor" strokeWidth="3" />
-                      <path d="M22 22l20 20M42 22L22 42" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                    </svg>
-                  )}
-                  <p className="font-display text-4xl font-bold mb-2">{message}</p>
-                  
-                  {result && (
-                    <div className="mt-8 space-y-2">
-                      <p className="font-display text-3xl text-white">{result.attendeeName}</p>
-                      <p className="font-body text-xl text-white/80">{result.tierName} × {result.quantity}</p>
-                    </div>
-                  )}
-                </div>
+                {status === "found" ? (
+                  <svg width="80" height="80" viewBox="0 0 64 64" fill="none" className="mx-auto mb-4">
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" strokeWidth="3" />
+                    <path d="M20 32l9 9 15-15" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : status === "already_checked_in" ? (
+                  <svg width="80" height="80" viewBox="0 0 64 64" fill="none" className="mx-auto mb-4">
+                    <path d="M32 4a28 28 0 100 56 28 28 0 000-56zM32 16v18l12 12" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="80" height="80" viewBox="0 0 64 64" fill="none" className="mx-auto mb-4">
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" strokeWidth="3" />
+                    <path d="M22 22l20 20M42 22L22 42" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                  </svg>
+                )}
+                <p className="font-display text-4xl font-bold mb-2">{message}</p>
+                
+                {result && (
+                  <div className="mt-8 space-y-2">
+                    <p className="font-display text-3xl text-white">{result.attendeeName}</p>
+                    <p className="font-body text-xl text-white/80">{result.tierName} × {result.quantity}</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Bottom panel — fixed at bottom above camera */}
-          <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0b0b0d] border-t border-gold/10 safe-area-inset-bottom">
+          {/* Bottom panel */}
+          <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0b0b0d] border-t border-gold/10">
             <div className={`px-5 py-3 border-b ${statusColor} border-opacity-30 flex justify-between items-center`}>
               <p className={`font-body text-[0.78rem] tracking-[0.1em] uppercase ${statusColor.split(" ")[1]}`}>
                 {status === "scanning" ? "Ready to scan" : "Scan complete"}
