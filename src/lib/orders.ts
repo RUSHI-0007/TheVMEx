@@ -138,15 +138,6 @@ export async function submitPaymentProof(
   if (!existing[0]) throw new Error("Order not found");
   const order = existing[0];
 
-  if (order.status !== "pending_verification") {
-    throw new Error("Order is not pending verification");
-  }
-
-  if (order.expiresAt && new Date(order.expiresAt) < new Date()) {
-    await expireOrder(orderId);
-    throw new Error("Order has expired");
-  }
-
   const utrExists = await db
     .select()
     .from(orders)
