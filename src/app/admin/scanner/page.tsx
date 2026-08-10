@@ -303,7 +303,7 @@ export default function ScannerPage() {
   return (
     <div className="min-h-screen bg-[#000] flex flex-col">
       {/* Top bar */}
-      <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-4 bg-black/60 backdrop-blur-md border-b border-gold/10">
+      <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-4 bg-black/60 backdrop-blur-md border-b border-gold/10">
         <button
           type="button"
           onClick={() => { stopCamera(); router.back(); }}
@@ -382,19 +382,20 @@ export default function ScannerPage() {
         </div>
       ) : (
         <>
-          {/* Full-screen camera */}
-          <div className="relative flex-1 bg-black overflow-hidden mt-16" style={{ minHeight: "60vh" }}>
+          {/* Full-screen camera — fixed so it always fills the display */}
+          <div className="fixed inset-0 bg-black z-0">
             <video
               ref={videoRef}
               className="absolute inset-0 w-full h-full object-cover"
               playsInline
+              autoPlay
               muted
             />
             <canvas ref={canvasRef} className="hidden" />
 
             {/* Scan frame overlay */}
             {cameraActive && status === "scanning" && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <div className="absolute inset-0 bg-black/40" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 10% 25%, 90% 25%, 90% 75%, 10% 75%, 10% 25%)" }} />
                 <div className="relative w-64 h-64">
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-gold" />
@@ -408,7 +409,7 @@ export default function ScannerPage() {
 
             {/* Result overlay for found/invalid/already_checked_in */}
             {(status === "found" || status === "invalid" || status === "already_checked_in" || status === "error") && (
-              <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 ${
+              <div className={`fixed inset-0 z-10 flex flex-col items-center justify-center p-6 ${
                 status === "found" ? "bg-emerald-900/90 backdrop-blur-sm" : 
                 status === "already_checked_in" ? "bg-amber-900/90 backdrop-blur-sm" :
                 "bg-red-900/90 backdrop-blur-sm"
@@ -446,8 +447,8 @@ export default function ScannerPage() {
             )}
           </div>
 
-          {/* Bottom panel */}
-          <div className="bg-[#0b0b0d] border-t border-gold/10 safe-area-inset-bottom">
+          {/* Bottom panel — fixed at bottom above camera */}
+          <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0b0b0d] border-t border-gold/10 safe-area-inset-bottom">
             <div className={`px-5 py-3 border-b ${statusColor} border-opacity-30 flex justify-between items-center`}>
               <p className={`font-body text-[0.78rem] tracking-[0.1em] uppercase ${statusColor.split(" ")[1]}`}>
                 {status === "scanning" ? "Ready to scan" : "Scan complete"}
