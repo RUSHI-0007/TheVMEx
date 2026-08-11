@@ -92,8 +92,9 @@ export async function createOrder(input: CreateOrderInput) {
   const baseAmount = tier.price * input.quantity;
   const payableAmount = await generateUniquePayableAmount(baseAmount);
   const now = new Date();
+  // 7 days — UTR + screenshot are always submitted together at booking time
   const expiresAt = new Date(
-    now.getTime() + 15 * 60 * 1000
+    now.getTime() + 7 * 24 * 60 * 60 * 1000
   );
 
   const db = getDb();
