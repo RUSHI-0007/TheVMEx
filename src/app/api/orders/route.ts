@@ -87,8 +87,12 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("[POST /api/orders] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to create order";
-    const status = message.includes("UTR") ? 409 : 400;
-    return NextResponse.json({ error: message }, { status });
+    const isUtrDuplicate = message.includes("UTR");
+    const userMessage = isUtrDuplicate
+      ? "This UTR has already been submitted. Your booking may have already gone through — please check your ticket status at thevmex.in/ticket or contact us on WhatsApp."
+      : message;
+    const status = isUtrDuplicate ? 409 : 400;
+    return NextResponse.json({ error: userMessage }, { status });
   }
 }
 
