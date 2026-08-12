@@ -41,19 +41,34 @@ export const EVENT = {
 
 export const TICKET_TIERS = [
   {
-    id: "earlybird",
-    label: "Early Bird",
-    description: "Limited time early bird ticket for Masquerade Night.",
+    id: "female_pass",
+    label: "Female Pass",
+    description: "Entry pass for one female.",
     price: 499,
     inclusions: [
       "1 Entry pass",
       "Welcome drink",
       "Access to all performances"
     ],
-    totalInventory: 100,
-    available: 100, // This should come from DB in real usage
-    badge: "Ends Aug 11",
+    totalInventory: 150,
+    available: 150,
+    badge: "Discounted",
     highlighted: true,
+  },
+  {
+    id: "male_pass",
+    label: "Male Pass",
+    description: "Entry pass for one male.",
+    price: 599,
+    inclusions: [
+      "1 Entry pass",
+      "Welcome drink",
+      "Access to all performances"
+    ],
+    totalInventory: 150,
+    available: 150,
+    badge: "Limited",
+    highlighted: false,
   }
 ] as const;
 

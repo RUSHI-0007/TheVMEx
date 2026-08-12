@@ -13,6 +13,7 @@ interface AttendeeForm {
   attendeeName: string;
   phone: string;
   email: string;
+  guests: { name: string; phone: string; gender: "male" | "female" }[];
 }
 
 interface OrderData {
@@ -107,10 +108,9 @@ function TierSelectionStep({
     <div>
       <div className="mb-6 border border-gold/20 bg-gold/[0.02] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h4 className="font-display text-lg text-gold mb-1">Early Bird Sale</h4>
-          <p className="font-body text-xs text-text-muted">Grab your tickets before the price goes up!</p>
+          <h4 className="font-display text-lg text-gold mb-1">Select Your Pass</h4>
+          <p className="font-body text-xs text-text-muted">Choose between Male and Female stag passes.</p>
         </div>
-        <EarlyBirdCountdown targetDate="2026-08-11T23:59:00+05:30" />
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 mb-10">
         {tiers.map((tier) => {
@@ -230,8 +230,25 @@ function DetailsAndPayStep({
   const tier = tiers.find((t) => t.id === tierId);
   const total = tier ? tier.price * quantity : 0;
 
-  const [form, setForm] = useState<AttendeeForm>({ attendeeName: "", phone: "", email: "" });
+  const [form, setForm] = useState<AttendeeForm>({ 
+    attendeeName: "", 
+    phone: "", 
+    email: "",
+    guests: Array.from({ length: quantity - 1 }).map(() => ({ name: "", phone: "", gender: "male" })) 
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    // If quantity changes (though in this step it usually doesn't), keep guests in sync
+    setForm(f => {
+      const needed = quantity - 1;
+      if (f.guests.length === needed) return f;
+      const guests = [...f.guests];
+      while (guests.length < needed) guests.push({ name: "", phone: "", gender: "male" });
+      while (guests.length > needed) guests.pop();
+      return { ...f, guests };
+    });
+  }, [quantity]);
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
@@ -240,6 +257,13 @@ function DetailsAndPayStep({
     else if (!/^\+?[0-9\s]{10,13}$/.test(form.phone.replace(/\s/g, ""))) e.phone = "Enter a valid 10-digit number";
     if (!form.email.trim()) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Enter a valid email address";
+
+    form.guests.forEach((g, i) => {
+      if (!g.name.trim()) e[`guest_${i}_name`] = "Guest name is required";
+      if (!g.phone.trim()) e[`guest_${i}_phone`] = "Guest phone is required";
+      else if (!/^\+?[0-9\s]{10,13}$/.test(g.phone.replace(/\s/g, ""))) e[`guest_${i}_phone`] = "Invalid number";
+    });
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -271,20 +295,57 @@ function DetailsAndPayStep({
 
       <div className="flex flex-col gap-5">
         <div>
-          {label("Full Name *")}
+          {label("Main Attendee Name *")}
           <input id="attendee-name" className={inputClass("attendeeName")} type="text" placeholder="As it appears on your ID" value={form.attendeeName} onChange={(e) => setForm(p => ({ ...p, attendeeName: e.target.value }))} />
           {errors.attendeeName && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-1">⚠ {errors.attendeeName}</p>}
         </div>
         <div>
-          {label("Phone Number *")}
+          {label("Main Attendee Phone *")}
           <input id="attendee-phone" className={inputClass("phone")} type="tel" placeholder="10-digit mobile" value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} />
           {errors.phone && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-1">⚠ {errors.phone}</p>}
         </div>
         <div>
-          {label("Email Address *")}
+          {label("Main Attendee Email *")}
           <input id="attendee-email" className={inputClass("email")} type="email" placeholder="you@email.com" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} />
           {errors.email && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-1">⚠ {errors.email}</p>}
         </div>
+
+        {form.guests.map((guest, i) => (
+          <div key={i} className="mt-6 border-t border-gold/10 pt-6 flex flex-col gap-5">
+            <h5 className="font-display text-gold-muted text-lg">Guest {i + 2} Details</h5>
+            <div>
+              {label(`Guest ${i + 2} Name *`)}
+              <input className={inputClass(`guest_${i}_name`)} type="text" placeholder="Guest Full Name" value={guest.name} onChange={(e) => {
+                const guests = [...form.guests];
+                guests[i].name = e.target.value;
+                setForm(p => ({ ...p, guests }));
+              }} />
+              {errors[`guest_${i}_name`] && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-1">⚠ {errors[`guest_${i}_name`]}</p>}
+            </div>
+            <div className="flex flex-col md:flex-row gap-5">
+              <div className="flex-1">
+                {label(`Guest ${i + 2} Phone *`)}
+                <input className={inputClass(`guest_${i}_phone`)} type="tel" placeholder="Guest Mobile" value={guest.phone} onChange={(e) => {
+                  const guests = [...form.guests];
+                  guests[i].phone = e.target.value;
+                  setForm(p => ({ ...p, guests }));
+                }} />
+                {errors[`guest_${i}_phone`] && <p className="font-body text-[0.75rem] text-[#e05c5c] mt-1">⚠ {errors[`guest_${i}_phone`]}</p>}
+              </div>
+              <div className="flex-1">
+                {label(`Guest ${i + 2} Gender *`)}
+                <select className={inputClass(`guest_${i}_gender`)} value={guest.gender} onChange={(e) => {
+                  const guests = [...form.guests];
+                  guests[i].gender = e.target.value as "male" | "female";
+                  setForm(p => ({ ...p, guests }));
+                }}>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        ))}
 
         {apiError && <p className="font-body text-[0.8rem] text-[#e05c5c] font-semibold">⚠ {apiError}</p>}
 
@@ -402,6 +463,7 @@ export default function TicketBookingSection() {
           attendeeName: form.attendeeName,
           phone: form.phone,
           email: form.email,
+          guests: form.guests,
         }),
       });
       const data = await res.json();

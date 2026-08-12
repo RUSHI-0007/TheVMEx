@@ -71,6 +71,7 @@ export interface CreateOrderInput {
   attendeeName: string;
   phone: string;
   email: string;
+  guests?: any[];
   cashfreeOrderId?: string;
   paymentMode?: "upi_manual" | "cashfree";
 }
@@ -110,6 +111,7 @@ export async function createOrder(input: CreateOrderInput) {
     email: input.email.trim().toLowerCase(),
     college: "",
     year: "",
+    guests: input.guests ?? [],
     cashfreeOrderId: input.cashfreeOrderId ?? null,
     paymentMode: (input.paymentMode ?? "upi_manual") as "upi_manual" | "cashfree",
     status: "pending_verification" as const,

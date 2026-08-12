@@ -5,11 +5,18 @@ import { isValidEmail, isValidPhone } from "@/lib/utils";
 import { createCashfreeOrder } from "@/lib/cashfree";
 
 const createOrderSchema = z.object({
-  ticketTierId: z.enum(["earlybird"]),
+  ticketTierId: z.enum(["male_pass", "female_pass"]),
   quantity: z.number().int().min(1).max(10),
   attendeeName: z.string().min(2).max(100),
   phone: z.string().min(10).max(15),
   email: z.string().email(),
+  guests: z.array(
+    z.object({
+      name: z.string().min(2).max(100),
+      phone: z.string().min(10).max(15),
+      gender: z.enum(["male", "female"]),
+    })
+  ).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -40,6 +47,7 @@ export async function POST(request: NextRequest) {
       attendeeName: data.attendeeName,
       phone: data.phone,
       email: data.email,
+      guests: data.guests,
       paymentMode: "cashfree",
     });
 

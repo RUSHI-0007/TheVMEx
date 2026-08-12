@@ -1,4 +1,4 @@
-import { pgTable, text, integer, real, index, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, index, boolean, jsonb } from "drizzle-orm/pg-core";
 
 export const orders = pgTable(
   "orders",
@@ -14,6 +14,7 @@ export const orders = pgTable(
     email: text("email").notNull(),
     college: text("college").notNull(),
     year: text("year").notNull(),
+    guests: jsonb("guests"),
     utr: text("utr").unique(),
     screenshotPath: text("screenshot_path"),
     cashfreeOrderId: text("cashfree_order_id"),
