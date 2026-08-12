@@ -26,7 +26,7 @@ export default function FooterSection() {
             { label: "Details", href: "#details" },
             { label: "Tickets", href: "#tickets" },
             { label: "Gallery", href: "#gallery" },
-            { label: "Contact", href: "#contact" },
+            { label: "Contact", href: "/contact" },
           ].map((link) => (
             <a
               key={link.label}
@@ -78,6 +78,8 @@ export default function FooterSection() {
             <a href="/terms" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Terms & Conditions</a>
             <span className="text-text-dim">·</span>
             <a href="/privacy" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Privacy Policy</a>
+            <span className="text-text-dim">·</span>
+            <a href="/refunds" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">Refunds & Cancellations</a>
             <span className="text-text-dim">·</span>
             <a href="/ticket" className="font-body text-[0.75rem] tracking-[0.08em] text-text-dim hover:text-gold transition-colors duration-200">My Ticket</a>
           </div>

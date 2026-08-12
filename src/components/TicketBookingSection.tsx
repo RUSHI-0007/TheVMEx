@@ -144,7 +144,7 @@ function TierSelectionStep({
               <p className="font-display text-[1.3rem] font-bold text-text-primary mb-1">{tier.label}</p>
               <p className="font-body text-[0.8rem] text-text-muted mb-4 leading-relaxed">{tier.description}</p>
               <p className="font-display text-[1.6rem] font-bold text-gold mb-4">
-                ₹{tier.price.toLocaleString("en-IN")}
+                ₹{tier.price.toLocaleString("en-IN")} INR
               </p>
               <ul className="list-none flex flex-col gap-1.5 mb-4">
                 {tier.inclusions.map((inc: string) => (
@@ -190,7 +190,7 @@ function TierSelectionStep({
             if (!tier) return null;
             return (
               <p className="font-display text-[1.1rem] font-semibold text-gold">
-                Total: ₹{(tier.price * quantity).toLocaleString("en-IN")}
+                Total: ₹{(tier.price * quantity).toLocaleString("en-IN")} INR
               </p>
             );
           })()}
@@ -281,7 +281,7 @@ function DetailsAndPayStep({
         <div className="bg-[#18151a] border border-gold/20 p-8 flex flex-col items-center justify-center text-center">
           <p className="font-body text-[0.65rem] tracking-[0.15em] uppercase text-text-dim mb-2">Scan & Pay</p>
           <p className="font-display text-[2rem] font-bold text-gold mb-6">
-            ₹{total.toLocaleString("en-IN")}
+            ₹{total.toLocaleString("en-IN")} INR
           </p>
           <div className="bg-white p-4 rounded-xl mb-4 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
             <img src="/images/Gpay_499.jpg" alt="UPI QR Code" className="w-48 h-48 object-contain" />
