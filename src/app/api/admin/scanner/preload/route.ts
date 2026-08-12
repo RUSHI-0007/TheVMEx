@@ -25,6 +25,7 @@ export async function GET(request: Request) {
         phone: orders.phone,
         checkedIn: orders.checkedIn,
         checkedInAt: orders.checkedInAt,
+        guests: orders.guests,
       })
       .from(orders)
       .where(

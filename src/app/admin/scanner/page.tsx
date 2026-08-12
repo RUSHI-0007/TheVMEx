@@ -14,6 +14,7 @@ interface OfflineTicket {
   phone: string;
   checkedIn: boolean;
   checkedInAt: string | null;
+  guests?: { name: string; phone: string; gender: "male" | "female" }[];
 }
 
 type LocalCheckins = Record<string, string>; // ticketId -> timestamp
@@ -443,6 +444,18 @@ export default function ScannerPage() {
                   <div className="mt-8 space-y-2">
                     <p className="font-display text-3xl text-white">{result.attendeeName}</p>
                     <p className="font-body text-xl text-white/80">{result.tierName} × {result.quantity}</p>
+                    {result.guests && result.guests.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-white/20 text-left">
+                        <p className="font-body text-sm tracking-widest uppercase text-white/60 mb-2">Additional Guests</p>
+                        <ul className="space-y-1">
+                          {result.guests.map((g, i) => (
+                            <li key={i} className="font-body text-lg text-white">
+                              {g.name} <span className="text-white/50 text-base">({g.gender === 'male' ? 'M' : 'F'})</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

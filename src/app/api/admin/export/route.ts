@@ -52,7 +52,8 @@ export async function GET(request: Request) {
       "Year",
       "Tier",
       "Quantity",
-      "Guests",
+      "Guests (Count)",
+      "Guest Details",
       "Amount Paid (₹)",
       "UTR",
       "Booked At",
@@ -62,10 +63,14 @@ export async function GET(request: Request) {
 
     const csvRows = rows.map((row) => {
       const tier = getTicketTier(row.ticketTierId as TicketTierId);
-      // Guests = quantity × people per ticket
-      const guestsPerTicket =
-        row.ticketTierId === "stag" ? 1 : row.ticketTierId === "couple" ? 2 : 4;
-      const totalGuests = row.quantity * guestsPerTicket;
+      
+      const guestList = (row.guests as any[]) || [];
+      // Main attendee is always 1, extra guests are in the array
+      const totalGuests = 1 + guestList.length;
+      
+      const guestDetailsString = guestList.length > 0 
+        ? guestList.map((g, i) => `${i+2}: ${g.name} (${g.gender})`).join(" | ")
+        : "None";
 
       return [
         row.orderId,
@@ -80,6 +85,7 @@ export async function GET(request: Request) {
         tier?.label ?? row.ticketTierId,
         row.quantity,
         totalGuests,
+        guestDetailsString,
         row.payableAmount.toFixed(2),
         row.utr ?? "",
         formatISTDate(row.createdAt),
