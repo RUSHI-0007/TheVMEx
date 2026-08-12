@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createOrder, buildUpiUrl } from "@/lib/orders";
-import { PAYMENT } from "@/lib/config";
+import { createOrder, getOrderByOrderId } from "@/lib/orders";
 import { isValidEmail, isValidPhone } from "@/lib/utils";
-import path from "path";
-import { submitPaymentProof } from "@/lib/orders";
+import { createCashfreeOrder } from "@/lib/cashfree";
 
 const createOrderSchema = z.object({
   ticketTierId: z.enum(["earlybird"]),
@@ -16,18 +14,9 @@ const createOrderSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse as FormData — contains both order fields AND payment proof
-    const formData = await request.formData();
-
-    const body = {
-      ticketTierId: formData.get("ticketTierId"),
-      quantity: Number(formData.get("quantity")),
-      attendeeName: formData.get("attendeeName"),
-      phone: formData.get("phone"),
-      email: formData.get("email"),
-    };
-
+    const body = await request.json();
     const parsed = createOrderSchema.safeParse(body);
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid form data", details: parsed.error.flatten() },
@@ -44,55 +33,64 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
 
-    // Validate UTR
-    const utr = formData.get("utr") as string;
-    if (!utr?.trim()) {
-      return NextResponse.json({ error: "UTR / reference number is required" }, { status: 400 });
-    }
-
-    // Validate screenshot
-    const screenshot = formData.get("screenshot") as File | null;
-    if (!screenshot) {
-      return NextResponse.json({ error: "Payment screenshot is required" }, { status: 400 });
-    }
-    if (!screenshot.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Screenshot must be an image file" }, { status: 400 });
-    }
-    if (screenshot.size > PAYMENT.maxScreenshotSizeMb * 1024 * 1024) {
-      return NextResponse.json(
-        { error: `File must be under ${PAYMENT.maxScreenshotSizeMb}MB` },
-        { status: 400 }
-      );
-    }
-
-    // Create order (goes directly to pending_verification)
+    // Create the DB order (status = pending_verification by default)
     const order = await createOrder({
       ticketTierId: data.ticketTierId,
       quantity: data.quantity,
       attendeeName: data.attendeeName,
       phone: data.phone,
       email: data.email,
-      paymentMode: "upi_manual",
+      paymentMode: "cashfree",
     });
 
-    // Attach payment proof immediately
-    const mimeType = screenshot.type || "image/jpeg";
-    const buffer = Buffer.from(await screenshot.arrayBuffer());
-    const base64 = buffer.toString("base64");
-    const screenshotDataUrl = `data:${mimeType};base64,${base64}`;
+    const origin =
+      request.headers.get("origin") ??
+      process.env.NEXT_PUBLIC_BASE_URL ??
+      "https://thevmex.in";
 
-    const updatedOrder = await submitPaymentProof(order.orderId, utr.trim(), screenshotDataUrl);
+    const returnUrl = `${origin}/api/cashfree/return?orderId=${order.orderId}`;
 
-    return NextResponse.json({ order: updatedOrder });
+    const cashfreeResult = await createCashfreeOrder({
+      orderId: order.orderId,
+      amount: order.payableAmount,
+      customerName: order.attendeeName,
+      customerPhone: order.phone,
+      customerEmail: order.email,
+      returnUrl,
+    });
+
+    // Persist the Cashfree order id back to the DB row
+    const { getDb } = await import("@/lib/db");
+    const { orders } = await import("@/lib/db/schema");
+    const { eq } = await import("drizzle-orm");
+    const db = getDb();
+    await db
+      .update(orders)
+      .set({ cashfreeOrderId: cashfreeResult.cfOrderId })
+      .where(eq(orders.orderId, order.orderId));
+
+    return NextResponse.json({
+      order: { ...order, cashfreeOrderId: cashfreeResult.cfOrderId },
+      paymentSessionId: cashfreeResult.paymentSessionId,
+      mode: "cashfree",
+    });
+
   } catch (error: any) {
     console.error("[POST /api/orders] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to create order";
-    const isUtrDuplicate = message.includes("UTR");
-    const userMessage = isUtrDuplicate
-      ? "This UTR has already been submitted. Your booking may have already gone through — please check your ticket status at thevmex.in/ticket or contact us on WhatsApp."
-      : message;
-    const status = isUtrDuplicate ? 409 : 400;
-    return NextResponse.json({ error: userMessage }, { status });
+    
+    // Extract Axios-specific details if it's an AxiosError (Cashfree SDK uses Axios)
+    const axiosData = error.isAxiosError ? {
+      url: error.config?.url,
+      responseData: error.response?.data,
+      status: error.response?.status,
+    } : undefined;
+
+    return NextResponse.json({ 
+      error: message, 
+      axiosDetails: axiosData,
+      raw: String(error) 
+    }, { status: 400 });
   }
 }
 
@@ -103,7 +101,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { getOrderByOrderId } = await import("@/lib/orders");
     const order = await getOrderByOrderId(orderId);
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
