@@ -5,7 +5,7 @@ import { isValidEmail, isValidPhone } from "@/lib/utils";
 import { createCashfreeOrder } from "@/lib/cashfree";
 
 const createOrderSchema = z.object({
-  ticketTierId: z.enum(["male_pass", "female_pass"]),
+  ticketTierId: z.enum(["male_pass", "female_pass", "couple_pass", "group_pass"]),
   quantity: z.number().int().min(1).max(10),
   attendeeName: z.string().min(2).max(100),
   phone: z.string().min(10).max(15),
