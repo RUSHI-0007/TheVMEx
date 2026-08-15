@@ -109,7 +109,7 @@ function TierSelectionStep({
       <div className="mb-6 border border-gold/20 bg-gold/[0.02] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h4 className="font-display text-lg text-gold mb-1">Select Your Pass</h4>
-          <p className="font-body text-xs text-text-muted">Choose between Male and Female stag passes.</p>
+          <p className="font-body text-xs text-text-muted">Select from our range of exclusive passes.</p>
         </div>
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 mb-10">

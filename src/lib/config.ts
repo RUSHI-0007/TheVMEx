@@ -69,6 +69,36 @@ export const TICKET_TIERS = [
     available: 150,
     badge: "Limited",
     highlighted: false,
+  },
+  {
+    id: "couple_pass",
+    label: "Couple Pass",
+    description: "Entry pass for one couple.",
+    price: 999,
+    inclusions: [
+      "Entry for a couple",
+      "Welcome drinks",
+      "Access to all performances"
+    ],
+    totalInventory: 100,
+    available: 100,
+    badge: "Popular",
+    highlighted: true,
+  },
+  {
+    id: "group_pass",
+    label: "Group of 5",
+    description: "Entry pass for a group of 5.",
+    price: 2499,
+    inclusions: [
+      "Entry for 5 people",
+      "Welcome drinks",
+      "Access to all performances"
+    ],
+    totalInventory: 50,
+    available: 50,
+    badge: "Value",
+    highlighted: false,
   }
 ] as const;
 
