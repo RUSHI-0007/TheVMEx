@@ -74,7 +74,7 @@ export const TICKET_TIERS = [
     id: "couple_pass",
     label: "Couple Pass",
     description: "Entry pass for one couple.",
-    price: 799,
+    price: 699,
     inclusions: [
       "Entry for a couple",
       "Welcome drinks",
