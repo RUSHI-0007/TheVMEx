@@ -22,7 +22,7 @@ export const EVENT = {
   upiId: "khairemanthan-1@okhdfcbank",
   upiName: "TheVMEx Events",
   adminPassword: process.env.ADMIN_PASSWORD, // Set ADMIN_PASSWORD in .env.local / Vercel env vars
-  pendingExpiryMinutes: 60,
+  pendingExpiryMinutes: 300,
   socialLinks: {
     instagram: "https://www.instagram.com/thevmexperience?igsh=ZTF5d3BvanFiN2c5",
     whatsapp: "https://wa.me/918888822040", 
