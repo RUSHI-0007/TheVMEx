@@ -1,4 +1,4 @@
-import { pgTable, text, integer, real, index, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, index, boolean, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const orders = pgTable(
   "orders",
@@ -60,3 +60,28 @@ export const orderAuditLog = pgTable("order_audit_log", {
 
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
+
+// ─── Guest List (offline / VIP attendees) ─────────────────────────────────────
+export const guestList = pgTable(
+  "guest_list",
+  {
+    id:          text("id").primaryKey(),
+    name:        text("name").notNull(),
+    // Normalized lookup keys — computed as lower(trim(value)) on write.
+    // DB enforces uniqueness so no duplicate rows from whitespace/casing drift.
+    nameKey:     text("name_key").notNull(),
+    phone:       text("phone").notNull().default(""),
+    source:      text("source").notNull(),
+    sourceKey:   text("source_key").notNull(),
+    checkedIn:   boolean("checked_in").notNull().default(false),
+    checkedInAt: text("checked_in_at"),          // nullable ISO string
+    uploadedAt:  text("uploaded_at").notNull(),
+  },
+  (t) => [
+    uniqueIndex("guest_list_key_idx").on(t.nameKey, t.sourceKey),
+    index("guest_list_source_idx").on(t.sourceKey),
+  ]
+);
+
+export type GuestListEntry    = typeof guestList.$inferSelect;
+export type NewGuestListEntry = typeof guestList.$inferInsert;

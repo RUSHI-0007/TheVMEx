@@ -301,6 +301,35 @@ function DashboardScreen({
                 <path d="M6 12l4-4-4-4" stroke="#9a948c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+
+            {/* VIP Guest List */}
+            <button
+              type="button"
+              onClick={() => router.push("/admin/guestlist")}
+              className="w-full flex items-center justify-between px-5 py-5 bg-[#151316] border border-gold/20 hover:border-gold/50 hover:bg-[#1a1720] transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 2l2 4 4.5.7-3.2 3.1.8 4.5L9 12l-4.1 2.3.8-4.5L2.5 6.7 7 6z" stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-body text-[0.9rem] font-semibold text-text-primary">VIP Guest List</p>
+                  <p className="font-body text-[0.72rem] text-text-muted mt-0.5">
+                    Upload &amp; check in offline guests by source
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-body text-[0.6rem] tracking-[0.1em] uppercase px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  VIP
+                </span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 12l4-4-4-4" stroke="#9a948c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </div>
