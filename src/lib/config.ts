@@ -44,7 +44,7 @@ export const TICKET_TIERS = [
     id: "female_pass",
     label: "Female Pass",
     description: "Entry pass for one female.",
-    price: 499,
+    price: 799,
     inclusions: [
       "1 Entry pass",
       "Welcome drink",
@@ -59,7 +59,7 @@ export const TICKET_TIERS = [
     id: "male_pass",
     label: "Male Pass",
     description: "Entry pass for one male.",
-    price: 599,
+    price: 999,
     inclusions: [
       "1 Entry pass",
       "Welcome drink",
@@ -74,7 +74,7 @@ export const TICKET_TIERS = [
     id: "couple_pass",
     label: "Couple Pass",
     description: "Entry pass for one couple.",
-    price: 999,
+    price: 1599,
     inclusions: [
       "Entry for a couple",
       "Welcome drinks",
@@ -89,7 +89,7 @@ export const TICKET_TIERS = [
     id: "group_pass",
     label: "Group of 5",
     description: "Entry pass for a group of 5.",
-    price: 2599,
+    price: 3999,
     inclusions: [
       "Entry for 5 people",
       "Welcome drinks",
