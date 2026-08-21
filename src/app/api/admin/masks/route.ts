@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
     .from(maskOrders)
     .orderBy(desc(maskOrders.createdAt));
 
-  // Split into pending (oldest first) + paid (newest first)
-  const pending = rows.filter((r) => r.status === "pending").reverse();
+  // Split into pending (newest first) + paid (newest first)
+  const pending = rows.filter((r) => r.status === "pending");
   const paid    = rows.filter((r) => r.status === "paid");
 
   return NextResponse.json({ pending, paid, maskPrice: MASK_PRICE_RUPEES });

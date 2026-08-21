@@ -353,7 +353,7 @@ export default function MasksPage() {
         {pending.length > 0 && (
           <div>
             <p className="font-body text-[0.6rem] tracking-[0.2em] uppercase text-text-dim px-5 pt-4 pb-2">
-              Pending — serve in order ↓
+              Pending — newest first ↓
             </p>
             <div className="divide-y divide-gold/[0.07]">
               {pending.map((order) => (
