@@ -231,10 +231,12 @@ export default function MasksPage() {
         "postgres_changes",
         { event: "*", schema: "public", table: "mask_orders" },
         (payload) => {
+          // If we're receiving events, the connection is clearly working
+          setRtStatus("live");
+
           const row = payload.new as MaskOrder;
 
           if (payload.eventType === "INSERT") {
-            // New order — prepend to pending, flash glow
             setPending((prev) => [row, ...prev]);
             setNewIds((prev) => new Set([...prev, row.id]));
             setTimeout(() => {
@@ -246,7 +248,6 @@ export default function MasksPage() {
             }, 3000);
           } else if (payload.eventType === "UPDATE") {
             if (row.status === "paid") {
-              // Move from pending → paid
               setPending((prev) => prev.filter((o) => o.id !== row.id));
               setPaid((prev) => [row, ...prev]);
             }
@@ -256,7 +257,7 @@ export default function MasksPage() {
       .subscribe((status) => {
         if (status === "SUBSCRIBED") setRtStatus("live");
         else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setRtStatus("error");
-        else setRtStatus("connecting");
+        // CLOSED = transitioning, keep as connecting — don't flip to error
       });
 
     channelRef.current = channel;
