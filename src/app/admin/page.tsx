@@ -330,6 +330,38 @@ function DashboardScreen({
                 </svg>
               </div>
             </button>
+
+            {/* Mask Counter */}
+            <button
+              type="button"
+              onClick={() => router.push("/admin/masks")}
+              className="w-full flex items-center justify-between px-5 py-5 bg-[#151316] border border-gold/20 hover:border-gold/50 hover:bg-[#1a1720] transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-gold/30 flex items-center justify-center group-hover:border-gold/60 transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <ellipse cx="9" cy="9" rx="7" ry="5" stroke="#d4af37" strokeWidth="1.5" />
+                    <path d="M5 9c0-2.2 1.8-4 4-4" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx="13.5" cy="5.5" r="1.5" fill="#d4af37" />
+                    <path d="M12.5 5.5h3M13.5 4.5v3" stroke="#d4af37" strokeWidth="1" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-body text-[0.9rem] font-semibold text-text-primary">Mask Counter</p>
+                  <p className="font-body text-[0.72rem] text-text-muted mt-0.5">
+                    Live queue · Person 2&apos;s station
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-body text-[0.6rem] tracking-[0.1em] uppercase px-2 py-0.5 bg-gold/10 border border-gold/20 text-gold">
+                  Live
+                </span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 12l4-4-4-4" stroke="#9a948c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </div>

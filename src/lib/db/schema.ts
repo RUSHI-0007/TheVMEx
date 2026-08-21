@@ -1,4 +1,4 @@
-import { pgTable, text, integer, real, index, boolean, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, index, boolean, jsonb, uniqueIndex, uuid, timestamp } from "drizzle-orm/pg-core";
 
 export const orders = pgTable(
   "orders",
@@ -85,3 +85,28 @@ export const guestList = pgTable(
 
 export type GuestListEntry    = typeof guestList.$inferSelect;
 export type NewGuestListEntry = typeof guestList.$inferInsert;
+
+// ─── Mask Orders (real-time mask distribution at entry) ──────────────────────
+export const maskOrders = pgTable(
+  "mask_orders",
+  {
+    id:        uuid("id").primaryKey().defaultRandom(),
+    guestName: text("guest_name").notNull(),
+    source:    text("source").notNull(),     // e.g. "Ticket", "Gourish Patil", "Manthan"
+    maskCount: integer("mask_count").notNull(),
+    amountDue: integer("amount_due").notNull(), // maskCount × MASK_PRICE_RUPEES
+    status:    text("status")
+      .$type<"pending" | "paid">()
+      .notNull()
+      .default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    paidAt:    timestamp("paid_at",    { withTimezone: true }),
+  },
+  (t) => [
+    index("mask_orders_status_idx").on(t.status),
+    index("mask_orders_created_at_idx").on(t.createdAt),
+  ]
+);
+
+export type MaskOrder    = typeof maskOrders.$inferSelect;
+export type NewMaskOrder = typeof maskOrders.$inferInsert;

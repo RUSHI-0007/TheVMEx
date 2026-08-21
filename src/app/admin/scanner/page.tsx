@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
+import { MASK_PRICE_RUPEES } from "@/lib/config";
+
 
 interface OfflineTicket {
   ticketId: string;
@@ -33,6 +35,12 @@ export default function ScannerPage() {
   const [status, setStatus] = useState<ScanStatus>("idle");
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<OfflineTicket | null>(null);
+
+  // ─── Mask counter state ────────────────────────────────────────────────────
+  const [maskCount, setMaskCount] = useState(1);
+  const [maskSent, setMaskSent]   = useState(false);  // true = "✓ Sent!" flash
+  const [maskSending, setMaskSending] = useState(false);
+
   const [cameraActive, setCameraActive] = useState(false);
 
   // Offline Sync State
@@ -290,7 +298,36 @@ export default function ScannerPage() {
     setStatus("scanning");
     setResult(null);
     setMessage("Point at ticket QR code");
+    // Reset mask state for next guest
+    setMaskCount(1);
+    setMaskSent(false);
+    setMaskSending(false);
   };
+
+  // ─── Send mask order to Person 2 ─────────────────────────────────────────
+  const handleSendMask = async () => {
+    if (!result || maskCount < 1 || maskSending || maskSent) return;
+    setMaskSending(true);
+    try {
+      await fetch("/api/admin/masks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestName: result.attendeeName,
+          source: result.tierName,
+          maskCount,
+        }),
+      });
+      setMaskSent(true);
+      // Re-enable after 2s (anti-double-tap)
+      setTimeout(() => setMaskSent(false), 2000);
+    } catch {
+      // Silently ignore — Person 2 can handle duplicates
+    } finally {
+      setMaskSending(false);
+    }
+  };
+
 
   const statusColor = {
     idle: "border-gold/20 text-text-muted",
@@ -418,7 +455,7 @@ export default function ScannerPage() {
               status === "already_checked_in" ? "bg-amber-900/90 backdrop-blur-sm" :
               "bg-red-900/90 backdrop-blur-sm"
             }`}>
-              <div className={`text-center ${
+              <div className={`w-full max-w-sm text-center ${
                 status === "found" ? "text-emerald-400" : 
                 status === "already_checked_in" ? "text-amber-400" :
                 "text-[#ff6b6b]"
@@ -441,7 +478,7 @@ export default function ScannerPage() {
                 <p className="font-display text-4xl font-bold mb-2">{message}</p>
                 
                 {result && (
-                  <div className="mt-8 space-y-2">
+                  <div className="mt-6 space-y-2">
                     <p className="font-display text-3xl text-white">{result.attendeeName}</p>
                     <p className="font-body text-xl text-white/80">{result.tierName} × {result.quantity}</p>
                     {result.guests && result.guests.length > 0 && (
@@ -456,11 +493,63 @@ export default function ScannerPage() {
                         </ul>
                       </div>
                     )}
+
+                    {/* ── Mask counter step (only on valid, unchecked scan) ── */}
+                    {status === "found" && (
+                      <div className="mt-6 pt-5 border-t border-white/20">
+                        <p className="font-body text-[0.65rem] tracking-[0.2em] uppercase text-white/50 mb-3">
+                          Masks needed for this group?
+                        </p>
+                        <div className="flex items-center justify-center gap-4 mb-3">
+                          <button
+                            type="button"
+                            id="mask-decrement"
+                            onClick={() => setMaskCount((c) => Math.max(0, c - 1))}
+                            className="w-12 h-12 border border-white/30 text-white text-2xl font-bold flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all"
+                          >
+                            −
+                          </button>
+                          <div className="text-center">
+                            <p className="font-display text-4xl font-bold text-white tabular-nums">{maskCount}</p>
+                            {maskCount > 0 && (
+                              <p className="font-body text-[0.8rem] text-emerald-300 tabular-nums">
+                                ₹{maskCount * MASK_PRICE_RUPEES}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            id="mask-increment"
+                            onClick={() => setMaskCount((c) => Math.min(10, c + 1))}
+                            className="w-12 h-12 border border-white/30 text-white text-2xl font-bold flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        {maskCount > 0 && (
+                          <button
+                            type="button"
+                            id="mask-send-btn"
+                            onClick={handleSendMask}
+                            disabled={maskSending || maskSent}
+                            className={`w-full py-3.5 font-body font-bold text-[0.82rem] tracking-[0.12em] uppercase transition-all active:scale-[0.98] ${
+                              maskSent
+                                ? "bg-emerald-500/80 text-white border border-emerald-400/50"
+                                : "bg-white/90 text-[#0b0b0d] hover:bg-white disabled:opacity-50"
+                            }`}
+                          >
+                            {maskSent ? "✓ Sent!" : maskSending ? "Sending…" : "Send to Mask Counter"}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           )}
+
 
           {/* Bottom panel */}
           <div className="fixed bottom-0 left-0 right-0 z-20 bg-[#0b0b0d] border-t border-gold/10">

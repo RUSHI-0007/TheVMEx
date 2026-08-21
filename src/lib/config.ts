@@ -160,3 +160,7 @@ export const CONTACT = {
 } as const;
 
 export const ADMIN_SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || "default_secret_for_development";
+
+// ─── Mask Counter ─────────────────────────────────────────────────────────────
+// Price per mask distributed at the entry gate (Person 2's station)
+export const MASK_PRICE_RUPEES = 300;
