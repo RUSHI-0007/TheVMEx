@@ -588,6 +588,56 @@ function SearchTab() {
                           </div>
                         )}
 
+                        {/* ── Mask counter ── */}
+                        <div className="pt-4 mt-4 border-t border-white/[0.05]">
+                          <p className="font-body text-[0.6rem] tracking-[0.18em] uppercase text-[#5e5a55] mb-3">
+                            Masks for this group?
+                          </p>
+                          <div className="flex items-center gap-3 mb-3">
+                            <button
+                              type="button"
+                              id={`mask-dec-${guest.id}`}
+                              onClick={() => setMaskCounts((prev) => new Map(prev).set(guest.id, Math.max(0, getMaskCount(guest.id) - 1)))}
+                              className="w-10 h-10 border border-white/20 text-[#ede6da] text-xl font-bold flex items-center justify-center hover:bg-white/[0.05] active:scale-95 transition-all"
+                            >
+                              −
+                            </button>
+                            <div className="flex-1 text-center">
+                              <p className="font-display text-[2rem] font-bold text-[#ede6da] tabular-nums leading-none">{getMaskCount(guest.id)}</p>
+                              {getMaskCount(guest.id) > 0 && (
+                                <p className="font-body text-[0.72rem] text-gold tabular-nums mt-0.5">
+                                  ₹{getMaskCount(guest.id) * MASK_PRICE_RUPEES}
+                                </p>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              id={`mask-inc-${guest.id}`}
+                              onClick={() => setMaskCounts((prev) => new Map(prev).set(guest.id, Math.min(10, getMaskCount(guest.id) + 1)))}
+                              className="w-10 h-10 border border-white/20 text-[#ede6da] text-xl font-bold flex items-center justify-center hover:bg-white/[0.05] active:scale-95 transition-all"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          {/* Standalone Send button (only if ALREADY checked in and they want to send more masks) */}
+                          {isChecked && getMaskCount(guest.id) > 0 && (
+                            <button
+                              type="button"
+                              id={`mask-send-${guest.id}`}
+                              onClick={() => handleSendMask(guest)}
+                              disabled={isMaskSending(guest.id) || isMaskSent(guest.id)}
+                              className={`w-full py-3 mb-4 font-body font-bold text-[0.78rem] tracking-[0.12em] uppercase transition-all ${
+                                isMaskSent(guest.id)
+                                  ? "border border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                                  : "border border-gold/40 text-gold hover:bg-gold/[0.06] disabled:opacity-40"
+                              }`}
+                            >
+                              {isMaskSent(guest.id) ? "✓ Sent!" : isMaskSending(guest.id) ? "Sending…" : "Send to Mask Counter"}
+                            </button>
+                          )}
+                        </div>
+
                         {/* Action buttons */}
                         <div className="pt-3 mt-3 border-t border-white/[0.06]">
                           {isChecked ? (
@@ -607,61 +657,26 @@ function SearchTab() {
                           ) : (
                             <button
                               type="button"
-                              onClick={() => handleCheckIn(guest)}
+                              onClick={() => {
+                                handleCheckIn(guest);
+                                if (getMaskCount(guest.id) > 0) {
+                                  handleSendMask(guest);
+                                }
+                              }}
                               disabled={isBusy}
-                              className="w-full py-3 border border-white/20 text-[#ede6da] font-body text-[0.8rem] font-bold tracking-[0.15em] uppercase hover:bg-white/[0.05] transition-colors disabled:opacity-30"
+                              className={`w-full py-3 border font-body font-bold text-[0.8rem] tracking-[0.15em] uppercase hover:bg-white/[0.05] transition-colors disabled:opacity-30 ${
+                                getMaskCount(guest.id) > 0
+                                  ? "border-gold/40 text-gold hover:bg-gold/[0.06]"
+                                  : "border-white/20 text-[#ede6da]"
+                              }`}
                             >
-                              {isBusy ? "Checking in…" : "Enter"}
+                              {isBusy 
+                                ? "Processing…" 
+                                : getMaskCount(guest.id) > 0 
+                                  ? `Enter & Send ${getMaskCount(guest.id)} Mask${getMaskCount(guest.id) !== 1 ? 's' : ''}` 
+                                  : "Enter"}
                             </button>
                           )}
-
-                          {/* ── Mask counter ── */}
-                          <div className="mt-4 pt-4 border-t border-white/[0.05]">
-                            <p className="font-body text-[0.6rem] tracking-[0.18em] uppercase text-[#5e5a55] mb-3">
-                              Masks for this group?
-                            </p>
-                            <div className="flex items-center gap-3 mb-3">
-                              <button
-                                type="button"
-                                id={`mask-dec-${guest.id}`}
-                                onClick={() => setMaskCounts((prev) => new Map(prev).set(guest.id, Math.max(0, getMaskCount(guest.id) - 1)))}
-                                className="w-10 h-10 border border-white/20 text-[#ede6da] text-xl font-bold flex items-center justify-center hover:bg-white/[0.05] active:scale-95 transition-all"
-                              >
-                                −
-                              </button>
-                              <div className="flex-1 text-center">
-                                <p className="font-display text-[2rem] font-bold text-[#ede6da] tabular-nums leading-none">{getMaskCount(guest.id)}</p>
-                                {getMaskCount(guest.id) > 0 && (
-                                  <p className="font-body text-[0.72rem] text-gold tabular-nums mt-0.5">
-                                    ₹{getMaskCount(guest.id) * MASK_PRICE_RUPEES}
-                                  </p>
-                                )}
-                              </div>
-                              <button
-                                type="button"
-                                id={`mask-inc-${guest.id}`}
-                                onClick={() => setMaskCounts((prev) => new Map(prev).set(guest.id, Math.min(10, getMaskCount(guest.id) + 1)))}
-                                className="w-10 h-10 border border-white/20 text-[#ede6da] text-xl font-bold flex items-center justify-center hover:bg-white/[0.05] active:scale-95 transition-all"
-                              >
-                                +
-                              </button>
-                            </div>
-                            {getMaskCount(guest.id) > 0 && (
-                              <button
-                                type="button"
-                                id={`mask-send-${guest.id}`}
-                                onClick={() => handleSendMask(guest)}
-                                disabled={isMaskSending(guest.id) || isMaskSent(guest.id)}
-                                className={`w-full py-3 font-body font-bold text-[0.78rem] tracking-[0.12em] uppercase transition-all ${
-                                  isMaskSent(guest.id)
-                                    ? "border border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                                    : "border border-gold/40 text-gold hover:bg-gold/[0.06] disabled:opacity-40"
-                                }`}
-                              >
-                                {isMaskSent(guest.id) ? "✓ Sent!" : isMaskSending(guest.id) ? "Sending…" : "Send to Mask Counter"}
-                              </button>
-                            )}
-                          </div>
                         </div>
 
                       </div>
