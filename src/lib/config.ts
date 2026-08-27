@@ -62,15 +62,15 @@ export const EVENTS_ARCHIVE = [
     ],
     // Drop real photos into /public/images/ and update these paths.
     // Pattern: /images/masquerade-night-1.jpg, masquerade-night-2.jpg …
-    coverImage: "/images/image.png",
-    galleryImages: [] as string[],
-    videos: ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4"],
+    coverImage: "/images/IMG_8961.PNG",
+    galleryImages: ["/images/IMG_8961.PNG"],
+    videos: ["/videos/Video4.MOV", "/videos/Video5.MOV", "/videos/Video6.MOV"],
     galleryAnchor: "#gallery",
     isComplete: true,
   },
   {
-    slug: "thevmex-night-2025",
-    name: "TheVMEx Night",
+    slug: "kiki-event-2025",
+    name: "Kiki Event",
     edition: "I",
     year: "2025",
     date: "2025",
@@ -79,15 +79,15 @@ export const EVENTS_ARCHIVE = [
     attendees: "500+",
     highlight: "The night that started it all.",
     recap:
-      "TheVMEx Night 2025 was the debut — an experiment in premium event-making that set the standard for everything that followed. 500+ people, one unforgettable night, and proof that Pune deserved better events.",
+      "Kiki Event 2025 was the debut — an experiment in premium event-making that set the standard for everything that followed. 500+ people, one unforgettable night, and proof that Pune deserved better events.",
     stats: [
       { label: "Attendees", value: "500+" },
       { label: "Edition", value: "I" },
       { label: "Year", value: "2025" },
     ],
-    coverImage: "",            // ← add cover photo when available
-    galleryImages: [] as string[],
-    videos: [] as string[],
+    coverImage: "/images/image.png",
+    galleryImages: ["/images/image.png"],
+    videos: ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4"],
     galleryAnchor: "",
     isComplete: true,
   },

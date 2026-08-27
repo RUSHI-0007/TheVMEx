@@ -14,47 +14,40 @@ type GalleryItem = {
 };
 
 // ─── Gallery items ─────────────────────────────────────────────────────────
-// Drop real Masquerade Night photos into /public/images/ and update src paths.
-// Suggested naming: masquerade-night-1.jpg, masquerade-night-2.jpg …
+// Masquerade Night 2026 — real media only.
+// MOV files play natively on Safari/iOS. Convert to mp4 for full cross-browser support.
 const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 1,
-    type: "video",
-    src: "/videos/video1.mp4",
-    alt: "Masquerade Night 2026 — live performance highlights",
-    className: "col-span-1 row-span-2",
+    type: "image",
+    src: "/images/IMG_8961.PNG",
+    alt: "Masquerade Night 2026 — masked guests at PIVO GARTEN",
+    className: "col-span-2 row-span-2", // hero frame
   },
   {
     id: 2,
-    type: "image",
-    // ← swap with real photo: /images/masquerade-night-1.jpg
-    src: "/images/image.png",
-    alt: "Masquerade Night 2026 — crowd at PIVO GARTEN",
+    type: "video",
+    src: "/videos/Video4.MOV",
+    alt: "Masquerade Night 2026 — crowd reel",
     className: "col-span-1 row-span-1",
   },
   {
     id: 3,
     type: "video",
-    src: "/videos/video2.mp4",
-    alt: "Masquerade Night 2026 — atmosphere reel",
+    src: "/videos/Video5.MOV",
+    alt: "Masquerade Night 2026 — stage reel",
     className: "col-span-1 row-span-1",
   },
   {
     id: 4,
-    type: "image",
-    // ← swap with real photo: /images/masquerade-night-2.jpg
-    src: "/images/image.png",
-    alt: "Masquerade Night 2026 — masked guests",
-    className: "col-span-2 row-span-1",
-  },
-  {
-    id: 5,
     type: "video",
-    src: "/videos/video3.mp4",
-    alt: "Masquerade Night 2026 — full event reel",
-    className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
+    src: "/videos/Video6.MOV",
+    alt: "Masquerade Night 2026 — moments reel",
+    className: "col-span-2 md:col-span-3 row-span-1",
   },
 ];
+
+
 
 export default function GallerySection() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
@@ -119,7 +112,7 @@ export default function GallerySection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-3 auto-rows-[160px] md:auto-rows-[220px] gap-0.5 mb-5"
+          className="grid grid-cols-2 md:grid-cols-3 auto-rows-[180px] md:auto-rows-[220px] gap-0.5 mb-5"
         >
           <AnimatePresence mode="popLayout">
           {filteredItems.map((item, i) => (
@@ -129,7 +122,7 @@ export default function GallerySection() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.35, delay: i * 0.05 }}
-              className={`relative overflow-hidden cursor-zoom-in group bg-[#0b0b0d] ${i >= 3 ? "max-md:hidden" : ""} ${item.className}`}
+              className={`relative overflow-hidden cursor-zoom-in group bg-[#0b0b0d] ${item.className}`}
               onClick={() => setSelectedItem(item)}
             >
               {item.type === "image" ? (
