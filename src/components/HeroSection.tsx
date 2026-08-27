@@ -4,40 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { EVENT } from "@/lib/config";
 
-// ─── Countdown ─────────────────────────────────────────────────────────────
-function useCountdown(targetISO: string) {
-  const [t, setT] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  useEffect(() => {
-    const target = new Date(targetISO).getTime();
-    const tick = () => {
-      const diff = target - Date.now();
-      if (diff <= 0) { setT({ days: 0, hours: 0, minutes: 0, seconds: 0 }); return; }
-      setT({
-        days:    Math.floor(diff / 86400000),
-        hours:   Math.floor((diff % 86400000) / 3600000),
-        minutes: Math.floor((diff % 3600000) / 60000),
-        seconds: Math.floor((diff % 60000) / 1000),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [targetISO]);
-  return t;
-}
-
-function CountdownUnit({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex flex-col items-center">
-      <span className="font-display text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-[#d4af37] leading-none tabular-nums tracking-tighter">
-        {String(value).padStart(2, "0")}
-      </span>
-      <span className="font-body text-[0.5rem] tracking-[0.22em] uppercase text-[#5e5a55] mt-1.5">
-        {label}
-      </span>
-    </div>
-  );
-}
+// Countdown logic removed for generic portfolio
 
 // ─── Navbar ────────────────────────────────────────────────────────────────
 function Navbar() {
@@ -56,7 +23,6 @@ function Navbar() {
   const links = [
     { label: "About",  href: "#about" },
     { label: "Events", href: "#events" },
-    { label: "Lineup", href: "#lineup" },
     { label: "Gallery", href: "#gallery" },
   ];
 
@@ -146,8 +112,6 @@ function Navbar() {
 
 // ─── Hero ──────────────────────────────────────────────────────────────────
 export default function HeroSection() {
-  const countdown = useCountdown(EVENT.dateISO);
-  const eventPast = new Date(EVENT.dateISO).getTime() < Date.now();
 
   const fadeUp: Variants = {
     hidden: { opacity: 0, y: 24 },
@@ -187,7 +151,7 @@ export default function HeroSection() {
             custom={0} initial="hidden" animate="show" variants={fadeUp}
             className="font-script text-[clamp(1.1rem,3vw,1.5rem)] text-[#c9a24b] mb-1 leading-none"
           >
-            TheVMEx presents
+            Welcome to
           </motion.p>
 
           {/* Title */}
@@ -196,53 +160,21 @@ export default function HeroSection() {
             className="font-display font-black tracking-wide leading-[0.92] text-[#ede6da] mb-3"
             style={{ fontSize: "clamp(2.6rem, 11vw, 7rem)" }}
           >
-            MASQUERADE
+            THE VM
             <br />
-            <span className="text-[#d4af37]">NIGHT</span>
+            <span className="text-[#d4af37]">EXPERIENCE</span>
           </motion.h1>
 
           {/* Subtitle */}
           <motion.p
             custom={2} initial="hidden" animate="show" variants={fadeUp}
-            className="font-serif italic text-[#9a948c] mb-8 leading-relaxed"
+            className="font-serif italic text-[#9a948c] mb-12 leading-relaxed"
             style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.2rem)" }}
           >
-            An Evening Shrouded in Mystery &amp; Elegance
+            Crafting Premium Event Experiences in Pune
           </motion.p>
 
-          {/* Info chips */}
-          <motion.div
-            custom={3} initial="hidden" animate="show" variants={fadeUp}
-            className="flex flex-wrap justify-center gap-2 mb-8"
-          >
-            {[
-              { icon: "calendar", text: EVENT.date },
-              { icon: "pin",      text: EVENT.venue },
-              { icon: "music",    text: `Ft. ${EVENT.artist}` },
-            ].map(({ icon, text }) => (
-              <div
-                key={text}
-                className="inline-flex items-center gap-2 px-3.5 py-2 border border-[#d4af37]/18 bg-[#d4af37]/[0.04] backdrop-blur-sm"
-              >
-                {icon === "calendar" && (
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#c9a24b" strokeWidth="1.2" strokeLinecap="round">
-                    <rect x="1" y="2" width="10" height="9" rx="1"/><line x1="1" y1="5" x2="11" y2="5"/><line x1="4" y1="1" x2="4" y2="3"/><line x1="8" y1="1" x2="8" y2="3"/>
-                  </svg>
-                )}
-                {icon === "pin" && (
-                  <svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="#c9a24b" strokeWidth="1.2" strokeLinecap="round">
-                    <path d="M5 1C3.07 1 1.5 2.57 1.5 4.5c0 2.83 3.5 6.5 3.5 6.5s3.5-3.67 3.5-6.5C8.5 2.57 6.93 1 5 1z"/><circle cx="5" cy="4.5" r="1.2"/>
-                  </svg>
-                )}
-                {icon === "music" && (
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#c9a24b" strokeWidth="1.2" strokeLinecap="round">
-                    <path d="M4.5 9V3l6-1v6"/><circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="8" r="1.5"/>
-                  </svg>
-                )}
-                <span className="font-body text-[0.72rem] font-medium tracking-wide text-[#9a948c]">{text}</span>
-              </div>
-            ))}
-          </motion.div>
+          {/* Info chips removed for portfolio page */}
 
           {/* CTAs */}
           <motion.div
@@ -257,47 +189,7 @@ export default function HeroSection() {
             </a>
           </motion.div>
 
-          {/* Countdown / Event Complete */}
-          <motion.div
-            custom={5} initial="hidden" animate="show" variants={fadeUp}
-          >
-            {eventPast ? (
-              /* Post-event state */
-              <div className="flex flex-col items-center gap-4">
-                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 border border-gold/30 bg-gold/[0.06] backdrop-blur-sm">
-                  <span className="w-1.5 h-1.5 bg-gold rounded-full" />
-                  <span className="font-body text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-gold">
-                    Event Complete
-                  </span>
-                </div>
-                <a
-                  href="#events"
-                  className="inline-flex items-center gap-2 font-body text-[0.75rem] font-semibold tracking-[0.12em] uppercase text-gold-muted hover:text-gold transition-colors duration-200 group"
-                >
-                  See the Recap
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
-                    <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
-              </div>
-            ) : (
-              /* Countdown (shown before event date) */
-              <>
-                <p className="font-body text-[0.55rem] tracking-[0.28em] uppercase text-[#5e5a55] mb-4">
-                  Event begins in
-                </p>
-                <div className="flex items-start justify-center gap-3 sm:gap-5">
-                  <CountdownUnit value={countdown.days}    label="Days" />
-                  <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
-                  <CountdownUnit value={countdown.hours}   label="Hours" />
-                  <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
-                  <CountdownUnit value={countdown.minutes} label="Mins" />
-                  <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
-                  <CountdownUnit value={countdown.seconds} label="Secs" />
-                </div>
-              </>
-            )}
-          </motion.div>
+          {/* Countdown removed for portfolio page */}
         </div>
 
         {/* Scroll cue */}

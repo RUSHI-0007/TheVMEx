@@ -88,7 +88,7 @@ export const EVENTS_ARCHIVE = [
     coverImage: "/images/image.png",
     galleryImages: ["/images/image.png"],
     videos: ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4"],
-    galleryAnchor: "",
+    galleryAnchor: "#gallery",
     isComplete: true,
   },
 ] as const;

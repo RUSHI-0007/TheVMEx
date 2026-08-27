@@ -4,10 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type FilterTab = "all" | "photos" | "videos";
+type EventTab = "masquerade" | "kiki";
 
 // Aspect ratio drives container shape — no fixed row height
 type GalleryItem = {
   id: number;
+  event: EventTab;
   type: "image" | "video";
   src: string;
   alt: string;
@@ -18,21 +20,20 @@ type GalleryItem = {
 };
 
 // ─── Gallery items ─────────────────────────────────────────────────────────
-// Masquerade Night 2026 — real media, each sized to its natural resolution.
-//   IMG_8961.PNG : 1320×2868  → portrait  1320/2868 ≈ 1:2.17
-//   Video4.MOV   : phone shot → portrait  9:16
-//   Video5.MOV   : excluded (137MB > GitHub limit) — host on Cloudinary/YouTube
-//   Video6.MOV   : camera     → landscape 16:9
 const GALLERY_ITEMS: GalleryItem[] = [
+  // Masquerade Night 2026
   {
     id: 1,
+    event: "masquerade",
     type: "image",
     src: "/images/IMG_8961.PNG",
     alt: "Masquerade Night 2026 — masked guests at PIVO GARTEN",
-    aspectRatio: "1320/2868", // portrait ~1:2.17
+    aspectRatio: "16/9", // portrait ~1:2.17 changed to landscape per user
+    wideOnDesktop: true,
   },
   {
     id: 2,
+    event: "masquerade",
     type: "video",
     src: "/videos/Video4.MOV",
     alt: "Masquerade Night 2026 — crowd reel",
@@ -40,10 +41,45 @@ const GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 3,
+    event: "masquerade",
     type: "video",
     src: "/videos/Video6.MOV",
     alt: "Masquerade Night 2026 — moments reel",
     aspectRatio: "16/9", // landscape
+    wideOnDesktop: true,
+  },
+  // Kiki Event 2025
+  {
+    id: 4,
+    event: "kiki",
+    type: "video",
+    src: "/videos/video1.mp4",
+    alt: "Kiki Event 2025 — live performance",
+    aspectRatio: "9/16",
+  },
+  {
+    id: 5,
+    event: "kiki",
+    type: "image",
+    src: "/images/image.png",
+    alt: "Kiki Event 2025 — crowd",
+    aspectRatio: "1320/2352",
+  },
+  {
+    id: 6,
+    event: "kiki",
+    type: "video",
+    src: "/videos/video2.mp4",
+    alt: "Kiki Event 2025 — atmosphere",
+    aspectRatio: "9/16",
+  },
+  {
+    id: 7,
+    event: "kiki",
+    type: "video",
+    src: "/videos/video3.mp4",
+    alt: "Kiki Event 2025 — full reel",
+    aspectRatio: "16/9",
     wideOnDesktop: true,
   },
 ];
@@ -109,8 +145,10 @@ function GalleryCell({
 export default function GallerySection() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
+  const [activeEvent, setActiveEvent] = useState<EventTab>("masquerade");
 
   const filteredItems = GALLERY_ITEMS.filter((item) => {
+    if (item.event !== activeEvent) return false;
     if (activeFilter === "all") return true;
     if (activeFilter === "photos") return item.type === "image";
     if (activeFilter === "videos") return item.type === "video";
@@ -136,12 +174,24 @@ export default function GallerySection() {
           className="flex flex-col sm:flex-row sm:items-end justify-between mb-7 gap-5"
         >
           <div>
-            <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-2">
-              Gallery
-            </p>
+            <div className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase mb-3 flex flex-wrap gap-4 items-center">
+              <button 
+                onClick={() => setActiveEvent("masquerade")}
+                className={`transition-colors ${activeEvent === "masquerade" ? "text-gold" : "text-text-dim hover:text-gold/70"}`}
+              >
+                Masquerade Night '26
+              </button>
+              <span className="text-text-dim opacity-30">|</span>
+              <button 
+                onClick={() => setActiveEvent("kiki")}
+                className={`transition-colors ${activeEvent === "kiki" ? "text-gold" : "text-text-dim hover:text-gold/70"}`}
+              >
+                Kiki Event '25
+              </button>
+            </div>
             <h2 className="font-display text-[clamp(1.8rem,4vw,2.75rem)] font-bold text-text-primary leading-[1.1]">
-              Masquerade Night<br />
-              <span className="text-gold italic">2026</span>
+              {activeEvent === "masquerade" ? "Masquerade Night" : "Kiki Event"}<br />
+              <span className="text-gold italic">{activeEvent === "masquerade" ? "2026" : "2025"}</span>
             </h2>
           </div>
 
