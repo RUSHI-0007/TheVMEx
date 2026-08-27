@@ -54,9 +54,9 @@ function Navbar() {
   }, [menuOpen]);
 
   const links = [
-    { label: "About",   href: "#about" },
-    { label: "Lineup",  href: "#lineup" },
-    { label: "Details", href: "#details" },
+    { label: "About",  href: "#about" },
+    { label: "Events", href: "#events" },
+    { label: "Lineup", href: "#lineup" },
     { label: "Gallery", href: "#gallery" },
   ];
 
@@ -86,10 +86,10 @@ function Navbar() {
           </a>
         ))}
         <a
-          href="#tickets"
+          href="#book"
           className="btn-gold py-2 px-5 text-[0.75rem]"
         >
-          Book Tickets
+          Book an Event
         </a>
       </nav>
 
@@ -132,11 +132,11 @@ function Navbar() {
             </a>
           ))}
           <a
-            href="#tickets"
+            href="#book"
             onClick={() => setMenuOpen(false)}
             className="btn-gold mt-2 justify-center"
           >
-            Book Tickets
+            Book an Event
           </a>
         </div>
       )}
@@ -147,6 +147,7 @@ function Navbar() {
 // ─── Hero ──────────────────────────────────────────────────────────────────
 export default function HeroSection() {
   const countdown = useCountdown(EVENT.dateISO);
+  const eventPast = new Date(EVENT.dateISO).getTime() < Date.now();
 
   const fadeUp: Variants = {
     hidden: { opacity: 0, y: 24 },
@@ -248,30 +249,54 @@ export default function HeroSection() {
             custom={4} initial="hidden" animate="show" variants={fadeUp}
             className="flex flex-col sm:flex-row justify-center gap-3 mb-12"
           >
-            <a href="#tickets" id="hero-book-cta" className="btn-gold px-9 py-3.5">
-              Book Your Ticket
+            <a href="#events" id="hero-events-cta" className="btn-gold px-9 py-3.5">
+              See Our Events
             </a>
-            <a href="#about" id="hero-details-cta" className="btn-gold-outline px-9 py-3.5">
-              View Details
+            <a href="#book" id="hero-book-cta" className="btn-gold-outline px-9 py-3.5">
+              Book an Event
             </a>
           </motion.div>
 
-          {/* Countdown */}
+          {/* Countdown / Event Complete */}
           <motion.div
             custom={5} initial="hidden" animate="show" variants={fadeUp}
           >
-            <p className="font-body text-[0.55rem] tracking-[0.28em] uppercase text-[#5e5a55] mb-4">
-              Event begins in
-            </p>
-            <div className="flex items-start justify-center gap-3 sm:gap-5">
-              <CountdownUnit value={countdown.days}    label="Days" />
-              <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
-              <CountdownUnit value={countdown.hours}   label="Hours" />
-              <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
-              <CountdownUnit value={countdown.minutes} label="Mins" />
-              <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
-              <CountdownUnit value={countdown.seconds} label="Secs" />
-            </div>
+            {eventPast ? (
+              /* Post-event state */
+              <div className="flex flex-col items-center gap-4">
+                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 border border-gold/30 bg-gold/[0.06] backdrop-blur-sm">
+                  <span className="w-1.5 h-1.5 bg-gold rounded-full" />
+                  <span className="font-body text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-gold">
+                    Event Complete
+                  </span>
+                </div>
+                <a
+                  href="#events"
+                  className="inline-flex items-center gap-2 font-body text-[0.75rem] font-semibold tracking-[0.12em] uppercase text-gold-muted hover:text-gold transition-colors duration-200 group"
+                >
+                  See the Recap
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="transition-transform duration-200 group-hover:translate-x-1">
+                    <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+              </div>
+            ) : (
+              /* Countdown (shown before event date) */
+              <>
+                <p className="font-body text-[0.55rem] tracking-[0.28em] uppercase text-[#5e5a55] mb-4">
+                  Event begins in
+                </p>
+                <div className="flex items-start justify-center gap-3 sm:gap-5">
+                  <CountdownUnit value={countdown.days}    label="Days" />
+                  <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
+                  <CountdownUnit value={countdown.hours}   label="Hours" />
+                  <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
+                  <CountdownUnit value={countdown.minutes} label="Mins" />
+                  <span className="font-display text-[clamp(1.5rem,4vw,2.2rem)] text-[#8a6f24] leading-none self-start pt-0.5">:</span>
+                  <CountdownUnit value={countdown.seconds} label="Secs" />
+                </div>
+              </>
+            )}
           </motion.div>
         </div>
 

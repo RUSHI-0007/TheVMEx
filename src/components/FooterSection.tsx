@@ -11,7 +11,7 @@ export default function FooterSection() {
         <div className="text-center mb-10">
           <span className="font-script text-[2.25rem] text-gold-dim block leading-none mb-1">{BRAND.name}</span>
           <div className="font-body text-[0.875rem] font-bold tracking-[0.2em] uppercase text-text-dim">
-            Masquerade Night · Aug 2026
+            TheVMEx — Event Portfolio
           </div>
           <div className="font-body text-[0.7rem] text-text-dim mt-2 opacity-60">
             {BRAND.name} is operated by {BRAND.legalName}
@@ -21,11 +21,11 @@ export default function FooterSection() {
         {/* Nav */}
         <nav className="flex flex-wrap justify-center gap-5 mb-8">
           {[
-            { label: "About", href: "#about" },
+            { label: "About",  href: "#about" },
+            { label: "Events", href: "#events" },
             { label: "Lineup", href: "#lineup" },
-            { label: "Details", href: "#details" },
-            { label: "Tickets", href: "#tickets" },
             { label: "Gallery", href: "#gallery" },
+            { label: "Book",   href: "#book" },
             { label: "Contact", href: "/contact" },
           ].map((link) => (
             <a

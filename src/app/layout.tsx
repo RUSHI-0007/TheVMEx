@@ -3,9 +3,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.thevmex.in"), 
-  title: "TheVMEx | The VM Experience — Masquerade Night 2026",
+  title: "TheVMEx | Premium Event Experiences — Pune",
   description:
-    "Welcome to The VM Experience (TheVMEx). Join us for Masquerade Night — an exclusive evening of mystery, elegance, and live music featuring Poltergeist. Friday, 21st August 2026.",
+    "TheVMEx (The VM Experience) is Pune's premium event brand. Two events delivered. Masquerade Night 2026 — done. Follow us for what's next.",
   keywords: [
     "TheVMEx",
     "thevmex",
@@ -14,12 +14,12 @@ export const metadata: Metadata = {
     "VMEx",
     "Masquerade Night",
     "Masquerade Night Pune",
-    "event",
-    "live music",
+    "premium events Pune",
+    "event management Pune",
+    "live music events",
     "Poltergeist",
-    "2026",
-    "ticket booking",
-    "exclusive events"
+    "college events Pune",
+    "private event organizer"
   ],
   authors: [{ name: "TheVMEx (The VM Experience)" }],
   openGraph: {
@@ -27,15 +27,15 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://www.thevmex.in",
     siteName: "TheVMEx — The VM Experience",
-    title: "TheVMEx | The VM Experience — Masquerade Night 2026",
+    title: "TheVMEx | Premium Event Experiences — Pune",
     description:
-      "Welcome to The VM Experience. An exclusive evening shrouded in mystery & elegance. Live music by Poltergeist. Friday, 21st August 2026. Book now.",
+      "TheVMEx — premium event experiences in Pune. Two events. Two chapters. Each one crafted to feel like something different. See our events portfolio.",
     images: [
       {
-        url: "/og-image.jpg", // ← Add event poster here
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "TheVMEx — The VM Experience | Masquerade Night 2026",
+        alt: "TheVMEx — The VM Experience | Premium Events Pune",
       },
     ],
   },
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TheVMEx | The VM Experience",
     description:
-      "Welcome to The VM Experience. An exclusive evening shrouded in mystery & elegance. Live music by Poltergeist. 21 Aug 2026.",
+      "TheVMEx — premium event experiences in Pune. Masquerade Night 2026 complete. Follow for what’s next.",
     images: ["/og-image.jpg"],
   },
   robots: {

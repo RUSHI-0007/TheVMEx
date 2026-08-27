@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+type FilterTab = "all" | "photos" | "videos";
+
 type GalleryItem = {
   id: number;
   type: "image" | "video";
@@ -11,47 +13,65 @@ type GalleryItem = {
   className: string;
 };
 
+// ─── Gallery items ─────────────────────────────────────────────────────────
+// Drop real Masquerade Night photos into /public/images/ and update src paths.
+// Suggested naming: masquerade-night-1.jpg, masquerade-night-2.jpg …
 const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 1,
     type: "video",
     src: "/videos/video1.mp4",
-    alt: "Event video",
-    className: "col-span-1 row-span-2", // tall
+    alt: "Masquerade Night 2026 — live performance highlights",
+    className: "col-span-1 row-span-2",
   },
   {
     id: 2,
     type: "image",
+    // ← swap with real photo: /images/masquerade-night-1.jpg
     src: "/images/image.png",
-    alt: "Event night",
-    className: "col-span-1 row-span-1", 
+    alt: "Masquerade Night 2026 — crowd at PIVO GARTEN",
+    className: "col-span-1 row-span-1",
   },
   {
     id: 3,
     type: "video",
     src: "/videos/video2.mp4",
-    alt: "video2",
-    className: "col-span-1 row-span-1", 
+    alt: "Masquerade Night 2026 — atmosphere reel",
+    className: "col-span-1 row-span-1",
   },
   {
     id: 4,
     type: "image",
+    // ← swap with real photo: /images/masquerade-night-2.jpg
     src: "/images/image.png",
-    alt: "Event night",
-    className: "col-span-2 row-span-1", // wide
+    alt: "Masquerade Night 2026 — masked guests",
+    className: "col-span-2 row-span-1",
   },
   {
     id: 5,
     type: "video",
     src: "/videos/video3.mp4",
-    alt: "video3",
+    alt: "Masquerade Night 2026 — full event reel",
     className: "col-span-2 md:col-span-3 row-span-1 md:row-span-2",
   },
-
 ];
 
 export default function GallerySection() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
+
+  const filteredItems = GALLERY_ITEMS.filter((item) => {
+    if (activeFilter === "all") return true;
+    if (activeFilter === "photos") return item.type === "image";
+    if (activeFilter === "videos") return item.type === "video";
+    return true;
+  });
+
+  const FILTER_TABS: { id: FilterTab; label: string }[] = [
+    { id: "all",    label: "All" },
+    { id: "photos", label: "Photos" },
+    { id: "videos", label: "Videos" },
+  ];
 
   return (
     <section id="gallery" className="bg-[#131115] py-[72px]">
@@ -63,14 +83,34 @@ export default function GallerySection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8 }}
-          className="flex items-end justify-between mb-7 gap-4"
+          className="flex flex-col sm:flex-row sm:items-end justify-between mb-7 gap-5"
         >
-          <h2 className="font-display text-[clamp(1.8rem,4vw,2.75rem)] font-bold text-text-primary leading-[1.1]">
-            Glimpses<br />of the Night
-          </h2>
-          <p className="font-body text-[0.875rem] tracking-[0.2em] uppercase text-text-dim pb-1 shrink-0">
-            Past Nights
-          </p>
+          <div>
+            <p className="font-body text-[0.6875rem] font-semibold tracking-[0.25em] uppercase text-gold-muted mb-2">
+              Gallery
+            </p>
+            <h2 className="font-display text-[clamp(1.8rem,4vw,2.75rem)] font-bold text-text-primary leading-[1.1]">
+              Masquerade Night<br />
+              <span className="text-gold italic">2026</span>
+            </h2>
+          </div>
+
+          {/* Filter tabs */}
+          <div className="flex items-center gap-px shrink-0">
+            {FILTER_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-4 py-2 font-body text-[0.7rem] tracking-[0.15em] uppercase transition-all duration-200 ${
+                  activeFilter === tab.id
+                    ? "bg-gold text-[#0b0b0d] font-semibold"
+                    : "border border-gold/20 text-text-dim hover:text-gold hover:border-gold/40"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Gallery grid */}
@@ -81,13 +121,14 @@ export default function GallerySection() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="grid grid-cols-2 md:grid-cols-3 auto-rows-[160px] md:auto-rows-[220px] gap-0.5 mb-5"
         >
-          {GALLERY_ITEMS.map((item, i) => (
+          <AnimatePresence mode="popLayout">
+          {filteredItems.map((item, i) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.35, delay: i * 0.05 }}
               className={`relative overflow-hidden cursor-zoom-in group bg-[#0b0b0d] ${i >= 3 ? "max-md:hidden" : ""} ${item.className}`}
               onClick={() => setSelectedItem(item)}
             >
@@ -124,6 +165,7 @@ export default function GallerySection() {
               </div>
             </motion.div>
           ))}
+          </AnimatePresence>
         </motion.div>
 
         <p className="font-body text-[0.875rem] tracking-[0.15em] uppercase text-text-dim text-center pt-4">

@@ -39,6 +39,71 @@ export const EVENT = {
   ],
 } as const;
 
+// ─── Events Archive ──────────────────────────────────────────────────────────
+// Canonical list for the EventsArchiveSection portfolio component.
+// Update attendees, stats, and galleryImages as real data arrives.
+export const EVENTS_ARCHIVE = [
+  {
+    slug: "masquerade-night-2026",
+    name: "Masquerade Night",
+    edition: "II",
+    year: "2026",
+    date: "Friday, 21st August 2026",
+    venue: "PIVO GARTEN",
+    artist: "Poltergeist",
+    attendees: "200+",         // ← update with real number
+    highlight: "Masks On. Music Loud. Night Unforgettable.",
+    recap:
+      "Masquerade Night 2026 brought mystery and elegance to PIVO GARTEN. Behind every mask was a story — strangers became characters, Poltergeist held the stage, and the night became something people talked about long after the masks came off.",
+    stats: [
+      { label: "Attendees", value: "200+" },    // ← update
+      { label: "Live Sets", value: "1" },
+      { label: "Edition", value: "II" },
+    ],
+    // Drop real photos into /public/images/ and update these paths.
+    // Pattern: /images/masquerade-night-1.jpg, masquerade-night-2.jpg …
+    coverImage: "/images/image.png",
+    galleryImages: [] as string[],
+    videos: ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4"],
+    galleryAnchor: "#gallery",
+    isComplete: true,
+  },
+  {
+    slug: "thevmex-night-2025",
+    name: "TheVMEx Night",
+    edition: "I",
+    year: "2025",
+    date: "2025",
+    venue: "Pune",
+    artist: "TBA",
+    attendees: "500+",
+    highlight: "The night that started it all.",
+    recap:
+      "TheVMEx Night 2025 was the debut — an experiment in premium event-making that set the standard for everything that followed. 500+ people, one unforgettable night, and proof that Pune deserved better events.",
+    stats: [
+      { label: "Attendees", value: "500+" },
+      { label: "Edition", value: "I" },
+      { label: "Year", value: "2025" },
+    ],
+    coverImage: "",            // ← add cover photo when available
+    galleryImages: [] as string[],
+    videos: [] as string[],
+    galleryAnchor: "",
+    isComplete: true,
+  },
+] as const;
+
+export type EventArchiveEntry = (typeof EVENTS_ARCHIVE)[number];
+
+// ─── Next Event Contact ───────────────────────────────────────────────────────
+export const NEXT_EVENT_CONTACT = {
+  headline: "Planning Something?",
+  subline: "Book TheVMEx for Your Next Night",
+  tagline: "Private events · College fests · Corporate nights",
+  whatsapp: "https://wa.me/918888822040",
+  instagram: "https://www.instagram.com/thevmexperience?igsh=ZTF5d3BvanFiN2c5",
+} as const;
+
 export const TICKET_TIERS = [
   {
     id: "female_pass",
