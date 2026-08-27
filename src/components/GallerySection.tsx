@@ -5,50 +5,107 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type FilterTab = "all" | "photos" | "videos";
 
+// Aspect ratio drives container shape — no fixed row height
 type GalleryItem = {
   id: number;
   type: "image" | "video";
   src: string;
   alt: string;
-  className: string;
+  // CSS aspect-ratio value e.g. "9/16", "16/9", "1320/2868"
+  aspectRatio: string;
+  // Spans 2 columns on desktop (for wide/landscape items)
+  wideOnDesktop?: boolean;
 };
 
 // ─── Gallery items ─────────────────────────────────────────────────────────
-// Masquerade Night 2026 — real media only.
-// MOV files play natively on Safari/iOS. Convert to mp4 for full cross-browser support.
+// Masquerade Night 2026 — real media, each sized to its natural resolution.
+//   IMG_8961.PNG : 1320×2868  → portrait  1320/2868 ≈ 1:2.17
+//   Video4.MOV   : phone shot → portrait  9:16
+//   Video5.MOV   : excluded (137MB > GitHub limit) — host on Cloudinary/YouTube
+//   Video6.MOV   : camera     → landscape 16:9
 const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 1,
     type: "image",
     src: "/images/IMG_8961.PNG",
     alt: "Masquerade Night 2026 — masked guests at PIVO GARTEN",
-    className: "col-span-2 row-span-2", // hero frame
+    aspectRatio: "1320/2868", // portrait ~1:2.17
   },
   {
     id: 2,
     type: "video",
     src: "/videos/Video4.MOV",
     alt: "Masquerade Night 2026 — crowd reel",
-    className: "col-span-1 row-span-1",
+    aspectRatio: "9/16", // portrait
   },
   {
     id: 3,
     type: "video",
-    src: "/videos/Video5.MOV",
-    alt: "Masquerade Night 2026 — stage reel",
-    className: "col-span-1 row-span-1",
-  },
-  {
-    id: 4,
-    type: "video",
     src: "/videos/Video6.MOV",
     alt: "Masquerade Night 2026 — moments reel",
-    className: "col-span-2 md:col-span-3 row-span-1",
+    aspectRatio: "16/9", // landscape
+    wideOnDesktop: true,
   },
 ];
 
+// ─── Single gallery cell ────────────────────────────────────────────────────
+function GalleryCell({
+  item,
+  index,
+  onClick,
+}: {
+  item: GalleryItem;
+  index: number;
+  onClick: (item: GalleryItem) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.4, delay: index * 0.06 }}
+      className={`overflow-hidden cursor-zoom-in group bg-[#0b0b0d] relative w-full${
+        item.wideOnDesktop ? " md:col-span-2" : ""
+      }`}
+      style={{ aspectRatio: item.aspectRatio }}
+      onClick={() => onClick(item)}
+    >
+      {item.type === "image" ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+          style={{ backgroundImage: `url(${item.src})` }}
+        />
+      ) : (
+        <video
+          src={item.src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      )}
 
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-[#0b0b0d]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+        {item.type === "video" ? (
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(201,162,75,0.9)"
+            className="drop-shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        ) : (
+          <svg width="26" height="26" viewBox="0 0 20 20" fill="none"
+            className="scale-90 group-hover:scale-100 transition-transform duration-300">
+            <line x1="10" y1="2" x2="10" y2="18" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="2" y1="10" x2="18" y2="10" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" />
+          </svg>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
+// ─── Main export ─────────────────────────────────────────────────────────────
 export default function GallerySection() {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
@@ -106,62 +163,34 @@ export default function GallerySection() {
           </div>
         </motion.div>
 
-        {/* Gallery grid */}
+        {/* Gallery — aspect-ratio-aware, portrait/landscape containers */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-3 auto-rows-[180px] md:auto-rows-[220px] gap-0.5 mb-5"
         >
+          {/*
+            Grid strategy:
+            Mobile  : 2 columns, items flow naturally in their aspect ratios
+            Desktop : 3 columns. Portrait items = 1 col (tall). Landscape = 2 cols (wide).
+            Each item self-sizes vertically via aspect-ratio — no fixed row height.
+          */}
           <AnimatePresence mode="popLayout">
-          {filteredItems.map((item, i) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.35, delay: i * 0.05 }}
-              className={`relative overflow-hidden cursor-zoom-in group bg-[#0b0b0d] ${item.className}`}
-              onClick={() => setSelectedItem(item)}
-            >
-              {item.type === "image" ? (
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${item.src})` }}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-0.5 items-start">
+              {filteredItems.map((item, i) => (
+                <GalleryCell
+                  key={item.id}
+                  item={item}
+                  index={i}
+                  onClick={setSelectedItem}
                 />
-              ) : (
-                <video
-                  src={item.src}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              )}
-
-              {/* Overlay with play/view icon */}
-              <div className="absolute inset-0 bg-[#0b0b0d]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                {item.type === "video" ? (
-                  // Play icon for videos
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(201,162,75,0.9)" className="drop-shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                ) : (
-                  // Zoom icon for images
-                  <svg width="24" height="24" viewBox="0 0 20 20" fill="none" className="scale-90 group-hover:scale-100 transition-transform duration-300">
-                    <line x1="10" y1="2" x2="10" y2="18" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" />
-                    <line x1="2" y1="10" x2="18" y2="10" stroke="#d4af37" strokeWidth="1.2" strokeLinecap="round" />
-                  </svg>
-                )}
-              </div>
-            </motion.div>
-          ))}
+              ))}
+            </div>
           </AnimatePresence>
         </motion.div>
 
-        <p className="font-body text-[0.875rem] tracking-[0.15em] uppercase text-text-dim text-center pt-4">
+        <p className="font-body text-[0.875rem] tracking-[0.15em] uppercase text-text-dim text-center pt-6">
           Tap any photo or video to view
         </p>
       </div>
@@ -183,7 +212,7 @@ export default function GallerySection() {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="relative max-w-full max-h-full flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking media
+              onClick={(e) => e.stopPropagation()}
             >
               {selectedItem.type === "image" ? (
                 <img
