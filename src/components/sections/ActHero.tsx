@@ -16,7 +16,7 @@ import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { FrameCanvas, type FrameCanvasHandle } from "@/components/hero/FrameCanvas";
 import { HeroTitle, type HeroTitleHandle } from "@/components/hero/HeroTitle";
-import { MaskIris, type MaskIrisHandle } from "@/components/hero/MaskIris";
+import { VmxMonogram, type VmxMonogramHandle } from "@/components/hero/VmxMonogram";
 import { PIN_DESKTOP_VH, PIN_MOBILE_VH } from "@/lib/motion-tokens";
 
 export function ActHero() {
@@ -26,7 +26,7 @@ export function ActHero() {
 
   const frameCanvasRef = useRef<FrameCanvasHandle>(null);
   const heroTitleRef = useRef<HeroTitleHandle>(null);
-  const maskIrisRef = useRef<MaskIrisHandle>(null);
+  const vmxMonogramRef = useRef<VmxMonogramHandle>(null);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -68,9 +68,9 @@ export function ActHero() {
           const titleProgress = Math.min(1, p / 0.35);
           heroTitleRef.current?.setProgress(titleProgress);
 
-          // 3. Masquerade mask iris wipe (0.65 -> 1.00)
-          const irisProgress = Math.max(0, (p - 0.65) / 0.35);
-          maskIrisRef.current?.setProgress(irisProgress);
+          // 3. VMX Monogram handoff (0.65 -> 1.00)
+          const monogramProgress = Math.max(0, (p - 0.65) / 0.35);
+          vmxMonogramRef.current?.setProgress(monogramProgress);
 
           // 4. Scroll cue fade out (0.00 -> 0.15)
           if (scrollCueRef.current) {
@@ -125,8 +125,8 @@ export function ActHero() {
         {/* Layer 1: Frame Canvas (scrubbed video + scrim + vignette) */}
         <FrameCanvas ref={frameCanvasRef} />
 
-        {/* Layer 2: Masquerade Mask Iris Wipe (reveals Act I through aperture) */}
-        <MaskIris ref={maskIrisRef} />
+        {/* Layer 2: Editorial VMX Monogram handoff into Act I */}
+        <VmxMonogram ref={vmxMonogramRef} />
 
         {/* Layer 3: Typography and CTAs */}
         <HeroTitle ref={heroTitleRef} />

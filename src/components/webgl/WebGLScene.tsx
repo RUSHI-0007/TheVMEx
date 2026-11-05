@@ -11,6 +11,7 @@
 import React, { Component, useEffect, type ReactNode } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { gsap } from "@/lib/gsap";
+import { GoldDust } from "./GoldDust";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -70,7 +71,7 @@ export function WebGLScene() {
         style={{ width: "100%", height: "100%" }}
       >
         <TickBridge />
-        {/* Shaders and planes are mounted here in subsequent phases */}
+        <GoldDust />
       </Canvas>
     </WebGLErrorBoundary>
   );
