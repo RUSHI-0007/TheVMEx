@@ -154,28 +154,17 @@ export const FrameCanvas = forwardRef<FrameCanvasHandle, FrameCanvasProps>(
     useImperativeHandle(
       ref,
       () => {
-        const frameProxy = { value: 0 };
         return {
           setProgress: (progress: number) => {
             const count = frameCountRef.current;
             const target = Math.round(progress * (count - 1));
             const clamped = Math.max(0, Math.min(count - 1, target));
 
-            // Smooth proxy to avoid micro-jitter
-            gsap.to(frameProxy, {
-              value: clamped,
-              duration: 0.22,
-              ease: "power1.out",
-              overwrite: "auto",
-              onUpdate: () => {
-                const intFrame = Math.round(frameProxy.value);
-                if (intFrame !== lastDrawnFrameRef.current) {
-                  currentFrameRef.current = intFrame;
-                  drawFrame(intFrame);
-                  updateBitmapWindow(intFrame);
-                }
-              },
-            });
+            if (clamped !== lastDrawnFrameRef.current) {
+              currentFrameRef.current = clamped;
+              drawFrame(clamped);
+              updateBitmapWindow(clamped);
+            }
           },
           drawImmediate: () => {
             drawFrame(currentFrameRef.current);

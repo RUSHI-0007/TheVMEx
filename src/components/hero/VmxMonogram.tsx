@@ -160,3 +160,4 @@ export const VmxMonogram = forwardRef<VmxMonogramHandle>(function VmxMonogram(_,
     </div>
   );
 });
+

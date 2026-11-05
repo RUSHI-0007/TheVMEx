@@ -11,7 +11,7 @@
 import React, { Component, useEffect, type ReactNode } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { gsap } from "@/lib/gsap";
-import { GoldDust } from "./GoldDust";
+import { DisplacementTransition } from "./DisplacementTransition";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -71,7 +71,7 @@ export function WebGLScene() {
         style={{ width: "100%", height: "100%" }}
       >
         <TickBridge />
-        <GoldDust />
+        <DisplacementTransition />
       </Canvas>
     </WebGLErrorBoundary>
   );

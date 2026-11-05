@@ -36,11 +36,11 @@ export function ActFounder() {
       if (photoContainerRef.current) {
         gsap.fromTo(
           photoContainerRef.current,
-          { clipPath: "inset(15% 0% 15% 0%)", opacity: 0, y: 40 },
+          { clipPath: "inset(15% 0% 15% 0%)", opacity: 0, x: -40 },
           {
             clipPath: "inset(0% 0% 0% 0%)",
             opacity: 1,
-            y: 0,
+            x: 0,
             duration: 1.2,
             ease: EASE.vm,
             scrollTrigger: {
@@ -64,13 +64,13 @@ export function ActFounder() {
         });
       }
 
-      // 2. Content entrance
+      // 2. Content entrance (slide from right)
       if (contentRef.current) {
         gsap.fromTo(
           contentRef.current.children,
-          { y: 35, opacity: 0 },
+          { x: 35, opacity: 0 },
           {
-            y: 0,
+            x: 0,
             opacity: 1,
             duration: 0.9,
             ease: EASE.vm,

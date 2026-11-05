@@ -55,7 +55,7 @@ export function ActHero() {
         pin: pinned,
         start: "top top",
         end: `+=${scrollDistance}`,
-        scrub: true,
+        scrub: 0.4,
         anticipatePin: 1,
         onUpdate: (self) => {
           const p = self.progress;
