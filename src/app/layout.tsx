@@ -1,8 +1,44 @@
 import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
+import { LenisProvider } from "@/lib/lenis/LenisProvider";
+import { WebGLCanvas } from "@/components/webgl/WebGLCanvas";
+import { AppBootstrap } from "@/components/AppBootstrap";
+import { Cursor } from "@/components/ui/Cursor";
+import { ScrollProgress } from "@/components/ui/ScrollProgress";
+import { Nav } from "@/components/ui/Nav";
+
+/* ─── Fonts via next/font (self-hosted, no Google request at runtime) ── */
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--next-font-display",
+  fallback: ["Georgia", "Times New Roman", "serif"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  display: "swap",
+  variable: "--next-font-body",
+  fallback: ["system-ui", "-apple-system", "sans-serif"],
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--next-font-mono",
+  fallback: ["Courier New", "monospace"],
+});
+
+/* ─── SEO Metadata (preserved from original) ───────────────────────── */
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.thevmex.in"), 
+  metadataBase: new URL("https://www.thevmex.in"),
   title: "TheVMEx | Premium Event Experiences — Pune",
   description:
     "TheVMEx (The VM Experience) is Pune's premium event brand. Two events delivered. Masquerade Night 2026 — done. Follow us for what's next.",
@@ -19,7 +55,7 @@ export const metadata: Metadata = {
     "live music events",
     "Poltergeist",
     "college events Pune",
-    "private event organizer"
+    "private event organizer",
   ],
   authors: [{ name: "TheVMEx (The VM Experience)" }],
   openGraph: {
@@ -43,7 +79,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TheVMEx | The VM Experience",
     description:
-      "TheVMEx — premium event experiences in Pune. Masquerade Night 2026 complete. Follow for what’s next.",
+      "TheVMEx — premium event experiences in Pune. Masquerade Night 2026 complete. Follow for what's next.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -65,29 +101,100 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/* ─── Root Layout ───────────────────────────────────────────────────── */
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html
+      lang="en"
+      className={`${cormorant.variable} ${inter.variable} ${spaceMono.variable}`}
+      style={{ height: "100%", scrollBehavior: "auto" }}
+    >
       <head>
-        {/* Google Fonts — preconnect + full font stack */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
+        {/* JSON-LD structured data — Phase 7 will add Event schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "TheVMEx",
+              alternateName: "The VM Experience",
+              url: "https://www.thevmex.in",
+              logo: "https://www.thevmex.in/og-image.jpg",
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: "+91-88888-22040",
+                contactType: "customer service",
+              },
+              sameAs: [
+                "https://www.instagram.com/thevmexperience",
+              ],
+            }),
+          }}
         />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600&family=Manrope:wght@300;400;500;600;700&family=Alex+Brush&display=swap"
-          rel="stylesheet"
-        />
-        {/* Analytics slot — add GA/Plausible script here */}
-        {/* <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX" /> */}
       </head>
-      <body className="min-h-full antialiased overflow-x-hidden w-full">{children}</body>
+      <body
+        style={{
+          minHeight: "100dvh",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          overflowX: "hidden",
+          width: "100%",
+          /* font-family picks up the CSS vars set in globals.css,
+             which reference --next-font-* variables injected by next/font */
+          fontFamily: "var(--font-body)",
+        }}
+      >
+        {/* Skip to main content — accessibility */}
+        <a
+          href="#main-content"
+          style={{
+            position: "absolute",
+            left: -9999,
+            top: "auto",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+          }}
+          className="focus:static focus:w-auto focus:h-auto focus:overflow-visible focus:p-4 focus:z-50"
+        >
+          Skip to content
+        </a>
+
+        {/* Client-only bootstrap: GSAP register + quality tier + reduced-motion */}
+        <AppBootstrap />
+
+        {/* Smooth scroll provider + single-clock bridge */}
+        <LenisProvider>
+          {/* Fixed background colour tween layer + persistent WebGL canvas */}
+          <WebGLCanvas />
+
+          {/* Film grain overlay */}
+          <div className="vm-grain" aria-hidden="true" />
+
+          {/* Vignette overlay */}
+          <div className="vm-vignette" aria-hidden="true" />
+
+          {/* Navigation */}
+          <Nav />
+
+          {/* Scroll progress hairline */}
+          <ScrollProgress />
+
+          {/* Custom cursor (desktop only) */}
+          <Cursor />
+
+          {/* Page content — relative z-index above WebGL */}
+          <div style={{ position: "relative", zIndex: 2 }}>
+            {children}
+          </div>
+        </LenisProvider>
+      </body>
     </html>
   );
 }

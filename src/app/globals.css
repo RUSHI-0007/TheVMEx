@@ -1,27 +1,35 @@
 @import "tailwindcss";
 
 @theme {
-  /* ─── Brand Colors ──────────────────────────────────────────────── */
-  --color-gold:         #d4af37;
-  --color-gold-muted:   #c9a24b;
-  --color-gold-dim:     #8a6f24;
-  --color-bronze:       #8c5a2b;
+  /* ─── Spec Design Tokens (source of truth) ───────────────────────── */
+  --color-bg:          #0B0B0D;
+  --color-smoke:       #141418;
+  --color-ink:         #F2EDE4;
+  --color-gold-300:    #E3C58A;
+  --color-gold-500:    #C9A45C;
+  --color-gold-700:    #8F6F32;
+  --color-line:        rgba(242,237,228,.12);
 
-  /* ─── Text hierarchy ────────────────────────────────────────────── */
-  --color-text-primary: #ede6da;
+  /* ─── Legacy aliases (keeps admin/api pages intact) ─────────────── */
+  --color-gold:         #C9A45C;   /* was #d4af37 */
+  --color-gold-muted:   #C9A45C;
+  --color-gold-dim:     #8F6F32;
+  --color-bronze:       #8F6F32;
+  --color-text-primary: #F2EDE4;
   --color-text-muted:   #9a948c;
   --color-text-dim:     #5e5a55;
-
-  /* ─── Surfaces ──────────────────────────────────────────────────── */
-  --color-bg-primary:   #0b0b0d;
-  --color-bg-secondary: #151316;
+  --color-bg-primary:   #0B0B0D;
+  --color-bg-secondary: #141418;
   --color-bg-card:      #18151a;
 
-  /* ─── Typography ────────────────────────────────────────────────── */
-  --font-display: "Playfair Display", "Cormorant Garamond", Georgia, serif;
-  --font-serif:   "Cormorant Garamond", Georgia, serif;
-  --font-body:    "Inter", "Manrope", system-ui, sans-serif;
-  --font-script:  "Alex Brush", cursive;
+  /* ─── Typography — next/font injects --next-font-* CSS variables ── */
+  /* Fallbacks used until next/font variables are injected by the layout */
+  --font-display: var(--next-font-display, "Cormorant Garamond"), Georgia, "Times New Roman", serif;
+  --font-serif:   var(--next-font-display, "Cormorant Garamond"), Georgia, serif;
+  --font-body:    var(--next-font-body, "Inter"), system-ui, -apple-system, sans-serif;
+  --font-mono:    var(--next-font-mono, "Space Mono"), "Courier New", monospace;
+  /* legacy — kept so old components don't break */
+  --font-script:  cursive;
 }
 
 @layer base {
@@ -32,73 +40,126 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Smooth scroll handled by Lenis — disable native */
+    scroll-behavior: auto;
   }
 
   body {
-    @apply bg-[#0b0b0d] text-[#ede6da] font-body min-h-[100dvh] antialiased overflow-x-hidden w-full;
-    /* Subtle dark grain texture */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 300px 300px;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
+    /* Section backgrounds are transparent; fixed bg-tween-layer handles colour */
+    background-image: none;
   }
 
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212,175,55,0.05) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(140,90,43,0.04) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
+  /* ─── Scrollbar ──────────────────────────────────────────────────── */
+  ::-webkit-scrollbar       { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-gold-700); border-radius: 2px; }
+
+  /* ─── Selection ──────────────────────────────────────────────────── */
+  ::selection { background: rgba(201,164,92,.2); color: var(--color-ink); }
+
+  /* ─── Focus — gold ring ──────────────────────────────────────────── */
+  :focus-visible {
+    outline: 1px solid var(--color-gold-500);
+    outline-offset: 3px;
   }
 
-  /* ─── Scrollbar ─────────────────────────────────────────────────── */
-  ::-webkit-scrollbar       { width: 5px; }
-  ::-webkit-scrollbar-track { background: #0b0b0d; }
-  ::-webkit-scrollbar-thumb { background: #8a6f24; border-radius: 3px; }
-
-  /* ─── Selection ─────────────────────────────────────────────────── */
-  ::selection { background: rgba(212,175,55,0.25); color: #ede6da; }
-
-  /* ─── Focus visible ─────────────────────────────────────────────── */
-  :focus-visible { outline: 1px solid rgba(212,175,55,0.6); outline-offset: 2px; }
+  /* ─── Reduced-motion: strip ALL transitions / animations ────────── */
+  [data-reduced-motion="true"] *,
+  [data-reduced-motion="true"] *::before,
+  [data-reduced-motion="true"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer components {
-  /* ─── Gold CTA button ───────────────────────────────────────────── */
+  /* ─── Film-grain overlay (animated noise sprite at 5% opacity) ───── */
+  .vm-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    animation: vm-grain-shift 0.15s steps(1) infinite;
+    opacity: 1;
+    mix-blend-mode: overlay;
+  }
+
+  /* ─── Vignette overlay ───────────────────────────────────────────── */
+  .vm-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 8999;
+    pointer-events: none;
+    background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%);
+  }
+
+  /* ─── Gold CTA button ────────────────────────────────────────────── */
   .btn-gold {
     @apply relative inline-flex items-center justify-center gap-2
            px-7 py-3
            font-body text-[0.8125rem] font-semibold tracking-[0.1em] uppercase
-           text-[#0b0b0d] bg-[#d4af37] border border-[#d4af37]
+           text-[#0B0B0D] bg-[--color-gold-500] border border-[--color-gold-500]
            transition-colors duration-300 whitespace-nowrap
-           hover:bg-[#c9a24b] hover:border-[#c9a24b]
+           hover:bg-[--color-gold-300] hover:border-[--color-gold-300]
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* ─── Gold outline button ───────────────────────────────────────── */
+  /* ─── Gold outline button ────────────────────────────────────────── */
   .btn-gold-outline {
     @apply relative inline-flex items-center justify-center gap-2
            px-7 py-3
            font-body text-[0.8125rem] font-semibold tracking-[0.1em] uppercase
-           text-[#d4af37] bg-transparent border border-[#d4af37]/40
+           text-[--color-gold-500] bg-transparent border border-[--color-gold-500]/40
            transition-all duration-300 whitespace-nowrap overflow-hidden
-           hover:text-[#0b0b0d] hover:border-[#d4af37] hover:bg-[#d4af37]
+           hover:text-[#0B0B0D] hover:border-[--color-gold-500] hover:bg-[--color-gold-500]
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
-}
 
-@layer utilities {
-  /* ─── Hide scrollbar (keep scroll functionality) ────────────────── */
+  /* ─── Hairline rule ──────────────────────────────────────────────── */
+  .vm-rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: var(--color-line);
+    transform-origin: left center;
+  }
+
+  /* ─── Hide scrollbar (keep scroll functionality) ─────────────────── */
   .hide-scrollbar::-webkit-scrollbar { display: none; }
   .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* ─── Safe area for mobile bottom bars ─────────────────────────── */
+  /* ─── Safe area ──────────────────────────────────────────────────── */
   .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 }
 
-/* ─── Animations ────────────────────────────────────────────────────── */
+/* ─── Grain animation — shifts offset every frame for film-noise feel ── */
+@keyframes vm-grain-shift {
+  0%   { background-position:    0%   0%; }
+  10%  { background-position:  -5%  -10%; }
+  20%  { background-position: -15%   5%; }
+  30%  { background-position:   7%  -25%; }
+  40%  { background-position:  -5%  25%; }
+  50%  { background-position: -15%  10%; }
+  60%  { background-position:  15%   0%; }
+  70%  { background-position:  0%  15%; }
+  80%  { background-position:   3%  35%; }
+  90%  { background-position: -10%  10%; }
+  100% { background-position:    0%   0%; }
+}
+
+/* ─── Legacy keyframes (kept for old components) ─────────────────────── */
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -107,12 +168,6 @@
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-8px); }
-}
-
-@keyframes scanline {
-  0%, 100% { transform: translateY(-80px); opacity: 0; }
-  20%, 80%  { opacity: 1; }
-  50%       { transform: translateY(80px); }
 }
 
 @keyframes pulse-gold {

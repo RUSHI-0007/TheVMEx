@@ -1,27 +1,28 @@
-import HeroSection from "@/components/HeroSection";
-import AboutSection from "@/components/AboutSection";
-import GoldDivider from "@/components/GoldDivider";
-import EventsArchiveSection from "@/components/EventsArchiveSection";
-import GallerySection from "@/components/GallerySection";
-import BookingSection from "@/components/BookingSection";
-import ContactSection from "@/components/ContactSection";
-import FooterSection from "@/components/FooterSection";
-// LineupSection, EventDetailsSection, TicketBookingSection preserved but unmounted
+/**
+ * Homepage — "One night, told in acts."
+ * Acts are rendered in sequence; scroll = time.
+ */
+
+import { ActHero } from "@/components/sections/ActHero";
+import { ActManifesto } from "@/components/sections/ActManifesto";
+import { ActFounder } from "@/components/sections/ActFounder";
+import { ActNights } from "@/components/sections/ActNights";
+import { ActMoments } from "@/components/sections/ActMoments";
+import { ActNextChapter } from "@/components/sections/ActNextChapter";
+import { ActInvitation } from "@/components/sections/ActInvitation";
+import { SiteFooter } from "@/components/sections/SiteFooter";
 
 export default function Home() {
   return (
-    <main>
-      <HeroSection />
-      <AboutSection />
-      <GoldDivider />
-      <EventsArchiveSection />
-      <GoldDivider />
-      <GallerySection />
-      <GoldDivider />
-      <BookingSection />
-      <GoldDivider />
-      <ContactSection />
-      <FooterSection />
+    <main id="main-content" aria-label="TheVMEx — Premium Event Experiences">
+      <ActHero />
+      <ActManifesto />
+      <ActFounder />
+      <ActNights />
+      <ActMoments />
+      <ActNextChapter />
+      <ActInvitation />
+      <SiteFooter />
     </main>
   );
 }
