@@ -56,3 +56,4 @@ export function registerManagedVideo(video: HTMLVideoElement): () => void {
     playingVideos.delete(video);
   };
 }
+

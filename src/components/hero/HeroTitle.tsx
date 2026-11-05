@@ -273,7 +273,7 @@ export const HeroTitle = forwardRef<HeroTitleHandle>(function HeroTitle(_, ref) 
           lineHeight: 1.5,
         }}
       >
-        Crafting Premium Event Experiences in Pune
+        We Create Nights You Remember.
       </p>
 
       {/* Action Buttons */}
