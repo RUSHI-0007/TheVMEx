@@ -1,0 +1,28 @@
+{
+  "fps": 24,
+  "durationSeconds": 5.0,
+  "desktop": {
+    "count": 120,
+    "width": 1920,
+    "height": 1080,
+    "pattern": "/frames/desktop/f_%04d.webp",
+    "quality": 82,
+    "sizeMb": 9.4
+  },
+  "mobile": {
+    "count": 60,
+    "width": 1080,
+    "height": 608,
+    "pattern": "/frames/mobile/f_%04d.webp",
+    "quality": 80,
+    "sizeMb": 2.0,
+    "stride": 2
+  },
+  "poster": "/img/hero-poster.jpg",
+  "posterBlur": "/img/hero-poster-blur.jpg",
+  "loopFallback": {
+    "mp4": "/video/hero-loop.mp4",
+    "webm": "/video/hero-loop.webm"
+  },
+  "allIntraFallback": "/video/hero-fallback.mp4"
+}
