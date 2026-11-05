@@ -123,6 +123,8 @@ export function ActNights() {
       cleanupVideo = registerManagedVideo(videoRef.current);
     }
 
+    let mm: ReturnType<typeof gsap.matchMedia> | undefined;
+
     const ctx = gsap.context(() => {
       // 1. Background color tween: #141418 -> warm #100F0D
       const bgLayer =
@@ -179,7 +181,7 @@ export function ActNights() {
       }
 
       // 3. Responsive Stacking Cards with gsap.matchMedia for clean dynamic breakpoint switching
-      const mm = gsap.matchMedia(container);
+      mm = gsap.matchMedia(container);
 
       // Desktop & iPad landscape (>= 1024px): Pinned stacking chapters
       mm.add("(min-width: 1024px)", () => {
@@ -259,7 +261,7 @@ export function ActNights() {
     }, container);
 
     return () => {
-      mm.revert();
+      mm?.revert();
       ctx.revert();
       if (cleanupVideo) cleanupVideo();
     };
