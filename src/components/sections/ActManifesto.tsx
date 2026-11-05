@@ -245,22 +245,17 @@ export function ActManifesto() {
           <div style={{ width: 40, height: 1, backgroundColor: "var(--color-line)" }} />
         </div>
 
-        {/* Headline (Left aligned) */}
+        {/* Headline (Left aligned with house roman + italic + gold styling) */}
         <h2
           ref={headingRef}
+          className="vm-house-headline"
           style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 300,
-            fontStyle: "italic",
-            fontSize: "clamp(42px, 7vw, 98px)",
-            lineHeight: 1.02,
-            letterSpacing: "-0.015em",
-            color: "var(--color-ink)",
+            fontSize: "var(--font-size-display-l)",
             maxWidth: "18ch",
             marginBottom: "clamp(36px, 6vh, 64px)",
           }}
         >
-          Where Mystery Meets Elegance
+          Where <em className="vm-gold">Mystery</em> Meets <em>Elegance</em>
         </h2>
 
         {/* 2-Column Editorial Grid: Left Story / Right Crowd Dancing Video */}

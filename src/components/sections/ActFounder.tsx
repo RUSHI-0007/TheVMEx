@@ -139,21 +139,16 @@ export function ActFounder() {
         overflow: "hidden",
       }}
     >
-      {/* Oversized background Roman Numeral II */}
+      {/* Oversized background Roman Numeral II with outlined 1px stroke */}
       <div
         ref={numeralRef}
         aria-hidden="true"
+        className="vm-ghost-numeral"
         style={{
           position: "absolute",
           top: "5%",
           right: "2%",
-          fontFamily: "var(--font-display)",
           fontSize: "clamp(240px, 38vw, 560px)",
-          lineHeight: 0.8,
-          color: "var(--color-ink)",
-          opacity: 0.02,
-          userSelect: "none",
-          pointerEvents: "none",
           zIndex: 0,
         }}
       >

@@ -101,8 +101,8 @@ export function ActMoments() {
             marginBottom: "clamp(48px, 8vh, 80px)",
           }}
         >
-          Masquerade Night &apos;26<br />
-          <span style={{ opacity: 0.5 }}>Kiki Event &apos;25</span>
+          Masquerade Night ’26<br />
+          <span style={{ opacity: 0.5 }}>Kiki Event ’25</span>
         </h2>
 
         {/* Filter bar placeholder */}

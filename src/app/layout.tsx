@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter, Space_Mono } from "next/font/google";
+import { Bodoni_Moda, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LenisProvider } from "@/lib/lenis/LenisProvider";
 import { WebGLCanvas } from "@/components/webgl/WebGLCanvas";
@@ -8,15 +8,15 @@ import { Cursor } from "@/components/ui/Cursor";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { Nav } from "@/components/ui/Nav";
 
-/* ─── Fonts via next/font (self-hosted, no Google request at runtime) ── */
+/* ─── Option B: Fashion Editorial Typography ───────────────────────── */
+/* Bodoni Moda (variable optical size) + Inter + JetBrains Mono         */
 
-const cormorant = Cormorant_Garamond({
+const bodoniModa = Bodoni_Moda({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
   variable: "--next-font-display",
-  fallback: ["Georgia", "Times New Roman", "serif"],
+  fallback: ["Didot", "Bodoni MT", "Georgia", "serif"],
 });
 
 const inter = Inter({
@@ -27,9 +27,9 @@ const inter = Inter({
   fallback: ["system-ui", "-apple-system", "sans-serif"],
 });
 
-const spaceMono = Space_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
   display: "swap",
   variable: "--next-font-mono",
   fallback: ["Courier New", "monospace"],
@@ -111,7 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${inter.variable} ${spaceMono.variable}`}
+      className={`${bodoniModa.variable} ${inter.variable} ${jetbrainsMono.variable}`}
       style={{ height: "100%", scrollBehavior: "auto" }}
     >
       <head>

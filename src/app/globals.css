@@ -22,14 +22,22 @@
   --color-bg-secondary: #141418;
   --color-bg-card:      #18151a;
 
-  /* ─── Typography — next/font injects --next-font-* CSS variables ── */
-  /* Fallbacks used until next/font variables are injected by the layout */
-  --font-display: var(--next-font-display, "Cormorant Garamond"), Georgia, "Times New Roman", serif;
-  --font-serif:   var(--next-font-display, "Cormorant Garamond"), Georgia, serif;
+  /* ─── Typography (Option B: Bodoni Moda + Inter + JetBrains Mono) ── */
+  --font-display: var(--next-font-display, "Bodoni Moda"), "Didot", "Bodoni MT", Georgia, serif;
+  --font-serif:   var(--next-font-display, "Bodoni Moda"), "Didot", Georgia, serif;
   --font-body:    var(--next-font-body, "Inter"), system-ui, -apple-system, sans-serif;
-  --font-mono:    var(--next-font-mono, "Space Mono"), "Courier New", monospace;
+  --font-mono:    var(--next-font-mono, "JetBrains Mono"), "Courier New", monospace;
   /* legacy — kept so old components don't break */
   --font-script:  cursive;
+
+  /* ─── Fluid Scale Tokens via clamp() ─────────────────────────────── */
+  --font-size-display-xl: clamp(48px, 14vw, 190px);
+  --font-size-display-l:  clamp(36px, 6.5vw, 92px);
+  --font-size-display-m:  clamp(26px, 4vw, 54px);
+  --font-size-h3:         clamp(20px, 2.4vw, 34px);
+  --font-size-lead:       clamp(1.25rem, 1.8vw, 1.6rem);
+  --font-size-body:       clamp(1.02rem, 1.1vw, 1.125rem);
+  --font-size-label:      clamp(0.68rem, 0.75vw, 0.72rem);
 }
 
 @layer base {
@@ -57,6 +65,17 @@
     background-image: none;
   }
 
+  /* ─── Typography Defaults (Step 2: Type System) ─────────────────── */
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+    font-feature-settings: "liga" 1, "dlig" 1;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
   /* ─── Scrollbar ──────────────────────────────────────────────────── */
   ::-webkit-scrollbar       { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--color-bg); }
@@ -82,6 +101,52 @@
 }
 
 @layer components {
+  /* ─── House Headline (Option B: Roman + Italic + Gold Accent) ────── */
+  .vm-house-headline {
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .vm-house-headline em {
+    font-style: italic;
+    font-weight: 400;
+  }
+  .vm-house-headline em.vm-gold {
+    color: var(--color-gold-300);
+  }
+
+  /* ─── Drop Cap (first manifesto paragraph & founder bio) ─────────── */
+  .vm-drop-cap::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.4em;
+    line-height: 0.82;
+    float: left;
+    padding-right: 0.12em;
+    padding-top: 0.05em;
+    color: var(--color-gold-500);
+    font-style: italic;
+  }
+
+  /* ─── Outlined Ghost Numeral (1px stroke at ~10-14% alpha) ───────── */
+  .vm-ghost-numeral {
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(242, 237, 228, 0.12);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* ─── Tabular Counter Figures ────────────────────────────────────── */
+  .vm-tabular-num,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* ─── Film-grain overlay (animated noise sprite at 5% opacity) ───── */
   .vm-grain {
     position: fixed;

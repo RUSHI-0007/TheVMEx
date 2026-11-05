@@ -523,21 +523,16 @@ export function ActNights() {
               willChange: "transform, opacity",
             }}
           >
-            {/* Oversized background Roman numeral positioned away from text column */}
+            {/* Oversized background Roman numeral with outlined 1px stroke */}
             <div
               aria-hidden="true"
+              className="vm-ghost-numeral"
               style={{
                 position: "absolute",
                 right: isAlternate ? "3%" : "auto",
                 left: isAlternate ? "auto" : "3%",
                 top: "5%",
-                fontFamily: "var(--font-display)",
                 fontSize: "clamp(260px, 40vw, 620px)",
-                lineHeight: 0.8,
-                color: "var(--color-ink)",
-                opacity: 0.02,
-                userSelect: "none",
-                pointerEvents: "none",
                 zIndex: 0,
               }}
             >
