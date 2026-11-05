@@ -52,48 +52,12 @@ export function ActInvitation() {
           color: "var(--color-ink)",
           opacity: 0.65,
           maxWidth: "44ch",
-          marginBottom: "clamp(24px, 4vh, 40px)",
-        }}
-      >
-        Book TheVMEx for Your Next Night.
-        Private events · College fests · Corporate nights.
-      </p>
-
-      {/* Pillars */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: "clamp(16px, 2vw, 24px)",
-          maxWidth: 640,
           marginBottom: "clamp(40px, 6vh, 64px)",
         }}
       >
-        {["Premium Production", "Curated Lineups", "End-to-End Management"].map(
-          (p) => (
-            <div
-              key={p}
-              style={{
-                borderTop: "1px solid var(--color-line)",
-                paddingTop: 16,
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "10px",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "var(--color-ink)",
-                  opacity: 0.7,
-                }}
-              >
-                {p}
-              </p>
-            </div>
-          ),
-        )}
-      </div>
+        Book TheVMEx for Your Next Night.
+        Private events · College fests · Curated nights.
+      </p>
 
       {/* Contact block */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

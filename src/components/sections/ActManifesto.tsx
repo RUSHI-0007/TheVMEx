@@ -555,9 +555,8 @@ export function ActManifesto() {
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: 14,
+                  marginBottom: 10,
                 }}
               >
                 <span
@@ -571,20 +570,6 @@ export function ActManifesto() {
                 >
                   Dress Code
                 </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "9px",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "var(--color-gold-300)",
-                    backgroundColor: "rgba(201, 164, 92, 0.12)",
-                    padding: "3px 8px",
-                    borderRadius: "2px",
-                  }}
-                >
-                  Priority Entry
-                </span>
               </div>
 
               <p
@@ -595,23 +580,9 @@ export function ActManifesto() {
                   color: "var(--color-ink)",
                   opacity: 0.9,
                   margin: 0,
-                  marginBottom: 10,
                 }}
               >
-                <strong>Formal / Semi-Formal</strong> — masks encouraged.
-              </p>
-
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "13px",
-                  lineHeight: 1.6,
-                  color: "var(--color-ink)",
-                  opacity: 0.65,
-                  margin: 0,
-                }}
-              >
-                Masked guests receive priority entry and a special surprise upon arrival.
+                <strong>Formal / Semi-Formal</strong> · Masks encouraged.
               </p>
             </div>
           </div>
