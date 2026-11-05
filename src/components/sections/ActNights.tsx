@@ -7,12 +7,13 @@
  * - Chapter I: Kiki Event '25 with the Hero and Co-Founder portrait (public/img/kiki-event.webp).
  *              Layout: Photo on LEFT, Story on RIGHT.
  * - Chapter II: Masquerade Night '26 with performer in hoodie & mask video clip
- *               (public/video/performer-hoodie.mp4).
+ *               (public/video/performer-hoodie.mp4 + .webm, 30fps clean frame).
  *               Layout: Story on LEFT, Performer Video on RIGHT (Alternating!).
- * - Chapter III: Edition III — "In the Works" ambient teaser with gold seal.
- * - Fixed overlap bug: Final card uses natural flow so Act IV Moments never collides into it.
+ * - Chapter III: "In the Works" — purely decorative living teaser with rotating gold halo and seal.
+ * - Fixed overlap bug: Final card pinned with pinSpacing so Act IV Moments never collides into it.
  * - Liquid-gold WebGL displacement: Updates __vmDisplacementState during chapter scroll transitions.
- * - Floating Chapter Navigation Index (I / II / III) with cursor-following hover preview card (P5-07).
+ * - Floating Chapter Navigation Index (I / II / III) with cursor-following hover preview card,
+ *   visible ONLY while Act III is on screen.
  * - Breakpoint-aware jump navigation (desktop pinned offsets vs tablet/mobile document scroll).
  */
 
@@ -20,6 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "@/lib/lenis/LenisProvider";
+import { registerManagedVideo } from "@/lib/video-controller";
 
 interface ChapterData {
   id: string;
@@ -34,6 +36,7 @@ interface ChapterData {
   imageSrc?: string;
   imageAlt?: string;
   videoSrc?: string;
+  videoWebm?: string;
   videoPoster?: string;
   isTeaser?: boolean;
 }
@@ -45,14 +48,13 @@ const CHAPTERS: ChapterData[] = [
     roman: "I",
     title: "Kiki Event",
     year: "2025",
-    venue: "Pune",
+    venue: "Pune · 2025",
     tagline: "The night that started it all.",
-    description:
-      "The inaugural edition that ignited TheVMEx. Two founders, one vision — bringing an unmatched level of music curation, crowd energy, and nightlife production to Pune.",
+    description: "The first TheVMEx night. 500+ attendees.",
     stats: [
       { label: "Attendees", value: "500+" },
-      { label: "Format", value: "Debut Club Night" },
-      { label: "Status", value: "Sold Out" },
+      { label: "Edition", value: "01" },
+      { label: "City", value: "Pune" },
     ],
     imageSrc: "/img/kiki-event.webp",
     imageAlt: "TheVMEx Founder and Co-Founder at Kiki Event 2025",
@@ -66,13 +68,14 @@ const CHAPTERS: ChapterData[] = [
     venue: "PIVO GARTEN · Fri 21 Aug 2026",
     tagline: "Masks On. Music Loud. Night Unforgettable.",
     description:
-      "A dark, elegant spectacle where mystery met high-voltage energy. Poltergeist held the stage with a live set that shook the room, while masked attendees filled the venue draped in gold and shadow.",
+      "A dark, elegant spectacle where mystery met high-voltage energy. Poltergeist held the stage, while masked attendees filled the venue draped in gold and shadow.",
     stats: [
       { label: "Attendees", value: "200+" },
       { label: "Headliner", value: "Poltergeist Live" },
-      { label: "Live Sets", value: "1 Epic Set" },
+      { label: "Live Set", value: "1 Set" },
     ],
     videoSrc: "/video/performer-hoodie.mp4",
+    videoWebm: "/video/performer-hoodie.webm",
     videoPoster: "/video/performer-hoodie-poster.jpg",
     imageAlt: "Poltergeist performing in hoodie and mask at Masquerade Night 2026",
   },
@@ -81,16 +84,11 @@ const CHAPTERS: ChapterData[] = [
     numeral: "03",
     roman: "III",
     title: "In the Works",
-    year: "Upcoming",
-    venue: "Pune · Secret Venue",
-    tagline: "Details coming. The standard stays the same.",
-    description:
-      "We are currently curating the next chapter of The VM Experience. Expect deeper soundscapes, bolder production, and an even more immersive atmosphere.",
-    stats: [
-      { label: "Edition", value: "III" },
-      { label: "Production", value: "Elevated" },
-      { label: "Access", value: "By Invitation" },
-    ],
+    year: "",
+    venue: "",
+    tagline: "",
+    description: "",
+    stats: [],
     isTeaser: true,
   },
 ];
@@ -98,6 +96,7 @@ const CHAPTERS: ChapterData[] = [
 export function ActNights() {
   const containerRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLElement | null)[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [activeChapter, setActiveChapter] = useState<number>(0);
   const [hoveredChapter, setHoveredChapter] = useState<number | null>(null);
   const [previewY, setPreviewY] = useState<number>(0);
@@ -118,8 +117,14 @@ export function ActNights() {
     const cards = cardsRef.current.filter(Boolean) as HTMLElement[];
     if (cards.length === 0) return;
 
+    // Register video auto-pause when off-screen
+    let cleanupVideo: (() => void) | undefined;
+    if (videoRef.current) {
+      cleanupVideo = registerManagedVideo(videoRef.current);
+    }
+
     const ctx = gsap.context(() => {
-      // Background color tween: #141418 -> warm #100F0D
+      // 1. Background color tween: #141418 -> warm #100F0D
       const bgLayer =
         (window as Window & { __vmBgLayer?: HTMLElement }).__vmBgLayer ||
         document.querySelector<HTMLElement>(".vm-bg-layer");
@@ -140,7 +145,40 @@ export function ActNights() {
         });
       }
 
-      // Responsive Stacking Cards
+      // 2. Side Chapter Navigation: Visible ONLY while Act III is on screen
+      if (navRef.current) {
+        ScrollTrigger.create({
+          trigger: container,
+          start: "top 70%",
+          end: "bottom 30%",
+          onEnter: () => {
+            if (navRef.current) {
+              navRef.current.style.opacity = "1";
+              navRef.current.style.pointerEvents = "auto";
+            }
+          },
+          onLeave: () => {
+            if (navRef.current) {
+              navRef.current.style.opacity = "0";
+              navRef.current.style.pointerEvents = "none";
+            }
+          },
+          onEnterBack: () => {
+            if (navRef.current) {
+              navRef.current.style.opacity = "1";
+              navRef.current.style.pointerEvents = "auto";
+            }
+          },
+          onLeaveBack: () => {
+            if (navRef.current) {
+              navRef.current.style.opacity = "0";
+              navRef.current.style.pointerEvents = "none";
+            }
+          },
+        });
+      }
+
+      // 3. Responsive Stacking Cards
       // Pinning applies to desktop (width >= 1024px)
       if (window.innerWidth >= 1024) {
         cards.forEach((card, i) => {
@@ -182,11 +220,14 @@ export function ActNights() {
               },
             });
           } else {
-            // Last card (Chapter III): Normal flow pinning so subsequent ActMoments never collides!
+            // Last card (Chapter III): Pin WITH pinSpacing so Act IV Moments waits until Chapter III is viewed!
             ScrollTrigger.create({
               trigger: card,
               start: "top top",
-              end: "bottom top",
+              end: "+=100%",
+              pin: true,
+              pinSpacing: true,
+              anticipatePin: 1,
               onToggle: (self) => {
                 if (self.isActive) {
                   setActiveChapter(i);
@@ -215,7 +256,10 @@ export function ActNights() {
       }
     }, container);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      if (cleanupVideo) cleanupVideo();
+    };
   }, []);
 
   const scrollToChapter = (index: number) => {
@@ -272,7 +316,9 @@ export function ActNights() {
           zIndex: 40,
           flexDirection: "column",
           gap: 16,
-          pointerEvents: "auto",
+          opacity: 0,
+          pointerEvents: "none",
+          transition: "opacity 0.4s ease",
         }}
         onMouseLeave={() => setHoveredChapter(null)}
       >
@@ -384,7 +430,9 @@ export function ActNights() {
                 margin: 0,
               }}
             >
-              Edition {CHAPTERS[hoveredChapter].roman} · {CHAPTERS[hoveredChapter].year}
+              {CHAPTERS[hoveredChapter].isTeaser
+                ? "The Next Chapter"
+                : `Edition ${CHAPTERS[hoveredChapter].roman} · ${CHAPTERS[hoveredChapter].year}`}
             </p>
           </div>
         )}
@@ -422,18 +470,17 @@ export function ActNights() {
                   backgroundColor: isActive
                     ? "var(--color-gold-500)"
                     : "rgba(242, 237, 228, 0.3)",
-                  transition:
-                    "width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease",
+                  transition: "width 0.25s ease, background-color 0.25s ease",
                 }}
               />
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "11px",
-                  letterSpacing: "0.18em",
+                  fontSize: "10px",
+                  letterSpacing: "0.2em",
                   color: isActive ? "var(--color-gold-500)" : "var(--color-ink)",
-                  opacity: isActive ? 1 : 0.5,
-                  transition: "opacity 0.3s ease, color 0.3s ease",
+                  opacity: isActive ? 1 : 0.45,
+                  transition: "color 0.25s ease, opacity 0.25s ease",
                 }}
               >
                 {ch.roman}
@@ -445,16 +492,17 @@ export function ActNights() {
 
       {/* Chapters Stack */}
       {CHAPTERS.map((ch, idx) => {
-        const isAlternate = idx === 1; // Chapter 2: Story Left, Media Right
+        // Alternating layout: Ch1 = Left media / Right story; Ch2 = Left story / Right media
+        const isAlternate = idx % 2 === 1;
 
         return (
           <article
             key={ch.id}
-            id={ch.id}
             ref={(el) => {
               cardsRef.current[idx] = el;
             }}
-            aria-label={`Chapter ${ch.roman}: ${ch.title}`}
+            id={`chapter-${ch.numeral}`}
+            aria-label={`${ch.title} — Edition ${ch.roman}`}
             style={{
               position: "relative",
               minHeight: "100svh",
@@ -470,19 +518,19 @@ export function ActNights() {
               willChange: "transform, opacity",
             }}
           >
-            {/* Oversized background Roman numeral */}
+            {/* Oversized background Roman numeral positioned away from text column */}
             <div
               aria-hidden="true"
               style={{
                 position: "absolute",
-                right: isAlternate ? "auto" : "4%",
-                left: isAlternate ? "4%" : "auto",
+                right: isAlternate ? "3%" : "auto",
+                left: isAlternate ? "auto" : "3%",
                 top: "5%",
                 fontFamily: "var(--font-display)",
                 fontSize: "clamp(260px, 40vw, 620px)",
                 lineHeight: 0.8,
                 color: "var(--color-ink)",
-                opacity: 0.025,
+                opacity: 0.02,
                 userSelect: "none",
                 pointerEvents: "none",
                 zIndex: 0,
@@ -494,7 +542,7 @@ export function ActNights() {
             <div
               style={{
                 position: "relative",
-                zIndex: 1,
+                zIndex: 2,
                 maxWidth: 1240,
                 margin: "0 auto",
                 width: "100%",
@@ -520,7 +568,7 @@ export function ActNights() {
                     margin: 0,
                   }}
                 >
-                  Act III · Edition {ch.roman} · {ch.year}
+                  {ch.isTeaser ? "Act III · Next Chapter" : `Act III · Edition ${ch.roman} · ${ch.year}`}
                 </p>
                 <div
                   style={{
@@ -534,7 +582,7 @@ export function ActNights() {
               {/* Chapter Layout:
                   - Chapter 1: Media Left (col 5), Story Right (col 7)
                   - Chapter 2: Story Left (col 7), Performer Video Right (col 5) [Alternating!]
-                  - Chapter 3: Center weighted teaser
+                  - Chapter 3: Decorative living teaser
               */}
               {!ch.isTeaser ? (
                 <div
@@ -618,12 +666,12 @@ export function ActNights() {
                       {/* Video vs Image Rendering */}
                       {ch.videoSrc ? (
                         <video
-                          src={ch.videoSrc}
+                          ref={videoRef}
                           poster={ch.videoPoster}
-                          autoPlay
-                          loop
+                          preload="none"
                           muted
                           playsInline
+                          loop
                           style={{
                             width: "100%",
                             height: "100%",
@@ -631,7 +679,12 @@ export function ActNights() {
                             display: "block",
                           }}
                           aria-label={ch.imageAlt}
-                        />
+                        >
+                          {ch.videoWebm && (
+                            <source src={ch.videoWebm} type="video/webm" />
+                          )}
+                          <source src={ch.videoSrc} type="video/mp4" />
+                        </video>
                       ) : (
                         ch.imageSrc && (
                           <Image
@@ -659,7 +712,7 @@ export function ActNights() {
                         }}
                       />
 
-                      {/* Edition Badge */}
+                      {/* Venue / City Badge */}
                       <div
                         style={{
                           position: "absolute",
@@ -746,49 +799,61 @@ export function ActNights() {
                       {ch.description}
                     </p>
 
-                    {/* Stats Grid */}
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3, 1fr)",
-                        gap: 16,
-                        padding: "20px 0",
-                        borderTop: "1px solid var(--color-line)",
-                        borderBottom: "1px solid var(--color-line)",
-                        marginBottom: 32,
-                        maxWidth: "52ch",
-                      }}
-                    >
-                      {ch.stats.map((s, i) => (
-                        <div key={i}>
-                          <span
+                    {/* Stats Grid with consistent horizontal baseline */}
+                    {ch.stats.length > 0 && (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: `repeat(${ch.stats.length}, 1fr)`,
+                          gap: 16,
+                          padding: "20px 0",
+                          borderTop: "1px solid var(--color-line)",
+                          borderBottom: "1px solid var(--color-line)",
+                          marginBottom: 32,
+                          maxWidth: "52ch",
+                        }}
+                      >
+                        {ch.stats.map((s, i) => (
+                          <div
+                            key={i}
                             style={{
-                              fontFamily: "var(--font-display)",
-                              fontSize: "clamp(24px, 3.2vw, 38px)",
-                              fontWeight: 300,
-                              lineHeight: 1,
-                              color: "var(--color-gold-500)",
-                              display: "block",
-                              marginBottom: 4,
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "flex-end",
+                              minHeight: 64,
                             }}
                           >
-                            {s.value}
-                          </span>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-mono)",
-                              fontSize: "9px",
-                              letterSpacing: "0.14em",
-                              textTransform: "uppercase",
-                              color: "var(--color-ink)",
-                              opacity: 0.6,
-                            }}
-                          >
-                            {s.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                            <span
+                              style={{
+                                fontFamily: "var(--font-display)",
+                                fontSize: "clamp(24px, 3.2vw, 38px)",
+                                fontWeight: 300,
+                                lineHeight: 1,
+                                color: "var(--color-gold-500)",
+                                display: "block",
+                                marginBottom: 6,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {s.value}
+                            </span>
+                            <span
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontSize: "9px",
+                                letterSpacing: "0.14em",
+                                textTransform: "uppercase",
+                                color: "var(--color-ink)",
+                                opacity: 0.6,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {s.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Gallery jump link */}
                     <a
@@ -820,7 +885,7 @@ export function ActNights() {
                   </div>
                 </div>
               ) : (
-                /* Chapter III: In the Works Teaser Layout */
+                /* Chapter III: Decorative Living Teaser */
                 <div
                   className="grid grid-cols-1 lg:grid-cols-12"
                   style={{
@@ -828,7 +893,7 @@ export function ActNights() {
                     alignItems: "center",
                   }}
                 >
-                  {/* Left Column: Ambient Teaser Card */}
+                  {/* Left Column: Living Teaser Card with Rotating Gold Halo */}
                   <div className="lg:col-span-5">
                     <div
                       data-chapter-media={idx}
@@ -839,28 +904,76 @@ export function ActNights() {
                         maxHeight: "68vh",
                         margin: "0 auto",
                         borderRadius: "2px",
-                        border: "1px dashed rgba(201, 164, 92, 0.3)",
-                        backgroundColor: "rgba(20, 20, 24, 0.45)",
+                        border: "1px solid rgba(201, 164, 92, 0.25)",
+                        backgroundColor: "rgba(16, 16, 20, 0.7)",
+                        boxShadow: "0 25px 60px rgba(0, 0, 0, 0.75)",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
                         padding: 32,
                         textAlign: "center",
+                        overflow: "hidden",
                       }}
                     >
-                      {/* Ambient Gold Halo */}
+                      {/* Luxury gold corner accents */}
                       <div
                         style={{
-                          width: 120,
-                          height: 120,
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: 14,
+                          height: 14,
+                          borderTop: "2px solid var(--color-gold-500)",
+                          borderLeft: "2px solid var(--color-gold-500)",
+                          zIndex: 2,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          right: 0,
+                          width: 14,
+                          height: 14,
+                          borderBottom: "2px solid var(--color-gold-500)",
+                          borderRight: "2px solid var(--color-gold-500)",
+                          zIndex: 2,
+                        }}
+                      />
+
+                      {/* Rotating Gold Liquid Halo */}
+                      <div
+                        className="vm-halo-rotate"
+                        style={{
+                          position: "absolute",
+                          width: 280,
+                          height: 280,
                           borderRadius: "50%",
-                          border: "1px solid var(--color-gold-500)",
+                          background:
+                            "conic-gradient(from 0deg, transparent 0%, rgba(201, 164, 92, 0.12) 35%, rgba(255, 241, 204, 0.18) 50%, rgba(201, 164, 92, 0.12) 65%, transparent 100%)",
+                          filter: "blur(24px)",
+                          pointerEvents: "none",
+                        }}
+                      />
+
+                      {/* Centered Decorative Seal */}
+                      <div
+                        style={{
+                          width: 110,
+                          height: 110,
+                          borderRadius: "50%",
+                          border: "1px solid rgba(201, 164, 92, 0.4)",
+                          backgroundColor: "rgba(11, 11, 13, 0.75)",
+                          backdropFilter: "blur(10px)",
+                          WebkitBackdropFilter: "blur(10px)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           marginBottom: 24,
-                          boxShadow: "0 0 50px rgba(201, 164, 92, 0.2)",
+                          boxShadow: "0 0 40px rgba(201, 164, 92, 0.15)",
+                          position: "relative",
+                          zIndex: 2,
                         }}
                       >
                         <span
@@ -869,37 +982,52 @@ export function ActNights() {
                             fontStyle: "italic",
                             fontSize: "36px",
                             color: "var(--color-gold-300)",
+                            letterSpacing: "0.06em",
                           }}
                         >
                           III
                         </span>
                       </div>
-                      <p
+
+                      {/* Subtle Ambient Status Pill */}
+                      <div
                         style={{
-                          fontFamily: "var(--font-display)",
-                          fontSize: "20px",
-                          color: "var(--color-ink)",
-                          margin: 0,
-                          marginBottom: 8,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "6px 14px",
+                          borderRadius: "20px",
+                          backgroundColor: "rgba(201, 164, 92, 0.08)",
+                          border: "1px solid rgba(201, 164, 92, 0.2)",
+                          position: "relative",
+                          zIndex: 2,
                         }}
                       >
-                        Edition III
-                      </p>
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "9px",
-                          letterSpacing: "0.2em",
-                          textTransform: "uppercase",
-                          color: "var(--color-gold-500)",
-                        }}
-                      >
-                        In the Works
-                      </span>
+                        <span
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            backgroundColor: "var(--color-gold-500)",
+                            boxShadow: "0 0 8px var(--color-gold-500)",
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: "9px",
+                            letterSpacing: "0.22em",
+                            textTransform: "uppercase",
+                            color: "var(--color-gold-300)",
+                          }}
+                        >
+                          In the Works
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Right Column: Teaser Story & Stats */}
+                  {/* Right Column: Decorative Title and CTA */}
                   <div className="lg:col-span-7">
                     <h2
                       style={{
@@ -913,80 +1041,22 @@ export function ActNights() {
                         marginBottom: 16,
                       }}
                     >
-                      {ch.title}
+                      In the Works
                     </h2>
 
                     <p
                       style={{
-                        fontFamily: "var(--font-display)",
-                        fontStyle: "italic",
-                        fontSize: "clamp(20px, 2.2vw, 28px)",
-                        lineHeight: 1.3,
-                        color: "var(--color-gold-300)",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "11px",
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        color: "var(--color-gold-500)",
                         margin: 0,
-                        marginBottom: 20,
-                      }}
-                    >
-                      &ldquo;{ch.tagline}&rdquo;
-                    </p>
-
-                    <p
-                      style={{
-                        fontFamily: "var(--font-body)",
-                        fontSize: "clamp(15px, 1.25vw, 17px)",
-                        lineHeight: 1.75,
-                        color: "var(--color-ink)",
-                        opacity: 0.75,
-                        maxWidth: "50ch",
                         marginBottom: 32,
                       }}
                     >
-                      {ch.description}
+                      The Next Chapter
                     </p>
-
-                    {/* Stats Grid */}
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3, 1fr)",
-                        gap: 16,
-                        padding: "20px 0",
-                        borderTop: "1px solid var(--color-line)",
-                        borderBottom: "1px solid var(--color-line)",
-                        marginBottom: 32,
-                        maxWidth: "50ch",
-                      }}
-                    >
-                      {ch.stats.map((s, i) => (
-                        <div key={i}>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-display)",
-                              fontSize: "clamp(24px, 3.2vw, 38px)",
-                              fontWeight: 300,
-                              lineHeight: 1,
-                              color: "var(--color-gold-500)",
-                              display: "block",
-                              marginBottom: 4,
-                            }}
-                          >
-                            {s.value}
-                          </span>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-mono)",
-                              fontSize: "9px",
-                              letterSpacing: "0.14em",
-                              textTransform: "uppercase",
-                              color: "var(--color-ink)",
-                              opacity: 0.6,
-                            }}
-                          >
-                            {s.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
 
                     <a
                       href="#invitation"

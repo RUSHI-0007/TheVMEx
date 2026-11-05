@@ -186,6 +186,20 @@
   animation: vm-scroll-drop 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
+@keyframes vm-halo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vm-halo-rotate {
+  animation: vm-halo-spin 20s linear infinite;
+  will-change: transform;
+}
+
 /* ─── SplitText character wrapper styling ────────────────────────── */
 .vm-char {
   display: inline-block;

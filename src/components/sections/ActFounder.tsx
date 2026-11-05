@@ -145,13 +145,13 @@ export function ActFounder() {
         aria-hidden="true"
         style={{
           position: "absolute",
-          top: "10%",
-          left: "4%",
+          top: "5%",
+          right: "2%",
           fontFamily: "var(--font-display)",
           fontSize: "clamp(240px, 38vw, 560px)",
           lineHeight: 0.8,
           color: "var(--color-ink)",
-          opacity: 0.025,
+          opacity: 0.02,
           userSelect: "none",
           pointerEvents: "none",
           zIndex: 0,
@@ -160,7 +160,7 @@ export function ActFounder() {
         II
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 1240, margin: "0 auto", width: "100%" }}>
+      <div style={{ position: "relative", zIndex: 2, maxWidth: 1240, margin: "0 auto", width: "100%" }}>
         {/* Act metadata */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: "clamp(24px, 4vh, 48px)" }}>
           <p
@@ -209,7 +209,7 @@ export function ActFounder() {
             >
               <Image
                 src="/img/founder.webp"
-                alt="Manthan Manohar Khaire — Founder & Host of TheVMEx [FOUNDER_PHOTO]"
+                alt="Manthan Manohar Khaire — Founder of TheVMEx"
                 fill
                 sizes="(max-width: 768px) 100vw, 460px"
                 style={{
@@ -282,7 +282,7 @@ export function ActFounder() {
                       marginBottom: 4,
                     }}
                   >
-                    Founder & Host
+                    Founder
                   </span>
                   <span
                     style={{
@@ -296,24 +296,12 @@ export function ActFounder() {
                     Manthan Khaire
                   </span>
                 </div>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "8px",
-                    letterSpacing: "0.14em",
-                    color: "var(--color-ink)",
-                    opacity: 0.4,
-                  }}
-                >
-                  [FOUNDER_PHOTO]
-                </span>
               </div>
             </div>
           </div>
 
           {/* Right Column: Bio, Stats, and Quick Actions */}
           <div ref={contentRef}>
-            {/* Marked placeholder label */}
             <span
               style={{
                 fontFamily: "var(--font-mono)",
@@ -325,7 +313,7 @@ export function ActFounder() {
                 marginBottom: 8,
               }}
             >
-              [FOUNDER_NAME]
+              The Host
             </span>
 
             <h2
@@ -354,26 +342,23 @@ export function ActFounder() {
                 marginBottom: 28,
               }}
             >
-              Founder & Experience Director · TheVMEx{" "}
-              <span style={{ opacity: 0.4, fontSize: "10px" }}>[ROLE]</span>
+              Founder · TheVMEx
             </p>
 
             {/* Bio Paragraph */}
             <p
               style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "clamp(15px, 1.35vw, 18px)",
-                lineHeight: 1.75,
+                fontFamily: "var(--font-display)",
+                fontStyle: "italic",
+                fontSize: "clamp(20px, 2.2vw, 28px)",
+                lineHeight: 1.35,
                 color: "var(--color-ink)",
-                opacity: 0.8,
-                maxWidth: "50ch",
+                opacity: 0.9,
+                maxWidth: "46ch",
                 marginBottom: 36,
               }}
             >
-              Behind TheVMEx is a vision to transform Pune&apos;s nightlife into cinematic,
-              curated spectacles. Every edition is engineered from sound and lighting to crowd
-              energy so guests don&apos;t just attend an event — they step into an unforgettable
-              night. <span style={{ opacity: 0.4, fontSize: "11px", fontFamily: "var(--font-mono)" }}>[SHORT_BIO]</span>
+              &ldquo;We Create Nights You Remember.&rdquo;
             </p>
 
             {/* Stat Counters Row */}
@@ -381,15 +366,16 @@ export function ActFounder() {
               ref={statsRef}
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 20,
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 24,
                 padding: "24px 0",
                 borderTop: "1px solid var(--color-line)",
                 borderBottom: "1px solid var(--color-line)",
                 marginBottom: 36,
+                maxWidth: "400px",
               }}
             >
-              <div>
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <span
                   ref={stat1Ref}
                   style={{
@@ -399,7 +385,8 @@ export function ActFounder() {
                     lineHeight: 1,
                     color: "var(--color-gold-500)",
                     display: "block",
-                    marginBottom: 4,
+                    marginBottom: 6,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   2+
@@ -412,13 +399,14 @@ export function ActFounder() {
                     textTransform: "uppercase",
                     color: "var(--color-ink)",
                     opacity: 0.6,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Editions Delivered
                 </span>
               </div>
 
-              <div>
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <span
                   ref={stat2Ref}
                   style={{
@@ -428,7 +416,8 @@ export function ActFounder() {
                     lineHeight: 1,
                     color: "var(--color-gold-500)",
                     display: "block",
-                    marginBottom: 4,
+                    marginBottom: 6,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   700+
@@ -441,37 +430,10 @@ export function ActFounder() {
                     textTransform: "uppercase",
                     color: "var(--color-ink)",
                     opacity: 0.6,
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  Attendees Immersed
-                </span>
-              </div>
-
-              <div>
-                <span
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "clamp(32px, 4vw, 52px)",
-                    fontWeight: 300,
-                    lineHeight: 1,
-                    color: "var(--color-gold-500)",
-                    display: "block",
-                    marginBottom: 4,
-                  }}
-                >
-                  100%
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "9px",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "var(--color-ink)",
-                    opacity: 0.6,
-                  }}
-                >
-                  Curated Production
+                  Total Attendees
                 </span>
               </div>
             </div>

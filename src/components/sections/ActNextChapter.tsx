@@ -27,7 +27,7 @@ export function ActNextChapter() {
           marginBottom: "clamp(12px, 2vh, 20px)",
         }}
       >
-        Act V — Edition III
+        Act V — Next Chapter
       </p>
 
       <h2
@@ -56,7 +56,7 @@ export function ActNextChapter() {
           marginBottom: "clamp(32px, 5vh, 56px)",
         }}
       >
-        Details coming. The standard stays the same.
+        We Create Nights You Remember.
       </p>
 
       <a

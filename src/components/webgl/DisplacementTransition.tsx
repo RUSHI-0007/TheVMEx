@@ -159,6 +159,12 @@ export function DisplacementTransition() {
       }
     ).__vmDisplacementState;
 
+    const gl = state.gl;
+    if (gl && gl.domElement && gl.domElement.parentElement) {
+      gl.domElement.parentElement.style.zIndex =
+        transitionState && transitionState.visible ? "25" : "1";
+    }
+
     if (
       !transitionState ||
       !transitionState.visible ||
@@ -221,3 +227,4 @@ export function DisplacementTransition() {
     </mesh>
   );
 }
+

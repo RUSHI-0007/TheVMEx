@@ -16,6 +16,7 @@
 import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { EASE } from "@/lib/motion-tokens";
+import { registerManagedVideo } from "@/lib/video-controller";
 
 const MANIFESTO_TEXT =
   "Masquerade Night is an invitation to disappear into another world. Behind every mask is a story. Curated live performances, atmosphere draped in gold and shadow.";
@@ -36,6 +37,7 @@ export function ActManifesto() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const paragraphRef = useRef<HTMLParagraphElement>(null);
   const videoCardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const dressCodeCardRef = useRef<HTMLDivElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const numeralRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,11 @@ export function ActManifesto() {
     if (!section) return;
 
     const ctx = gsap.context(() => {
+      // Register video auto-pause offscreen & max-concurrency
+      if (videoRef.current) {
+        registerManagedVideo(videoRef.current);
+      }
+
       // 1. Background color tween into #141418 (smoke)
       const bgLayer =
         (window as Window & { __vmBgLayer?: HTMLElement }).__vmBgLayer ||
@@ -457,12 +464,12 @@ export function ActManifesto() {
               {/* Looping crowd video */}
               <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 10" }}>
                 <video
-                  src="/video/crowd-dancing.mp4"
+                  ref={videoRef}
                   poster="/video/crowd-dancing-poster.jpg"
-                  autoPlay
-                  loop
+                  preload="none"
                   muted
                   playsInline
+                  loop
                   style={{
                     width: "100%",
                     height: "100%",
@@ -470,7 +477,10 @@ export function ActManifesto() {
                     display: "block",
                   }}
                   aria-label="Crowd dancing and celebrating at TheVMEx Masquerade Night"
-                />
+                >
+                  <source src="/video/crowd-dancing.webm" type="video/webm" />
+                  <source src="/video/crowd-dancing.mp4" type="video/mp4" />
+                </video>
                 <div
                   style={{
                     position: "absolute",
@@ -511,7 +521,7 @@ export function ActManifesto() {
                       color: "var(--color-ink)",
                     }}
                   >
-                    Live Dance Floor Energy
+                    Dance Floor Atmosphere
                   </span>
                 </div>
               </div>

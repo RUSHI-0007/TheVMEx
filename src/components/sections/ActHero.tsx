@@ -8,8 +8,8 @@
  *    coarse-to-fine loading and sliding-window ImageBitmap decoding.
  * 2. Cormorant Garamond display typography with SplitText char reveal
  *    and scroll-linked drift/fade.
- * 3. Masquerade mask iris wipe that expands exponentially towards the end of
- *    the scrub (progress 0.65 -> 1.0) with glowing liquid-gold edge.
+ * 3. Editorial VMX Monogram handoff that blooms into Act I
+ *    with glowing liquid-gold edge.
  */
 
 import { useEffect, useRef } from "react";

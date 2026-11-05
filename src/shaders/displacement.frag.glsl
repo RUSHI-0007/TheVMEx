@@ -76,3 +76,4 @@ void main() {
 
     gl_FragColor = vec4(blended.rgb + goldFlare + vec3(specular), 1.0);
 }
+
