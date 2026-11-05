@@ -16,6 +16,9 @@ interface AppStore {
   loadedPct: number;
   setLoadedPct: (pct: number) => void;
 
+  isPreloaded: boolean;
+  setPreloaded: (loaded: boolean) => void;
+
   cursorState: CursorState;
   setCursorState: (state: CursorState) => void;
 
@@ -32,6 +35,9 @@ interface AppStore {
 export const useAppStore = create<AppStore>((set) => ({
   loadedPct: 0,
   setLoadedPct: (pct) => set({ loadedPct: pct }),
+
+  isPreloaded: false,
+  setPreloaded: (loaded) => set({ isPreloaded: loaded }),
 
   cursorState: "default",
   setCursorState: (state) => set({ cursorState: state }),

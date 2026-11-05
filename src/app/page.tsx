@@ -3,6 +3,7 @@
  * Acts are rendered in sequence; scroll = time.
  */
 
+import { Preloader } from "@/components/ui/Preloader";
 import { ActHero } from "@/components/sections/ActHero";
 import { ActManifesto } from "@/components/sections/ActManifesto";
 import { ActFounder } from "@/components/sections/ActFounder";
@@ -14,15 +15,18 @@ import { SiteFooter } from "@/components/sections/SiteFooter";
 
 export default function Home() {
   return (
-    <main id="main-content" aria-label="TheVMEx — Premium Event Experiences">
-      <ActHero />
-      <ActManifesto />
-      <ActFounder />
-      <ActNights />
-      <ActMoments />
-      <ActNextChapter />
-      <ActInvitation />
-      <SiteFooter />
-    </main>
+    <>
+      <Preloader />
+      <main id="main-content" aria-label="TheVMEx — Premium Event Experiences">
+        <ActHero />
+        <ActManifesto />
+        <ActFounder />
+        <ActNights />
+        <ActMoments />
+        <ActNextChapter />
+        <ActInvitation />
+        <SiteFooter />
+      </main>
+    </>
   );
 }

@@ -51,8 +51,8 @@ function TickBridge() {
 
   useEffect(() => {
     // Initial manual render call to ensure first frame is painted immediately
-    advance();
-    const tick = (time: number) => advance(time);
+    advance(performance.now());
+    const tick = (time: number) => advance(time * 1000);
     gsap.ticker.add(tick);
     return () => gsap.ticker.remove(tick);
   }, [advance]);
