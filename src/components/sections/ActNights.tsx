@@ -178,11 +178,12 @@ export function ActNights() {
         });
       }
 
-      // 3. Responsive Stacking Cards
-      // Pinning applies to desktop (width >= 1024px)
-      if (window.innerWidth >= 1024) {
+      // 3. Responsive Stacking Cards with gsap.matchMedia for clean dynamic breakpoint switching
+      const mm = gsap.matchMedia(container);
+
+      // Desktop & iPad landscape (>= 1024px): Pinned stacking chapters
+      mm.add("(min-width: 1024px)", () => {
         cards.forEach((card, i) => {
-          // Pinned cards before the last one
           if (i < cards.length - 1) {
             ScrollTrigger.create({
               trigger: card,
@@ -196,7 +197,6 @@ export function ActNights() {
               },
               onUpdate: (self) => {
                 const p = self.progress;
-                // Track active media element for liquid-gold WebGL displacement
                 const mediaEl = card.querySelector<HTMLElement>("[data-chapter-media]");
                 const rect = mediaEl ? mediaEl.getBoundingClientRect() : undefined;
 
@@ -220,7 +220,7 @@ export function ActNights() {
               },
             });
           } else {
-            // Last card (Chapter III): Pin WITH pinSpacing so Act IV Moments waits until Chapter III is viewed!
+            // Last card (Chapter III): Pin WITH pinSpacing so Act IV Moments waits until Chapter III is viewed
             ScrollTrigger.create({
               trigger: card,
               start: "top top",
@@ -241,8 +241,10 @@ export function ActNights() {
             });
           }
         });
-      } else {
-        // Tablet / Mobile (< 1024px): Natural touch scroll flow
+      });
+
+      // Tablet portrait & Mobile (< 1024px): Natural unpinned touch scroll flow
+      mm.add("(max-width: 1023px)", () => {
         cards.forEach((card, i) => {
           ScrollTrigger.create({
             trigger: card,
@@ -253,10 +255,11 @@ export function ActNights() {
             },
           });
         });
-      }
+      });
     }, container);
 
     return () => {
+      mm.revert();
       ctx.revert();
       if (cleanupVideo) cleanupVideo();
     };
@@ -802,6 +805,7 @@ export function ActNights() {
                     {/* Stats Grid with consistent horizontal baseline */}
                     {ch.stats.length > 0 && (
                       <div
+                        data-stat-grid={ch.id}
                         style={{
                           display: "grid",
                           gridTemplateColumns: `repeat(${ch.stats.length}, 1fr)`,
