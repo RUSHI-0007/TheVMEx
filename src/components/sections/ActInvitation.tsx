@@ -20,10 +20,10 @@ export function ActInvitation() {
       <p
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "11px",
+          fontSize: "var(--font-size-label)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "var(--color-gold-500)",
+          color: "var(--ink-60)",
           marginBottom: "clamp(12px, 2vh, 20px)",
         }}
       >
@@ -37,7 +37,7 @@ export function ActInvitation() {
           fontSize: "clamp(36px, 7vw, 96px)",
           lineHeight: 1.05,
           letterSpacing: "-0.02em",
-          color: "var(--color-ink)",
+          color: "var(--ink-100)",
           marginBottom: "clamp(12px, 2vh, 20px)",
         }}
       >
@@ -49,8 +49,7 @@ export function ActInvitation() {
           fontFamily: "var(--font-body)",
           fontSize: "clamp(15px, 1.4vw, 18px)",
           lineHeight: 1.7,
-          color: "var(--color-ink)",
-          opacity: 0.65,
+          color: "var(--ink-60)",
           maxWidth: "44ch",
           marginBottom: "clamp(40px, 6vh, 64px)",
         }}
@@ -60,18 +59,19 @@ export function ActInvitation() {
       </p>
 
       {/* Contact block */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <a
           href="https://wa.me/918888822040"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Contact TheVMEx on WhatsApp — +91 88888 22040"
+          className="vm-gradient-link"
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "13px",
             letterSpacing: "0.1em",
-            color: "var(--color-gold-500)",
-            textDecoration: "none",
+            color: "var(--color-gold-300)",
+            alignSelf: "flex-start",
           }}
         >
           WhatsApp → +91 88888 22040
@@ -81,12 +81,13 @@ export function ActInvitation() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="TheVMEx on Instagram @thevmexperience"
+          className="vm-gradient-link"
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "13px",
             letterSpacing: "0.1em",
-            color: "var(--color-gold-500)",
-            textDecoration: "none",
+            color: "var(--color-gold-300)",
+            alignSelf: "flex-start",
           }}
         >
           Instagram → @thevmexperience
@@ -94,13 +95,13 @@ export function ActInvitation() {
         <a
           href="mailto:khairemanthan@gmail.com"
           aria-label="Email TheVMEx — khairemanthan@gmail.com"
+          className="vm-gradient-link"
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "13px",
             letterSpacing: "0.1em",
-            color: "var(--color-ink)",
-            opacity: 0.6,
-            textDecoration: "none",
+            color: "var(--ink-60)",
+            alignSelf: "flex-start",
           }}
         >
           khairemanthan@gmail.com

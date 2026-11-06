@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TheVMEx — The VM Experience
 
-## Getting Started
+> **We Create Nights You Remember.**  
+> Pune’s premiere curated nocturnal events, immersive nightlife productions, and private celebrations.
 
-First, run the development server:
+---
+
+## ✦ Overview
+
+**TheVMEx** is a high-craft cinematic web experience built for Pune's signature event brand. Featuring a 7-Act narrative architecture, physical scroll choreography, frame-scrubbed hero visuals, fluid optical-size typography, and verified WCAG AA accessible contrast tiers draped in shadow and gold.
+
+- **Production URL:** [thevmex.in](https://thevmex.in)
+- **Host & Founder:** Manthan Manohar Khaire
+- **Signature Events:** *Kiki Event '25*, *Masquerade Night '26*, *Act III (Next Chapter)*
+
+---
+
+## ✦ Design & Engineering System
+
+- **Framework:** Next.js 16 (App Router + React Server Components + Turbopack)
+- **Typography Engine (Option B — Editorial Luxe):**
+  - **Display:** `Bodoni Moda` (Variable optical size `opsz` 6–96, fluid `clamp()` tokens, tabular numerals)
+  - **Body / Prose:** `Inter` (Variable 100–900, text-wrap `pretty`, hanging punctuation)
+  - **Technical / Labels:** `JetBrains Mono` (Uppercase, tracking `0.22em`, minimum `0.72rem`)
+- **Colour & Contrast Architecture (WCAG 2.1 AA Compliant):**
+  - `--ink-100` (`#F2EDE4`): Headlines & high-emphasis display (AAA 16.86:1)
+  - `--ink-80` (`#C8C3BA`): Lead paragraphs & subheads (AAA 11.21:1)
+  - `--ink-60` (`#99948C`): Body copy & small technical labels (AA 6.53:1 base, 5.18:1 spotlight)
+  - `--ink-40` (`#66635D`): Strictly for large decorative numerals & meta hairlines
+  - **Per-Chapter Accent Tints:**
+    - Chapter I: *Ember Coral-Red* (`#FF6B57` — 7.02:1 base, 5.57:1 spotlight)
+    - Chapter II: *Amber Gold* (`#E3C58A` — 11.82:1 base, 9.38:1 spotlight)
+    - Chapter III: *Moonlight Silver-Blue* (`#A2B7CC` — 9.53:1 base, 7.57:1 spotlight)
+- **Motion & Smooth Scroll:**
+  - GSAP 3 + ScrollTrigger + SplitText
+  - Single RAF clock via Lenis smooth scroll
+  - Liquid gold WebGL displacement transitions
+  - Strict `prefers-reduced-motion` zero-jump compliance
+
+---
+
+## ✦ Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+
+### Installation
+
+```bash
+git clone git@github.com:RUSHI-0007/TheVMEx.git
+cd TheVMEx
+npm install
+```
+
+### Local Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the experience.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## ✦ Contact & Inquiries
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **WhatsApp:** [+91 88888 22040](https://wa.me/918888822040)
+- **Instagram:** [@thevmexperience](https://www.instagram.com/thevmexperience)
+- **Email:** [khairemanthan@gmail.com](mailto:khairemanthan@gmail.com)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+&copy; TheVMEx. Operated by Manthan Manohar Khaire. All rights reserved.

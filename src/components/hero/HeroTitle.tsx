@@ -228,10 +228,10 @@ export const HeroTitle = forwardRef<HeroTitleHandle>(function HeroTitle(_, ref) 
         ref={badgeRef}
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "clamp(11px, 1.2vw, 13px)",
+          fontSize: "var(--font-size-label)",
           letterSpacing: "0.26em",
           textTransform: "uppercase",
-          color: "var(--color-gold-500)",
+          color: "var(--color-gold-300)",
           marginBottom: "clamp(14px, 2.5vh, 24px)",
           opacity: 0,
         }}
@@ -248,7 +248,7 @@ export const HeroTitle = forwardRef<HeroTitleHandle>(function HeroTitle(_, ref) 
           fontSize: "clamp(44px, 12vw, 160px)",
           lineHeight: 0.94,
           letterSpacing: "-0.02em",
-          color: "var(--color-ink)",
+          color: "var(--ink-100)",
           margin: 0,
           marginBottom: "clamp(18px, 3vh, 32px)",
           textTransform: "uppercase",
@@ -264,7 +264,7 @@ export const HeroTitle = forwardRef<HeroTitleHandle>(function HeroTitle(_, ref) 
         style={{
           fontFamily: "var(--font-body)",
           fontSize: "clamp(14px, 1.4vw, 19px)",
-          color: "var(--color-ink)",
+          color: "var(--ink-80)",
           letterSpacing: "0.04em",
           maxWidth: "560px",
           margin: "0 auto",

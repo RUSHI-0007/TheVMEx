@@ -93,6 +93,27 @@ const CHAPTERS: ChapterData[] = [
   },
 ];
 
+const CHAPTER_ACCENTS = [
+  {
+    tint: "var(--accent-ch1)", // Ember Coral-Red #FF6B57 (7.02:1 base, 5.57:1 spotlight)
+    ghostStroke: "rgba(255, 107, 87, 0.14)",
+    hairline: "rgba(255, 107, 87, 0.4)",
+    glow: "rgba(255, 107, 87, 0.2)",
+  },
+  {
+    tint: "var(--accent-ch2)", // Amber Gold #E3C58A (11.82:1 base, 9.38:1 spotlight)
+    ghostStroke: "rgba(227, 197, 138, 0.14)",
+    hairline: "rgba(227, 197, 138, 0.4)",
+    glow: "rgba(227, 197, 138, 0.2)",
+  },
+  {
+    tint: "var(--accent-ch3)", // Moonlight Silver-Blue #A2B7CC (9.53:1 base, 7.57:1 spotlight)
+    ghostStroke: "rgba(162, 183, 204, 0.14)",
+    hairline: "rgba(162, 183, 204, 0.4)",
+    glow: "rgba(162, 183, 204, 0.2)",
+  },
+];
+
 export function ActNights() {
   const containerRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<(HTMLElement | null)[]>([]);
@@ -418,7 +439,7 @@ export function ActNights() {
               style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "15px",
-                color: "var(--color-ink)",
+                color: "var(--ink-100)",
                 margin: 0,
                 marginBottom: 2,
               }}
@@ -428,10 +449,10 @@ export function ActNights() {
             <p
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "9px",
+                fontSize: "var(--font-size-label)",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                color: "var(--color-gold-500)",
+                color: "var(--color-gold-300)",
                 margin: 0,
               }}
             >
@@ -444,6 +465,7 @@ export function ActNights() {
 
         {CHAPTERS.map((ch, idx) => {
           const isActive = activeChapter === idx;
+          const accent = CHAPTER_ACCENTS[idx] || CHAPTER_ACCENTS[0];
           return (
             <button
               key={ch.id}
@@ -473,7 +495,7 @@ export function ActNights() {
                   width: isActive ? 24 : 12,
                   height: 1,
                   backgroundColor: isActive
-                    ? "var(--color-gold-500)"
+                    ? accent.tint
                     : "rgba(242, 237, 228, 0.3)",
                   transition: "width 0.25s ease, background-color 0.25s ease",
                 }}
@@ -481,10 +503,10 @@ export function ActNights() {
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "10px",
+                  fontSize: "var(--font-size-label)",
                   letterSpacing: "0.2em",
-                  color: isActive ? "var(--color-gold-500)" : "var(--color-ink)",
-                  opacity: isActive ? 1 : 0.45,
+                  color: isActive ? accent.tint : "var(--ink-60)",
+                  opacity: isActive ? 1 : 0.65,
                   transition: "color 0.25s ease, opacity 0.25s ease",
                 }}
               >
@@ -499,6 +521,7 @@ export function ActNights() {
       {CHAPTERS.map((ch, idx) => {
         // Alternating layout: Ch1 = Left media / Right story; Ch2 = Left story / Right media
         const isAlternate = idx % 2 === 1;
+        const accent = CHAPTER_ACCENTS[idx] || CHAPTER_ACCENTS[0];
 
         return (
           <article
@@ -523,7 +546,7 @@ export function ActNights() {
               willChange: "transform, opacity",
             }}
           >
-            {/* Oversized background Roman numeral with outlined 1px stroke */}
+            {/* Oversized background Roman numeral with 1px stroke tinted to chapter accent */}
             <div
               aria-hidden="true"
               className="vm-ghost-numeral"
@@ -534,6 +557,7 @@ export function ActNights() {
                 top: "5%",
                 fontSize: "clamp(260px, 40vw, 620px)",
                 zIndex: 0,
+                WebkitTextStroke: `1px ${accent.ghostStroke}`,
               }}
             >
               {ch.roman}
@@ -561,10 +585,10 @@ export function ActNights() {
                 <p
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "11px",
-                    letterSpacing: "0.26em",
+                    fontSize: "var(--font-size-label)",
+                    letterSpacing: "0.22em",
                     textTransform: "uppercase",
-                    color: "var(--color-gold-500)",
+                    color: accent.tint,
                     margin: 0,
                   }}
                 >
@@ -574,7 +598,7 @@ export function ActNights() {
                   style={{
                     width: 48,
                     height: 1,
-                    backgroundColor: "var(--color-line)",
+                    backgroundColor: accent.hairline,
                   }}
                 />
               </div>
@@ -729,17 +753,18 @@ export function ActNights() {
                             width: 6,
                             height: 6,
                             borderRadius: "50%",
-                            backgroundColor: "var(--color-gold-500)",
-                            boxShadow: "0 0 8px var(--color-gold-500)",
+                            backgroundColor: accent.tint,
+                            boxShadow: `0 0 8px ${accent.tint}`,
                           }}
                         />
                         <span
+                          className="vm-scrim-text"
                           style={{
                             fontFamily: "var(--font-mono)",
-                            fontSize: "10px",
+                            fontSize: "var(--font-size-label)",
                             letterSpacing: "0.18em",
                             textTransform: "uppercase",
-                            color: "var(--color-ink)",
+                            color: "var(--ink-100)",
                           }}
                         >
                           {ch.venue}
@@ -761,7 +786,7 @@ export function ActNights() {
                         fontSize: "clamp(40px, 6.2vw, 82px)",
                         lineHeight: 0.96,
                         letterSpacing: "-0.02em",
-                        color: "var(--color-ink)",
+                        color: "var(--ink-100)",
                         margin: 0,
                         marginBottom: 16,
                       }}
@@ -776,7 +801,7 @@ export function ActNights() {
                         fontStyle: "italic",
                         fontSize: "clamp(20px, 2.2vw, 28px)",
                         lineHeight: 1.3,
-                        color: "var(--color-gold-300)",
+                        color: accent.tint,
                         margin: 0,
                         marginBottom: 20,
                       }}
@@ -790,8 +815,7 @@ export function ActNights() {
                         fontFamily: "var(--font-body)",
                         fontSize: "clamp(15px, 1.25vw, 17px)",
                         lineHeight: 1.75,
-                        color: "var(--color-ink)",
-                        opacity: 0.75,
+                        color: "var(--ink-60)",
                         maxWidth: "52ch",
                         marginBottom: 32,
                       }}
@@ -825,6 +849,7 @@ export function ActNights() {
                             }}
                           >
                             <span
+                              className="vm-tabular-num"
                               style={{
                                 fontFamily: "var(--font-display)",
                                 fontSize: "clamp(24px, 3.2vw, 38px)",
@@ -841,11 +866,10 @@ export function ActNights() {
                             <span
                               style={{
                                 fontFamily: "var(--font-mono)",
-                                fontSize: "9px",
+                                fontSize: "var(--font-size-label)",
                                 letterSpacing: "0.14em",
                                 textTransform: "uppercase",
-                                color: "var(--color-ink)",
-                                opacity: 0.6,
+                                color: "var(--ink-60)",
                                 whiteSpace: "nowrap",
                               }}
                             >
@@ -859,25 +883,17 @@ export function ActNights() {
                     {/* Gallery jump link */}
                     <a
                       href="#moments"
+                      className="vm-gradient-link"
                       aria-label={`View gallery moments for ${ch.title}`}
                       style={{
                         fontFamily: "var(--font-mono)",
-                        fontSize: "11px",
+                        fontSize: "var(--font-size-label)",
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
-                        color: "var(--color-ink)",
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 10,
-                        textDecoration: "none",
                         padding: "8px 0",
-                        transition: "color 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "var(--color-gold-500)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "var(--color-ink)";
                       }}
                     >
                       <span>Explore Moments</span>
@@ -964,7 +980,7 @@ export function ActNights() {
                           width: 110,
                           height: 110,
                           borderRadius: "50%",
-                          border: "1px solid rgba(201, 164, 92, 0.4)",
+                          border: `1px solid ${accent.tint}`,
                           backgroundColor: "rgba(11, 11, 13, 0.75)",
                           backdropFilter: "blur(10px)",
                           WebkitBackdropFilter: "blur(10px)",
@@ -972,7 +988,7 @@ export function ActNights() {
                           alignItems: "center",
                           justifyContent: "center",
                           marginBottom: 24,
-                          boxShadow: "0 0 40px rgba(201, 164, 92, 0.15)",
+                          boxShadow: `0 0 40px ${accent.glow}`,
                           position: "relative",
                           zIndex: 2,
                         }}
@@ -982,7 +998,7 @@ export function ActNights() {
                             fontFamily: "var(--font-display)",
                             fontStyle: "italic",
                             fontSize: "36px",
-                            color: "var(--color-gold-300)",
+                            color: accent.tint,
                             letterSpacing: "0.06em",
                           }}
                         >
@@ -998,8 +1014,8 @@ export function ActNights() {
                           gap: 8,
                           padding: "6px 14px",
                           borderRadius: "20px",
-                          backgroundColor: "rgba(201, 164, 92, 0.08)",
-                          border: "1px solid rgba(201, 164, 92, 0.2)",
+                          backgroundColor: "rgba(162, 183, 204, 0.08)",
+                          border: `1px solid ${accent.hairline}`,
                           position: "relative",
                           zIndex: 2,
                         }}
@@ -1009,17 +1025,17 @@ export function ActNights() {
                             width: 6,
                             height: 6,
                             borderRadius: "50%",
-                            backgroundColor: "var(--color-gold-500)",
-                            boxShadow: "0 0 8px var(--color-gold-500)",
+                            backgroundColor: accent.tint,
+                            boxShadow: `0 0 8px ${accent.tint}`,
                           }}
                         />
                         <span
                           style={{
                             fontFamily: "var(--font-mono)",
-                            fontSize: "9px",
+                            fontSize: "var(--font-size-label)",
                             letterSpacing: "0.22em",
                             textTransform: "uppercase",
-                            color: "var(--color-gold-300)",
+                            color: accent.tint,
                           }}
                         >
                           In the Works

@@ -27,8 +27,8 @@ export function SiteFooter() {
           fontSize: "clamp(48px, 16vw, 220px)",
           lineHeight: 0.85,
           letterSpacing: "-0.03em",
-          color: "var(--color-ink)",
-          opacity: 0.08,
+          color: "var(--ink-40)",
+          opacity: 0.15,
           userSelect: "none",
           marginBottom: "clamp(32px, 6vh, 60px)",
           pointerEvents: "none",
@@ -53,7 +53,7 @@ export function SiteFooter() {
               fontWeight: 300,
               fontSize: "clamp(18px, 2vw, 24px)",
               letterSpacing: "0.1em",
-              color: "var(--color-ink)",
+              color: "var(--ink-100)",
               marginBottom: 8,
               textTransform: "uppercase",
             }}
@@ -65,8 +65,7 @@ export function SiteFooter() {
               fontFamily: "var(--font-body)",
               fontSize: "13px",
               lineHeight: 1.6,
-              color: "var(--color-ink)",
-              opacity: 0.5,
+              color: "var(--ink-60)",
               maxWidth: "28ch",
             }}
           >
@@ -79,16 +78,16 @@ export function SiteFooter() {
           <p
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "10px",
+              fontSize: "var(--font-size-label)",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "var(--color-gold-500)",
+              color: "var(--ink-60)",
               marginBottom: 16,
             }}
           >
             Navigate
           </p>
-          <ul role="list" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+          <ul role="list" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
             {[
               { label: "Events", href: "#nights" },
               { label: "Gallery", href: "#moments" },
@@ -98,12 +97,11 @@ export function SiteFooter() {
               <li key={link.href}>
                 <a
                   href={link.href}
+                  className="vm-gradient-link"
                   style={{
                     fontFamily: "var(--font-body)",
                     fontSize: "14px",
-                    color: "var(--color-ink)",
-                    opacity: 0.6,
-                    textDecoration: "none",
+                    color: "var(--ink-80)",
                   }}
                 >
                   {link.label}
@@ -118,16 +116,16 @@ export function SiteFooter() {
           <p
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "10px",
+              fontSize: "var(--font-size-label)",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "var(--color-gold-500)",
+              color: "var(--ink-60)",
               marginBottom: 16,
             }}
           >
             Legal
           </p>
-          <ul role="list" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+          <ul role="list" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
             {[
               { label: "Terms", href: "/terms" },
               { label: "Privacy", href: "/privacy" },
@@ -137,12 +135,11 @@ export function SiteFooter() {
               <li key={link.href}>
                 <a
                   href={link.href}
+                  className="vm-gradient-link"
                   style={{
                     fontFamily: "var(--font-body)",
                     fontSize: "14px",
-                    color: "var(--color-ink)",
-                    opacity: 0.6,
-                    textDecoration: "none",
+                    color: "var(--ink-80)",
                   }}
                 >
                   {link.label}
@@ -167,10 +164,9 @@ export function SiteFooter() {
         <p
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: "10px",
+            fontSize: "var(--font-size-label)",
             letterSpacing: "0.1em",
-            color: "var(--color-ink)",
-            opacity: 0.35,
+            color: "var(--ink-60)",
           }}
         >
           TheVMEx is operated by Manthan Manohar Khaire
@@ -178,10 +174,9 @@ export function SiteFooter() {
         <p
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: "10px",
+            fontSize: "var(--font-size-label)",
             letterSpacing: "0.1em",
-            color: "var(--color-ink)",
-            opacity: 0.35,
+            color: "var(--ink-60)",
           }}
         >
           © {year} TheVMEx

@@ -20,10 +20,10 @@ export function ActNextChapter() {
       <p
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "11px",
+          fontSize: "var(--font-size-label)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "var(--color-gold-500)",
+          color: "var(--ink-60)",
           marginBottom: "clamp(12px, 2vh, 20px)",
         }}
       >
@@ -38,7 +38,7 @@ export function ActNextChapter() {
           fontSize: "clamp(36px, 7vw, 96px)",
           lineHeight: 1.05,
           letterSpacing: "-0.01em",
-          color: "var(--color-ink)",
+          color: "var(--ink-100)",
           marginBottom: "clamp(24px, 4vh, 40px)",
         }}
       >
@@ -50,8 +50,7 @@ export function ActNextChapter() {
           fontFamily: "var(--font-body)",
           fontSize: "clamp(15px, 1.4vw, 18px)",
           lineHeight: 1.7,
-          color: "var(--color-ink)",
-          opacity: 0.65,
+          color: "var(--ink-60)",
           maxWidth: "44ch",
           marginBottom: "clamp(32px, 5vh, 56px)",
         }}
@@ -64,7 +63,7 @@ export function ActNextChapter() {
         aria-label="Book TheVMEx for your next event"
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "11px",
+          fontSize: "var(--font-size-label)",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: "var(--color-bg)",

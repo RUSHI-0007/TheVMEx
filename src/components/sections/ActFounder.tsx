@@ -269,7 +269,7 @@ export function ActFounder() {
                   <span
                     style={{
                       fontFamily: "var(--font-mono)",
-                      fontSize: "9px",
+                      fontSize: "var(--font-size-label)",
                       letterSpacing: "0.22em",
                       textTransform: "uppercase",
                       color: "var(--color-gold-300)",
@@ -284,7 +284,7 @@ export function ActFounder() {
                       fontFamily: "var(--font-body)",
                       fontSize: "13px",
                       letterSpacing: "0.04em",
-                      color: "var(--color-ink)",
+                      color: "var(--ink-100)",
                       fontWeight: 500,
                     }}
                   >
@@ -300,10 +300,10 @@ export function ActFounder() {
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "10px",
+                fontSize: "var(--font-size-label)",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
-                color: "var(--color-gold-500)",
+                color: "var(--ink-60)",
                 display: "block",
                 marginBottom: 8,
               }}
@@ -318,7 +318,7 @@ export function ActFounder() {
                 fontSize: "clamp(38px, 6vw, 84px)",
                 lineHeight: 0.95,
                 letterSpacing: "-0.02em",
-                color: "var(--color-ink)",
+                color: "var(--ink-100)",
                 margin: 0,
                 marginBottom: 12,
               }}
@@ -330,7 +330,7 @@ export function ActFounder() {
             <p
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "12px",
+                fontSize: "var(--font-size-label)",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "var(--color-gold-300)",
@@ -347,8 +347,7 @@ export function ActFounder() {
                 fontStyle: "italic",
                 fontSize: "clamp(20px, 2.2vw, 28px)",
                 lineHeight: 1.35,
-                color: "var(--color-ink)",
-                opacity: 0.9,
+                color: "var(--ink-80)",
                 maxWidth: "46ch",
                 marginBottom: 36,
               }}
@@ -373,6 +372,7 @@ export function ActFounder() {
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <span
                   ref={stat1Ref}
+                  className="vm-tabular-num"
                   style={{
                     fontFamily: "var(--font-display)",
                     fontSize: "clamp(32px, 4vw, 52px)",
@@ -389,10 +389,10 @@ export function ActFounder() {
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "9px",
+                    fontSize: "var(--font-size-label)",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "var(--color-ink)",
+                    color: "var(--ink-60)",
                     opacity: 0.6,
                     whiteSpace: "nowrap",
                   }}
@@ -404,6 +404,7 @@ export function ActFounder() {
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <span
                   ref={stat2Ref}
+                  className="vm-tabular-num"
                   style={{
                     fontFamily: "var(--font-display)",
                     fontSize: "clamp(32px, 4vw, 52px)",
@@ -420,11 +421,10 @@ export function ActFounder() {
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "9px",
+                    fontSize: "var(--font-size-label)",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "var(--color-ink)",
-                    opacity: 0.6,
+                    color: "var(--ink-60)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -442,7 +442,7 @@ export function ActFounder() {
                 aria-label="Connect with Manthan on WhatsApp"
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "11px",
+                  fontSize: "var(--font-size-label)",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "var(--color-bg)",
@@ -474,7 +474,7 @@ export function ActFounder() {
                 aria-label="Follow TheVMEx on Instagram"
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "11px",
+                  fontSize: "var(--font-size-label)",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "var(--color-gold-500)",
@@ -507,21 +507,12 @@ export function ActFounder() {
               <a
                 href="mailto:khairemanthan@gmail.com"
                 aria-label="Email Manthan Manohar Khaire"
+                className="vm-gradient-link"
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "11px",
+                  fontSize: "var(--font-size-label)",
                   letterSpacing: "0.14em",
-                  color: "var(--color-ink)",
-                  opacity: 0.6,
-                  textDecoration: "none",
                   padding: "14px 16px",
-                  transition: "opacity 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = "1";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "0.6";
                 }}
               >
                 khairemanthan@gmail.com

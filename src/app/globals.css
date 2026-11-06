@@ -10,6 +10,16 @@
   --color-gold-700:    #8F6F32;
   --color-line:        rgba(242,237,228,.12);
 
+  /* ─── Step 3: Ink Tiers & Chapter Accents ───────────────────────── */
+  --color-ink-100:     #F2EDE4;   /* Headlines & high-emphasis display (AAA 16.86:1) */
+  --color-ink-80:      #C8C3BA;   /* Lead paragraphs & subheads (AAA 11.21:1) */
+  --color-ink-60:      #99948C;   /* Body copy & small labels (AA 6.53:1 on base, 5.18:1 on spotlight) */
+  --color-ink-40:      #66635D;   /* Strictly for large text & decorative ghost numerals only (3.28:1) */
+
+  --color-accent-ch1:  #FF6B57;   /* Chapter I: Ember Coral-Red (AA 7.02:1 on base, 5.57:1 on spotlight) */
+  --color-accent-ch2:  #E3C58A;   /* Chapter II: Amber Gold (AAA 11.82:1 on base, 9.38:1 on spotlight) */
+  --color-accent-ch3:  #A2B7CC;   /* Chapter III: Moonlight Silver-Blue (AAA 9.53:1 on base, 7.57:1 on spotlight) */
+
   /* ─── Legacy aliases (keeps admin/api pages intact) ─────────────── */
   --color-gold:         #C9A45C;   /* was #d4af37 */
   --color-gold-muted:   #C9A45C;
@@ -37,7 +47,18 @@
   --font-size-h3:         clamp(20px, 2.4vw, 34px);
   --font-size-lead:       clamp(1.25rem, 1.8vw, 1.6rem);
   --font-size-body:       clamp(1.02rem, 1.1vw, 1.125rem);
-  --font-size-label:      clamp(0.68rem, 0.75vw, 0.72rem);
+  --font-size-label:      clamp(0.72rem, 0.8vw, 0.78rem);
+}
+
+:root {
+  /* Step 3 CSS Custom Properties */
+  --ink-100: #F2EDE4;
+  --ink-80:  #C8C3BA;
+  --ink-60:  #99948C;
+  --ink-40:  #66635D;
+  --accent-ch1: #FF6B57;
+  --accent-ch2: #E3C58A;
+  --accent-ch3: #A2B7CC;
 }
 
 @layer base {
@@ -82,11 +103,11 @@
   ::-webkit-scrollbar-thumb { background: var(--color-gold-700); border-radius: 2px; }
 
   /* ─── Selection ──────────────────────────────────────────────────── */
-  ::selection { background: rgba(201,164,92,.2); color: var(--color-ink); }
+  ::selection { background: rgba(201,164,92,.28); color: #F2EDE4; }
 
   /* ─── Focus — gold ring ──────────────────────────────────────────── */
   :focus-visible {
-    outline: 1px solid var(--color-gold-500);
+    outline: 1.5px solid var(--color-gold-500);
     outline-offset: 3px;
   }
 
@@ -116,6 +137,54 @@
   }
   .vm-house-headline em.vm-gold {
     color: var(--color-gold-300);
+  }
+
+  /* ─── Gold Sheen Gradient Sweep (Step 3: Text Colour System) ────── */
+  .vm-gold-sheen {
+    background-image: linear-gradient(100deg, #8F6F32 0%, #E3C58A 35%, #FFF1CC 50%, #C9A45C 65%, #8F6F32 100%);
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    transition: background-position 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: vm-sheen-sweep 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .vm-gold-sheen:hover {
+    background-position: 0% 0;
+  }
+
+  /* ─── Gradient Link Underline ────────────────────────────────────── */
+  .vm-gradient-link {
+    position: relative;
+    text-decoration: none;
+    color: var(--color-ink-80);
+    transition: color 0.3s ease;
+  }
+  .vm-gradient-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, #8F6F32, #E3C58A, #8F6F32);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .vm-gradient-link:hover {
+    color: var(--color-ink-100);
+  }
+  .vm-gradient-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  /* ─── Video Scrim Shadow Protection ──────────────────────────────── */
+  .vm-scrim-text {
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85), 0 0 32px rgba(11, 11, 13, 0.95);
   }
 
   /* ─── Drop Cap (first manifesto paragraph & founder bio) ─────────── */
@@ -238,6 +307,19 @@
 @keyframes pulse-gold {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
+}
+
+/* ─── Sheen Sweep Animation ───────────────────────────────────────── */
+@keyframes vm-sheen-sweep {
+  0%   { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
+}
+
+[data-reduced-motion="true"] .vm-gold-sheen {
+  background: none !important;
+  -webkit-text-fill-color: #C9A45C !important;
+  color: #C9A45C !important;
+  animation: none !important;
 }
 
 /* ─── Scroll indicator pulse ─────────────────────────────────────── */

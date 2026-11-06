@@ -16,6 +16,7 @@ const bodoniModa = Bodoni_Moda({
   style: ["normal", "italic"],
   display: "swap",
   variable: "--next-font-display",
+  axes: ["opsz"],
   fallback: ["Didot", "Bodoni MT", "Georgia", "serif"],
 });
 

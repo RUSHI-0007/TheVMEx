@@ -233,10 +233,10 @@ export function ActManifesto() {
           <p
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "11px",
-              letterSpacing: "0.26em",
+              fontSize: "var(--font-size-label)",
+              letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: "var(--color-gold-500)",
+              color: "var(--ink-60)",
               margin: 0,
             }}
           >
@@ -255,7 +255,7 @@ export function ActManifesto() {
             marginBottom: "clamp(36px, 6vh, 64px)",
           }}
         >
-          Where <em className="vm-gold">Mystery</em> Meets <em>Elegance</em>
+          Where <em className="vm-gold vm-gold-sheen">Mystery</em> Meets <em>Elegance</em>
         </h2>
 
         {/* 2-Column Editorial Grid: Left Story / Right Crowd Dancing Video */}
@@ -314,10 +314,10 @@ export function ActManifesto() {
               <p
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "10px",
-                  letterSpacing: "0.24em",
+                  fontSize: "var(--font-size-label)",
+                  letterSpacing: "0.22em",
                   textTransform: "uppercase",
-                  color: "var(--color-gold-500)",
+                  color: "var(--ink-60)",
                   marginBottom: 12,
                 }}
               >
@@ -329,7 +329,7 @@ export function ActManifesto() {
                   fontWeight: 300,
                   fontSize: "clamp(24px, 2.8vw, 36px)",
                   lineHeight: 1.2,
-                  color: "var(--color-ink)",
+                  color: "var(--ink-100)",
                   margin: 0,
                   marginBottom: 14,
                 }}
@@ -341,8 +341,7 @@ export function ActManifesto() {
                   fontFamily: "var(--font-body)",
                   fontSize: "clamp(14px, 1.2vw, 16px)",
                   lineHeight: 1.7,
-                  color: "var(--color-ink)",
-                  opacity: 0.7,
+                  color: "var(--ink-60)",
                   margin: 0,
                   maxWidth: "52ch",
                 }}
@@ -369,7 +368,7 @@ export function ActManifesto() {
                   fontStyle: "italic",
                   fontSize: "clamp(20px, 2.2vw, 30px)",
                   lineHeight: 1.35,
-                  color: "var(--color-ink)",
+                  color: "var(--ink-100)",
                   margin: 0,
                   marginBottom: 12,
                 }}
@@ -380,11 +379,11 @@ export function ActManifesto() {
               <cite
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "10px",
+                  fontSize: "var(--font-size-label)",
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
                   fontStyle: "normal",
-                  color: "var(--color-gold-500)",
+                  color: "var(--color-gold-300)",
                 }}
               >
                 — TheVMEx
@@ -508,12 +507,13 @@ export function ActManifesto() {
                     }}
                   />
                   <span
+                    className="vm-scrim-text"
                     style={{
                       fontFamily: "var(--font-mono)",
-                      fontSize: "9px",
+                      fontSize: "var(--font-size-label)",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "var(--color-ink)",
+                      color: "var(--ink-100)",
                     }}
                   >
                     Dance Floor Atmosphere
@@ -557,10 +557,10 @@ export function ActManifesto() {
                 <span
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    letterSpacing: "0.24em",
+                    fontSize: "var(--font-size-label)",
+                    letterSpacing: "0.22em",
                     textTransform: "uppercase",
-                    color: "var(--color-gold-500)",
+                    color: "var(--ink-60)",
                   }}
                 >
                   Dress Code
@@ -572,8 +572,7 @@ export function ActManifesto() {
                   fontFamily: "var(--font-body)",
                   fontSize: "15px",
                   lineHeight: 1.6,
-                  color: "var(--color-ink)",
-                  opacity: 0.9,
+                  color: "var(--ink-80)",
                   margin: 0,
                 }}
               >
